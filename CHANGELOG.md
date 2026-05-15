@@ -17,3 +17,7 @@ All notable changes to this project will be documented in this file.
 - ESLint and Prettier configuration.
 - Technical documentation (`README.md`, `ARCHITECTURE.md`).
 - `.env.example` file.
+- Local Supabase development environment with Docker.
+- Initial database schema with `profiles` table and RLS policies.
+- npm scripts for local Supabase management.
+- Documentation for local development (`docs/LOCAL_SUPABASE.md`).
