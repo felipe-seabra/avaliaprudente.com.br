@@ -29,3 +29,6 @@ All notable changes to this project will be documented in this file.
 - Generated TypeScript types for the entire database.
 - Dashboard test page and logout flow.
 - Sonner integration for UI feedback.
+- Fixed missing Radix UI dependencies (`@radix-ui/react-label`, `@radix-ui/react-slot`).
+- Fixed Next.js 15 metadata viewport warning in RootLayout.
+- Validated complete UI component system and build success.
