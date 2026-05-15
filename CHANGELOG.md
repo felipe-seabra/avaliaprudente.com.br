@@ -21,3 +21,11 @@ All notable changes to this project will be documented in this file.
 - Initial database schema with `profiles` table and RLS policies.
 - npm scripts for local Supabase management.
 - Documentation for local development (`docs/LOCAL_SUPABASE.md`).
+- Complete authentication flow (Login, Register, Forgot Password, Reset Password).
+- Reusable form system with React Hook Form, Zod, and shadcn/ui.
+- Protected routes and auth redirection in Middleware.
+- Database schema expansion: `businesses`, `review_links`, `qr_codes`, and `reviews` tables.
+- Comprehensive RLS policies and indexes for all tables.
+- Generated TypeScript types for the entire database.
+- Dashboard test page and logout flow.
+- Sonner integration for UI feedback.

@@ -1,0 +1,109 @@
+'use client'
+
+import React from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { loginSchema, type LoginInput } from '@/lib/validations/auth'
+import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Form } from '@/components/ui/form'
+import { InputField } from '@/components/shared/input-field'
+
+export function LoginForm() {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = React.useState(false)
+  const supabase = createClient()
+
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
+
+  async function onSubmit(data: LoginInput) {
+    setIsLoading(true)
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      })
+
+      if (error) {
+        toast.error('Erro ao fazer login', {
+          description: error.message,
+        })
+        return
+      }
+
+      toast.success('Login realizado com sucesso!')
+      router.push('/dashboard')
+      router.refresh()
+    } catch {
+      toast.error('Ocorreu um erro inesperado')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Entrar</CardTitle>
+        <CardDescription>
+          Digite seu e-mail e senha para acessar sua conta.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <InputField
+              name="email"
+              label="E-mail"
+              placeholder="seu@email.com"
+              type="email"
+              disabled={isLoading}
+            />
+            <InputField
+              name="password"
+              label="Senha"
+              placeholder="••••••"
+              type="password"
+              disabled={isLoading}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Entrando...' : 'Entrar'}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+      <CardFooter className="flex flex-wrap items-center justify-between gap-2">
+        <Link
+          href="/forgot-password"
+          className="text-sm text-muted-foreground hover:underline"
+        >
+          Esqueceu a senha?
+        </Link>
+        <Link
+          href="/register"
+          className="text-sm text-muted-foreground hover:underline"
+        >
+          Não tem uma conta? Cadastre-se
+        </Link>
+      </CardFooter>
+    </Card>
+  )
+}
