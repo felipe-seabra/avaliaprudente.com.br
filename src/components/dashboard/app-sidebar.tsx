@@ -24,6 +24,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { UserNav } from './user-nav'
+import { BusinessSwitcher } from './business-switcher'
 
 const data = {
   navMain: [
@@ -76,6 +77,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <div className="px-2 pb-2 group-data-[collapsible=icon]:hidden">
+          <BusinessSwitcher />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>

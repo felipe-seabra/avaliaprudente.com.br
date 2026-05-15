@@ -36,3 +36,13 @@ All notable changes to this project will be documented in this file.
 - Complete Landing Page with Hero, Features, How It Works, Pricing, FAQ, and Footer sections.
 - Reusable Dashboard Shell with Sidebar, Top Navigation, Breadcrumbs, User dropdown, and Theme Toggle.
 - Extensive use of new shadcn/ui components (`sidebar`, `dropdown-menu`, `avatar`, `sheet`, `accordion`, etc) integrated with `@base-ui`.
+- Core SaaS logic implementation with Clean Architecture (Infrastructure, Domain, Application layers).
+- Business Onboarding flow with `CreateBusinessDialog` and `BusinessSwitcher`.
+- Business Context Provider (`BusinessProvider`) to manage active business state across the dashboard.
+- Review Link management (CRUD) for each business.
+- Public Review Flow (`/r/[slug]`) with premium 1-5 star rating interaction.
+- Conditional redirection logic: Positive ratings (>= 4) redirect to Google; negative ratings (< 4) show a private feedback form.
+- Internal feedback capture system to preserve business reputation.
+- Dashboard summary with total reviews, average rating, and redirection stats.
+- Robust data fetching hooks (`useBusiness`, `useReviewLink`).
+- Full TypeScript validation and lint cleanup across the entire Phase 4 implementation.
