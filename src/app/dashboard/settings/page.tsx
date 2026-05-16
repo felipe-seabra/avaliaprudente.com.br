@@ -22,7 +22,6 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog'
 import { AlertTriangle, Trash2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { Business } from '@/core/domain/entities'
 
 const settingsSchema = z.object({
@@ -38,7 +37,6 @@ export default function SettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const repository = new BusinessRepository()
-  const supabase = createClient()
 
   const form = useForm<SettingsInput>({
     resolver: zodResolver(settingsSchema),
@@ -76,32 +74,13 @@ export default function SettingsPage() {
     if (!currentBusiness) return
     setIsDeleting(true)
     try {
-      // 1. Storage Cleanup (Optional but recommended)
-      if (currentBusiness.logo_url) {
-        try {
-          // Extract path from public URL if it's a Supabase URL
-          // Format: .../storage/v1/object/public/business-assets/PATH
-          if (currentBusiness.logo_url.includes('business-assets')) {
-            const parts = currentBusiness.logo_url.split('business-assets/')
-            if (parts.length > 1) {
-              const filePath = parts[1]
-              await supabase.storage.from('business-assets').remove([filePath])
-              console.log('✅ Storage asset cleaned up:', filePath)
-            }
-          }
-        } catch (storageErr) {
-          console.error('Failed to cleanup storage asset:', storageErr)
-        }
-      }
-
-      // 2. Database Deletion (Cascades automatically)
+      // Database Deletion (Repo handles storage cleanup automatically)
       await repository.delete(currentBusiness.id)
       
       toast.success('Empresa excluída permanentemente.')
       setIsDialogOpen(false)
       
-      // 3. Refresh State
-      // The BusinessProvider will handle switching to another business if available
+      // Refresh State
       await refreshBusinesses()
     } catch (error: unknown) {
       logError(error, 'Delete Business')

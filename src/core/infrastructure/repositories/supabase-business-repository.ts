@@ -1,6 +1,7 @@
 import { createClient as createBrowserClient } from '@/lib/supabase/client'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Business, CreateBusinessDTO } from '@/core/domain/entities'
+import { extractStoragePath } from '@/lib/supabase/storage-utils'
 
 export class BusinessRepository {
   private supabase: SupabaseClient
@@ -66,6 +67,18 @@ export class BusinessRepository {
   }
 
   async update(id: string, business: Partial<CreateBusinessDTO>): Promise<Business> {
+    // Cleanup old logo if logo_url is being updated
+    if (business.logo_url !== undefined) {
+      const oldBusiness = await this.getById(id)
+      if (oldBusiness?.logo_url && oldBusiness.logo_url !== business.logo_url) {
+        const oldPath = extractStoragePath(oldBusiness.logo_url)
+        if (oldPath) {
+          await this.supabase.storage.from('business-assets').remove([oldPath])
+          console.log('✅ Cleaned up old logo storage asset:', oldPath)
+        }
+      }
+    }
+
     const { data, error } = await this.supabase
       .from('businesses')
       .update(business)
@@ -78,6 +91,23 @@ export class BusinessRepository {
   }
 
   async delete(id: string): Promise<void> {
+    // 1. Fetch business to get logo_url for cleanup
+    const business = await this.getById(id)
+    
+    // 2. Perform cleanup if logo exists
+    if (business?.logo_url) {
+      const path = extractStoragePath(business.logo_url)
+      if (path) {
+        try {
+          await this.supabase.storage.from('business-assets').remove([path])
+          console.log('✅ Storage asset cleaned up during deletion:', path)
+        } catch (storageErr) {
+          console.error('Failed to cleanup storage asset:', storageErr)
+        }
+      }
+    }
+
+    // 3. Delete database record
     const { error } = await this.supabase
       .from('businesses')
       .delete()
