@@ -24,38 +24,35 @@ export class AdminRepository {
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-      const [
-        { count: customers },
-        { count: businesses },
-        { count: verifiedBusinesses },
-        { data: reviews },
-        { count: visits },
-        { count: nfcScans },
-        { count: newBusinesses }
-      ] = await Promise.all([
-        this.supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        this.supabase.from('businesses').select('*', { count: 'exact', head: true }),
-        this.supabase.from('businesses').select('*', { count: 'exact', head: true }).eq('is_verified', true),
-        this.supabase.from('reviews').select('rating'),
-        this.supabase.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'page_visit'),
-        this.supabase.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'nfc_scan'),
-        this.supabase.from('businesses').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo.toISOString())
-      ])
+      // Fetch metrics individually to avoid Promise.all failure on single query error
+      // Also allows better debugging
+      const customersRes = await this.supabase.from('profiles').select('*', { count: 'exact', head: true })
+      const businessesRes = await this.supabase.from('businesses').select('*', { count: 'exact', head: true })
+      const verifiedRes = await this.supabase.from('businesses').select('*', { count: 'exact', head: true }).eq('is_verified', true)
+      const reviewsRes = await this.supabase.from('reviews').select('rating')
+      const visitsRes = await this.supabase.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'page_visit')
+      const scansRes = await this.supabase.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'nfc_scan')
+      const newBusinessesRes = await this.supabase.from('businesses').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo.toISOString())
 
-      const reviewList = reviews || []
+      // Log errors if any but don't crash
+      if (customersRes.error) console.error('AdminRepo: Error fetching customers count', customersRes.error)
+      if (businessesRes.error) console.error('AdminRepo: Error fetching businesses count', businessesRes.error)
+      if (reviewsRes.error) console.error('AdminRepo: Error fetching reviews', reviewsRes.error)
+
+      const reviewList = reviewsRes.data || []
       const averageRating = reviewList.length > 0 
         ? reviewList.reduce((acc, r) => acc + r.rating, 0) / reviewList.length 
         : 0
 
       return {
-        totalCustomers: customers || 0,
-        totalBusinesses: businesses || 0,
-        verifiedBusinesses: verifiedBusinesses || 0,
+        totalCustomers: customersRes.count || 0,
+        totalBusinesses: businessesRes.count || 0,
+        verifiedBusinesses: verifiedRes.count || 0,
         totalReviews: reviewList.length,
         averageRating: Number(averageRating.toFixed(1)),
-        totalVisits: visits || 0,
-        totalNfcScans: nfcScans || 0,
-        newBusinessesThisMonth: newBusinesses || 0
+        totalVisits: visitsRes.count || 0,
+        totalNfcScans: scansRes.count || 0,
+        newBusinessesThisMonth: newBusinessesRes.count || 0
       }
     } catch (err) {
       console.error('Failed to fetch admin stats:', err)
@@ -67,16 +64,24 @@ export class AdminRepository {
   }
 
   async getAllBusinesses() {
+    // With the new foreign key, this join should work perfectly
     const { data, error } = await this.supabase
       .from('businesses')
-      .select('*, profiles(full_name, email)')
+      .select(`
+        *,
+        profiles!businesses_owner_id_fkey (
+          full_name,
+          email
+        )
+      `)
       .order('created_at', { ascending: false })
 
     if (error) {
       console.error('AdminRepo: getAllBusinesses error', error)
+      // Fallback without profiles join if it still fails
       const { data: fallbackData, error: fallbackError } = await this.supabase
         .from('businesses')
-        .select('*, profiles(full_name)')
+        .select('*')
         .order('created_at', { ascending: false })
         
       if (fallbackError) throw fallbackError
@@ -93,6 +98,8 @@ export class AdminRepository {
         .order('created_at', { ascending: false })
 
       if (error) {
+        console.error('AdminRepo: getAllCustomers error', error)
+        // Fallback to updated_at if created_at doesn't exist yet
         const { data: fallbackData, error: fallbackError } = await this.supabase
           .from('profiles')
           .select('*')
@@ -109,13 +116,21 @@ export class AdminRepository {
   }
 
   async getRecentActivity() {
-    const { data, error } = await this.supabase
-      .from('analytics_events')
-      .select('*, businesses(name, slug)')
-      .order('created_at', { ascending: false })
-      .limit(10)
+    try {
+      const { data, error } = await this.supabase
+        .from('analytics_events')
+        .select('*, businesses(name, slug)')
+        .order('created_at', { ascending: false })
+        .limit(10)
 
-    if (error) throw error
-    return data
+      if (error) {
+        console.error('AdminRepo: getRecentActivity error', error)
+        return []
+      }
+      return data || []
+    } catch (err) {
+      console.error('AdminRepo: getRecentActivity unexpected error', err)
+      return []
+    }
   }
 }
