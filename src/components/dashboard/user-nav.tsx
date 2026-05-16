@@ -28,11 +28,32 @@ export function UserNav() {
   const router = useRouter()
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
+  const [role, setRole] = useState<string>('customer')
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-    })
+    async function getProfile() {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        if (authUser) {
+          setUser(authUser)
+          
+          // Try to get role from profile table
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', authUser.id)
+            .single()
+          
+          if (profile) {
+            setRole(profile.role)
+          }
+        }
+      } catch (err) {
+        logError(err, 'UserNav Profile Fetch')
+      }
+    }
+    
+    getProfile()
   }, [supabase])
 
   async function handleSignOut() {
@@ -54,19 +75,26 @@ export function UserNav() {
 
   if (!user) return <SkeletonAvatar />
 
-  const initials = user.user_metadata?.full_name
-    ? user.user_metadata.full_name.substring(0, 2).toUpperCase()
-    : user.email?.substring(0, 2).toUpperCase()
+  const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário'
+  const email = user.email || ''
+  const avatarUrl = user.user_metadata?.avatar_url || ''
+  
+  const initials = displayName
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase() || 'U'
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+          <Button variant="ghost" className="relative h-9 w-9 rounded-full focus-visible:ring-0">
             <Avatar className="h-9 w-9">
               <AvatarImage
-                src={user.user_metadata?.avatar_url}
-                alt={user.user_metadata?.full_name || 'Usuário'}
+                src={avatarUrl}
+                alt={displayName}
               />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
@@ -76,33 +104,44 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
-              {user.user_metadata?.full_name || 'Usuário'}
-            </p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium leading-none">
+                {displayName}
+              </p>
+              {role === 'admin' && (
+                <span className="bg-destructive/10 text-destructive text-[10px] uppercase font-bold px-1.5 py-0.5 rounded">
+                  Admin
+                </span>
+              )}
+            </div>
+            <p className="text-xs leading-none text-muted-foreground truncate">
+              {email}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem render={
-            <button className="w-full flex items-center" onClick={() => router.push('/dashboard/profile')}>
+            <button className="w-full flex items-center cursor-pointer" onClick={() => router.push('/dashboard/profile')}>
               <UserIcon className="mr-2 h-4 w-4" />
               <span>Perfil</span>
             </button>
           } />
           <DropdownMenuItem render={
-            <button className="w-full flex items-center" onClick={() => router.push('/dashboard/settings')}>
+            <button className="w-full flex items-center cursor-pointer" onClick={() => router.push('/dashboard/settings')}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Configurações</span>
             </button>
           } />
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4 text-destructive" />
-          <span className="text-destructive">Sair</span>
+        <DropdownMenuItem 
+          variant="destructive"
+          onClick={handleSignOut}
+          className="cursor-pointer"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Sair</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
