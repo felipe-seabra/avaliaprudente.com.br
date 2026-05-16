@@ -25,10 +25,30 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const isInitialLoad = useRef(true)
   const repository = useMemo(() => new BusinessRepository(), [])
 
+  // Safely get item from localStorage
+  const getStoredId = useCallback(() => {
+    if (typeof window === 'undefined') return null
+    try {
+      return localStorage.getItem(STORAGE_KEY)
+    } catch {
+      return null
+    }
+  }, [])
+
+  // Safely set item in localStorage
+  const setStoredId = useCallback((id: string) => {
+    if (typeof window === 'undefined') return
+    try {
+      localStorage.setItem(STORAGE_KEY, id)
+    } catch {
+      // Ignore storage errors
+    }
+  }, [])
+
   const selectBusiness = useCallback((business: Business) => {
     setCurrentBusiness(business)
-    localStorage.setItem(STORAGE_KEY, business.id)
-  }, [])
+    setStoredId(business.id)
+  }, [setStoredId])
 
   const refreshBusinesses = useCallback(async () => {
     try {
@@ -36,13 +56,20 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       setBusinesses(data)
       
       if (data.length > 0) {
-        const storedId = localStorage.getItem(STORAGE_KEY)
+        const storedId = getStoredId()
         const storedBusiness = data.find(b => b.id === storedId)
         
         if (storedBusiness) {
           setCurrentBusiness(storedBusiness)
-        } else if (isInitialLoad.current || !currentBusiness || !data.find(b => b.id === currentBusiness.id)) {
-          setCurrentBusiness(data[0])
+        } else {
+          // If no stored business or it no longer exists, 
+          // check if current business is still valid
+          setCurrentBusiness(prev => {
+            if (prev && data.find(b => b.id === prev.id)) {
+              return prev
+            }
+            return data[0]
+          })
         }
       } else {
         setCurrentBusiness(null)
@@ -55,11 +82,11 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false)
       isInitialLoad.current = false
     }
-  }, [currentBusiness, repository])
+  }, [repository, getStoredId])
 
   useEffect(() => {
     refreshBusinesses()
-  }, [refreshBusinesses]) // Run once on mount and when refreshBusinesses changes
+  }, [refreshBusinesses])
 
   return (
     <BusinessContext.Provider
