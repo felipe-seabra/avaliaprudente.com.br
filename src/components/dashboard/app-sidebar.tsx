@@ -12,6 +12,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 import { APP_CONFIG } from '@/lib/constants'
@@ -83,14 +84,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Star className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {APP_CONFIG.name}
-                </span>
-                <span className="truncate text-xs">Gestão</span>
+              <div className="flex items-center gap-3">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
+                  <Star className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                  <Image
+                    src="/branding/logo-horizontal.webp"
+                    alt={APP_CONFIG.name}
+                    width={140}
+                    height={32}
+                    className="h-6 w-auto object-contain dark:invert"
+                  />
+                </div>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -1,6 +1,6 @@
 export const APP_CONFIG = {
   name: 'Avalia Prudente',
-  description: 'Gestão inteligente de avaliações Google',
+  description: 'Plataforma NFC Inteligente para Negócios Locais',
   url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
 }
 

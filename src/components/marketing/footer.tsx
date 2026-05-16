@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { APP_CONFIG } from '@/lib/constants'
 import { MessageCircle } from 'lucide-react'
 
@@ -9,9 +10,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="inline-block mb-4">
-              <span className="font-bold tracking-tight text-xl text-gradient">
-                {APP_CONFIG.name}
-              </span>
+              <Image
+                src="/branding/logo-horizontal.webp"
+                alt={APP_CONFIG.name}
+                width={160}
+                height={36}
+                className="h-7 w-auto object-contain dark:invert"
+              />
             </Link>
             <p className="text-muted-foreground max-w-sm mb-6">
               Plataforma NFC inteligente para negócios locais. Aumente suas avaliações no Google e digitalize seu atendimento com uma única placa.
@@ -50,6 +55,9 @@ export function Footer() {
           <p className="text-sm text-muted-foreground mb-4 md:mb-0">
             &copy; {new Date().getFullYear()} {APP_CONFIG.name}. Todos os direitos reservados.
           </p>
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest font-bold opacity-30">
+            NFC Digital Presence
+          </div>
         </div>
       </div>
     </footer>

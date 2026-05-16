@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { QRCodeCanvas } from 'qrcode.react'
-import { Download, Copy, Check, Info } from 'lucide-react'
+import { Download, Copy, Check, Info, SmartphoneNfc } from 'lucide-react'
 import { toast } from 'sonner'
 import { APP_CONFIG } from '@/lib/constants'
+import Image from 'next/image'
 
 export default function QRCodesPage() {
   const { currentBusiness } = useBusiness()
@@ -54,37 +55,63 @@ export default function QRCodesPage() {
       </div>
 
       <div className="grid gap-8 md:grid-cols-5">
-        <Card className="md:col-span-3 flex flex-col items-center justify-center p-12 bg-card border-none shadow-2xl relative overflow-hidden">
-          {/* Visual decoration */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 to-purple-400/50" />
+        <Card className="md:col-span-3 flex flex-col items-center justify-center p-12 bg-zinc-950 border-none shadow-2xl relative overflow-hidden group">
+          {/* Physical Card Mockup Look */}
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,var(--color-primary)_0%,transparent_40%)] opacity-20" />
           
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] mb-8 transition-transform hover:scale-[1.02]">
-            <QRCodeCanvas
-              id="qr-canvas"
-              value={businessUrl}
-              size={280}
-              level="H"
-              includeMargin
-              fgColor={qrColor}
-            />
-          </div>
-          
-          <div className="w-full max-w-sm space-y-6">
-            <div className="flex items-center gap-4 bg-muted/50 p-4 rounded-2xl border border-border/50 group transition-colors hover:bg-muted">
-              <code className="text-xs truncate flex-1 font-mono opacity-60 group-hover:opacity-100">{businessUrl}</code>
-              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl" onClick={copyLink}>
-                {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
-              </Button>
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="mb-8 flex flex-col items-center gap-2">
+               <Image 
+                 src="/branding/logo-vertical.webp" 
+                 alt="Logo" 
+                 width={100} 
+                 height={100} 
+                 className="h-16 w-auto invert opacity-80"
+               />
+               <div className="h-px w-20 bg-white/20" />
             </div>
-            
-            <div className="flex flex-col gap-3">
-              <Button size="lg" className="w-full gap-2 h-14 text-base rounded-2xl shadow-lg shadow-primary/20" onClick={downloadPNG}>
-                <Download className="h-5 w-5" />
-                Baixar para Celular (PNG)
-              </Button>
-              <p className="text-center text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                Ideal para redes sociais e apresentações digitais
-              </p>
+
+            <div className="bg-white p-8 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] mb-8 transition-transform group-hover:scale-105 duration-500">
+              <QRCodeCanvas
+                id="qr-canvas"
+                value={businessUrl}
+                size={280}
+                level="H"
+                includeMargin
+                fgColor={qrColor}
+                imageSettings={{
+                  src: "/favicon.ico",
+                  x: undefined,
+                  y: undefined,
+                  height: 40,
+                  width: 40,
+                  excavate: true,
+                }}
+              />
+            </div>
+
+            <div className="w-full max-w-sm space-y-6">
+              <div className="flex flex-col items-center gap-2 mb-4">
+                 <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-[10px]">
+                    <SmartphoneNfc className="h-3 w-3" />
+                    Tecnologia NFC Ativa
+                 </div>
+                 <p className="text-white/40 text-[9px] uppercase tracking-tighter italic">Digital Presence by Avalia Prudente</p>
+              </div>
+
+              <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 group transition-colors hover:bg-white/10">
+                <code className="text-xs truncate flex-1 font-mono text-white/60 group-hover:text-white/100">{businessUrl}</code>
+                <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-white/60 hover:text-white hover:bg-white/10" onClick={copyLink}>
+                  {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
+                </Button>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                <Button size="lg" className="w-full gap-2 h-14 text-base rounded-2xl shadow-xl shadow-primary/30" onClick={downloadPNG}>
+                  <Download className="h-5 w-5" />
+                  Baixar para Celular (PNG)
+                </Button>
+              </div>
             </div>
           </div>
         </Card>

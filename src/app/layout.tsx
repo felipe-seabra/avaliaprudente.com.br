@@ -28,6 +28,11 @@ export const metadata: Metadata = {
   keywords: ['NFC', 'Avaliações Google', 'Marketing Local', 'Cartão de Visita Digital', 'Review', 'Google Meu Negócio'],
   authors: [{ name: 'Avalia Prudente' }],
   creator: 'Avalia Prudente',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
@@ -37,7 +42,7 @@ export const metadata: Metadata = {
     siteName: 'Avalia Prudente',
     images: [
       {
-        url: '/og-image.png',
+        url: '/branding/logo-horizontal.webp',
         width: 1200,
         height: 630,
         alt: 'Avalia Prudente - Plataforma NFC',
@@ -48,7 +53,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Avalia Prudente | Plataforma NFC',
     description: 'Transforme seu balcão em uma central de conexões digitais.',
-    images: ['/og-image.png'],
+    images: ['/branding/logo-horizontal.webp'],
   },
 }
 
