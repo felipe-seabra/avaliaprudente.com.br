@@ -18,22 +18,25 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { useEffect, useState, useMemo } from 'react'
-import { logError } from '@/lib/error-handler'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 
 export function UserNav() {
   const router = useRouter()
-  const supabase = useMemo(() => createClient(), [])
   const [user, setUser] = useState<User | null>(null)
   const [role, setRole] = useState<string>('customer')
   const [mounted, setMounted] = useState(false)
+  const [isSignOutLoading, setIsSignOutLoading] = useState(false)
+
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     setMounted(true)
+    let isSubscribed = true
+
     async function getProfile() {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser()
-        if (authUser) {
+        if (authUser && isSubscribed) {
           setUser(authUser)
           
           const { data: profile } = await supabase
@@ -42,45 +45,51 @@ export function UserNav() {
             .eq('id', authUser.id)
             .single()
           
-          if (profile) {
+          if (profile && isSubscribed) {
             setRole(profile.role)
           }
         }
       } catch (err) {
-        logError(err, 'UserNav Profile Fetch')
+        console.error('UserNav: Failed to fetch profile', err)
       }
     }
     
     getProfile()
+    return () => { isSubscribed = false }
   }, [supabase])
 
-  async function handleSignOut() {
+  const handleSignOut = useCallback(async () => {
+    if (isSignOutLoading) return
+    setIsSignOutLoading(true)
+    
     try {
-      console.log('🚀 Initiating sign out...')
+      console.log('UserNav: Sign out initiated')
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       
       toast.success('Saindo...')
-      
-      // Force a full page reload to clear all states and redirect
       window.location.href = '/login'
     } catch (err) {
-      logError(err, 'Sign Out unexpected')
-      // Fallback redirect even if signOut fails
+      console.error('UserNav: Sign out error', err)
+      toast.error('Erro ao sair. Redirecionando...')
       window.location.href = '/login'
+    } finally {
+      setIsSignOutLoading(false)
     }
-  }
+  }, [supabase, isSignOutLoading])
 
-  if (!mounted || !user) return <SkeletonAvatar />
+  if (!mounted) return <div className="h-9 w-9 rounded-full bg-muted border border-border/20" />
+  if (!user) return <div className="h-9 w-9 rounded-full bg-muted border border-border/20" />
 
-  const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário'
+  const meta = user.user_metadata || {}
+  const displayName = String(meta.full_name || user.email?.split('@')[0] || 'Usuário')
   const email = user.email || ''
-  const avatarUrl = user.user_metadata?.avatar_url || ''
+  const avatarUrl = String(meta.avatar_url || '')
   
   const initials = displayName
     .split(' ')
     .filter(Boolean)
-    .map((n: string) => n[0])
+    .map((n) => n[0])
     .join('')
     .substring(0, 2)
     .toUpperCase() || 'U'
@@ -88,13 +97,20 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="group relative flex h-9 w-9 items-center justify-center rounded-full outline-none cursor-pointer transition-transform active:scale-95 border-none bg-transparent p-0"
-      >
-        <Avatar className="h-9 w-9 pointer-events-none ring-1 ring-border group-hover:ring-primary/50 transition-all">
-          <AvatarImage src={avatarUrl} alt={displayName} />
-          <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{initials}</AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
+        render={
+          <button 
+            type="button"
+            className="group relative flex h-9 w-9 items-center justify-center rounded-full outline-none cursor-pointer transition-transform active:scale-95 border-none bg-transparent p-0"
+            aria-label="Menu do usuário"
+            onClick={() => console.log('UserNav: Trigger clicked')}
+          >
+            <Avatar className="h-9 w-9 pointer-events-none ring-1 ring-border group-hover:ring-primary/50 transition-all">
+              <AvatarImage src={avatarUrl} alt={displayName} />
+              <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{initials}</AvatarFallback>
+            </Avatar>
+          </button>
+        }
+      />
       <DropdownMenuContent className="w-56" align="end" sideOffset={8}>
         <DropdownMenuLabel className="font-normal p-3">
           <div className="flex flex-col space-y-2">
@@ -112,7 +128,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="cursor-pointer py-3"
-          onClick={() => router.push('/dashboard/settings')}
+          onSelect={() => router.push('/dashboard/settings')}
         >
           <Settings className="mr-2 h-4 w-4 opacity-60" />
           <span className="font-medium text-sm">Configurações</span>
@@ -121,18 +137,15 @@ export function UserNav() {
         <DropdownMenuItem 
           variant="destructive"
           className="cursor-pointer py-3"
-          onClick={handleSignOut}
+          onSelect={handleSignOut}
+          disabled={isSignOutLoading}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span className="font-bold text-sm">Sair da conta</span>
+          <span className="font-bold text-sm">
+            {isSignOutLoading ? 'Saindo...' : 'Sair da conta'}
+          </span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
-
-function SkeletonAvatar() {
-  return (
-    <div className="h-9 w-9 animate-pulse rounded-full bg-muted border border-border/20"></div>
   )
 }
