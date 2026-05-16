@@ -61,15 +61,15 @@ export default function BusinessesPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <button className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-muted text-muted-foreground transition-colors">
                         <MoreVertical className="h-4 w-4" />
-                      </Button>
+                      </button>
                     }
                   />
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem 
                       render={
-                        <Link href={`/dashboard/businesses/${business.id}`}>
+                        <Link href={`/dashboard/businesses/${business.id}`} className="flex items-center w-full">
                           <Settings className="mr-2 h-4 w-4" />
                           Configurações
                         </Link>

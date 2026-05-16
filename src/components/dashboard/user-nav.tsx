@@ -137,12 +137,13 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           variant="destructive"
-          onClick={handleSignOut}
-          className="cursor-pointer"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
-        </DropdownMenuItem>
+          render={
+            <button className="w-full flex items-center cursor-pointer" onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sair</span>
+            </button>
+          }
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   )

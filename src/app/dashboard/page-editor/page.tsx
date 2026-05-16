@@ -224,7 +224,7 @@ export default function PageEditor() {
           <Button 
             variant="outline" 
             render={
-              <Link href={`/${currentBusiness.slug}`} target="_blank">
+              <Link href={`/r/${currentBusiness.slug}`} target="_blank">
                 <Eye className="mr-2 h-4 w-4" />
                 Visualizar
               </Link>
@@ -289,33 +289,47 @@ export default function PageEditor() {
               <h2 className="text-xl font-semibold">Links e Botões (CTAs)</h2>
               <DropdownMenu>
                 <DropdownMenuTrigger render={
-                  <Button size="sm" className="gap-2">
+                  <button className="h-9 px-3 inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground gap-2 text-sm font-medium transition-colors">
                     <Plus className="h-4 w-4" />
                     Adicionar Link
-                  </Button>
+                  </button>
                 } />
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => handleAddLink('google_review')}>
-                    <Star className="mr-2 h-4 w-4" /> Avaliação Google
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleAddLink('whatsapp')}>
-                    <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleAddLink('instagram')}>
-                    <Camera className="mr-2 h-4 w-4" /> Instagram
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleAddLink('facebook')}>
-                    <Share2 className="mr-2 h-4 w-4" /> Facebook
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleAddLink('website')}>
-                    <Globe className="mr-2 h-4 w-4" /> Website
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleAddLink('portfolio')}>
-                    <Briefcase className="mr-2 h-4 w-4" /> Portfólio
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleAddLink('custom')}>
-                    <LinkIcon className="mr-2 h-4 w-4" /> Link Personalizado
-                  </DropdownMenuItem>
+                  <DropdownMenuItem render={
+                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('google_review')}>
+                      <Star className="mr-2 h-4 w-4" /> Avaliação Google
+                    </button>
+                  } />
+                  <DropdownMenuItem render={
+                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('whatsapp')}>
+                      <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+                    </button>
+                  } />
+                  <DropdownMenuItem render={
+                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('instagram')}>
+                      <Camera className="mr-2 h-4 w-4" /> Instagram
+                    </button>
+                  } />
+                  <DropdownMenuItem render={
+                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('facebook')}>
+                      <Share2 className="mr-2 h-4 w-4" /> Facebook
+                    </button>
+                  } />
+                  <DropdownMenuItem render={
+                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('website')}>
+                      <Globe className="mr-2 h-4 w-4" /> Website
+                    </button>
+                  } />
+                  <DropdownMenuItem render={
+                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('portfolio')}>
+                      <Briefcase className="mr-2 h-4 w-4" /> Portfólio
+                    </button>
+                  } />
+                  <DropdownMenuItem render={
+                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('custom')}>
+                      <LinkIcon className="mr-2 h-4 w-4" /> Link Personalizado
+                    </button>
+                  } />
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

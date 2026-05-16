@@ -5,7 +5,6 @@ import { useBusiness } from '@/providers/business-provider'
 import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { ReviewLink } from '@/core/domain/entities'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Link2, MoreVertical, Trash2, ExternalLink } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
@@ -107,23 +106,29 @@ export default function ReviewLinksPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           render={
-                            <Button variant="ghost" size="icon">
+                            <button className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-muted text-muted-foreground transition-colors">
                               <MoreVertical className="h-4 w-4" />
-                            </Button>
+                            </button>
                           }
                         />
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => window.open(`/r/${link.slug}`, '_blank')}>
-                            <ExternalLink className="mr-2 h-4 w-4" />
-                            Testar Link
-                          </DropdownMenuItem>
                           <DropdownMenuItem 
-                            className="text-destructive"
-                            onClick={() => handleDelete(link.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Excluir
-                          </DropdownMenuItem>
+                            render={
+                              <button className="w-full flex items-center cursor-pointer" onClick={() => window.open(`/r/${link.slug}`, '_blank')}>
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                Testar Link
+                              </button>
+                            }
+                          />
+                          <DropdownMenuItem 
+                            variant="destructive"
+                            render={
+                              <button className="w-full flex items-center cursor-pointer text-destructive" onClick={() => handleDelete(link.id)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Excluir
+                              </button>
+                            }
+                          />
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

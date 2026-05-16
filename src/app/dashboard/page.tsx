@@ -76,7 +76,7 @@ export default function DashboardPage() {
   const pageVisits = stats.filter(s => s.event_type === 'page_visit').length
   const ctaClicks = stats.filter(s => s.event_type === 'cta_click').length
 
-  const publicUrl = `${APP_CONFIG.url}/${currentBusiness.slug}`
+  const publicUrl = `${APP_CONFIG.url}/r/${currentBusiness.slug}`
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(publicUrl)

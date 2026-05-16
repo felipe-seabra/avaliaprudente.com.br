@@ -25,7 +25,7 @@ export default function QRCodesPage() {
     )
   }
 
-  const businessUrl = `${APP_CONFIG.url}/${currentBusiness.slug}`
+  const businessUrl = `${APP_CONFIG.url}/r/${currentBusiness.slug}`
 
   const downloadPNG = () => {
     const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement
