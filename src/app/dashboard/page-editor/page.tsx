@@ -14,14 +14,10 @@ import {
   Plus, 
   Eye, 
   Save,
-  Star,
-  MessageCircle,
   Globe,
   Briefcase,
   Link as LinkIcon,
-  Camera,
-  Share2,
-  Image as ImageIcon
+  ChevronRight
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -50,6 +46,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableLinkItem } from '@/components/dashboard/sortable-link-item'
 import { ImageUpload } from '@/components/shared/image-upload'
 import { parseError, logError } from '@/lib/error-handler'
+import { BrandIcons } from '@/components/shared/brand-icons'
 
 export default function PageEditor() {
   const { currentBusiness, refreshBusinesses } = useBusiness()
@@ -129,6 +126,10 @@ export default function PageEditor() {
       whatsapp: 'Fale conosco no WhatsApp',
       instagram: 'Siga-nos no Instagram',
       facebook: 'Curta nossa página no Facebook',
+      tiktok: 'Siga-nos no TikTok',
+      youtube: 'Inscreva-se no YouTube',
+      linkedin: 'Conecte-se no LinkedIn',
+      twitter: 'Siga-nos no X',
       website: 'Visite nosso site',
       portfolio: 'Veja nosso portfólio',
       custom: 'Novo Link'
@@ -200,6 +201,22 @@ export default function PageEditor() {
         fetchData() // Revert to DB state on error
       }
     }
+  }
+
+  const getPreviewIcon = (link: PageLink) => {
+    const type = link.type.toLowerCase()
+    const url = link.url.toLowerCase()
+
+    if (type === 'google_review') return <BrandIcons.Google size={14} className="text-[#4285F4]" />
+    if (type === 'whatsapp' || url.includes('wa.me')) return <BrandIcons.WhatsApp size={16} className="text-[#25D366]" />
+    if (type === 'instagram' || url.includes('instagram.com')) return <BrandIcons.Instagram size={14} className="text-[#E4405F]" />
+    if (type === 'facebook' || url.includes('facebook.com')) return <BrandIcons.Facebook size={14} className="text-[#1877F2]" />
+    if (type === 'tiktok' || url.includes('tiktok.com')) return <BrandIcons.TikTok size={14} className="text-foreground" />
+    if (type === 'youtube' || url.includes('youtube.com')) return <BrandIcons.YouTube size={14} className="text-[#FF0000]" />
+    if (type === 'linkedin' || url.includes('linkedin.com')) return <BrandIcons.LinkedIn size={14} className="text-[#0A66C2]" />
+    if (type === 'twitter' || type === 'x' || url.includes('x.com')) return <BrandIcons.Twitter size={12} className="text-foreground" />
+    
+    return <LinkIcon className="h-3.5 w-3.5 text-muted-foreground" />
   }
 
   if (isLoading) return <div className="p-8 animate-pulse space-y-4">
@@ -289,30 +306,44 @@ export default function PageEditor() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gradient">Links e Botões (CTAs)</h2>
               <DropdownMenu>
-                <DropdownMenuTrigger render={
-                  <button className="h-9 px-3 inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground gap-2 text-sm font-medium transition-colors cursor-pointer outline-none">
-                    <Plus className="h-4 w-4" />
-                    Adicionar Link
-                  </button>
-                } />
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuTrigger
+                  render={
+                    <button className="h-9 px-3 inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground gap-2 text-sm font-medium transition-colors cursor-pointer outline-none">
+                      <Plus className="h-4 w-4" />
+                      Adicionar Link
+                    </button>
+                  }
+                />
+                <DropdownMenuContent align="end" className="w-64 max-h-[400px] overflow-y-auto">
                   <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('google_review')}>
-                    <Star className="mr-2 h-4 w-4" /> Avaliação Google
+                    <BrandIcons.Google className="mr-2 h-4 w-4 text-[#4285F4]" /> Avaliação Google
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('whatsapp')}>
-                    <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+                    <BrandIcons.WhatsApp className="mr-2 h-4 w-4 text-[#25D366]" /> WhatsApp
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('instagram')}>
-                    <Camera className="mr-2 h-4 w-4" /> Instagram
+                    <BrandIcons.Instagram className="mr-2 h-4 w-4 text-[#E4405F]" /> Instagram
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('facebook')}>
-                    <Share2 className="mr-2 h-4 w-4" /> Facebook
+                    <BrandIcons.Facebook className="mr-2 h-4 w-4 text-[#1877F2]" /> Facebook
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('tiktok')}>
+                    <BrandIcons.TikTok className="mr-2 h-4 w-4" /> TikTok
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('youtube')}>
+                    <BrandIcons.YouTube className="mr-2 h-4 w-4 text-[#FF0000]" /> YouTube
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('linkedin')}>
+                    <BrandIcons.LinkedIn className="mr-2 h-4 w-4 text-[#0A66C2]" /> LinkedIn
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('twitter')}>
+                    <BrandIcons.Twitter className="mr-2 h-4 w-4" /> Twitter / X
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('website')}>
-                    <Globe className="mr-2 h-4 w-4" /> Website
+                    <Globe className="mr-2 h-4 w-4 text-primary" /> Website
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('portfolio')}>
-                    <Briefcase className="mr-2 h-4 w-4" /> Portfólio
+                    <Briefcase className="mr-2 h-4 w-4 text-primary" /> Portfólio
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('custom')}>
                     <LinkIcon className="mr-2 h-4 w-4" /> Link Personalizado
@@ -356,12 +387,12 @@ export default function PageEditor() {
 
         {/* Preview Column */}
         <div className="hidden md:block">
-          <div className="sticky top-24 border-8 border-muted rounded-[3rem] h-[600px] w-full overflow-hidden shadow-2xl bg-background">
-            <div className="h-full overflow-y-auto custom-scrollbar p-6 flex flex-col items-center">
-              <div className="w-16 h-1 bg-muted-foreground/20 rounded-full mb-8 shrink-0" />
+          <div className="sticky top-24 border-8 border-muted rounded-[3rem] h-[600px] w-full overflow-hidden shadow-2xl bg-muted/30">
+            <div className="h-full overflow-y-auto custom-scrollbar p-6 flex flex-col items-center bg-background/50">
+              <div className="w-16 h-1.5 bg-muted-foreground/20 rounded-full mb-10 shrink-0" />
               
               {currentBusiness.logo_url ? (
-                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-primary/20 mb-4 shrink-0 shadow-sm bg-background">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary/10 mb-5 shrink-0 shadow-lg bg-background">
                   <Image 
                     src={currentBusiness.logo_url} 
                     alt={currentBusiness.name} 
@@ -370,33 +401,35 @@ export default function PageEditor() {
                   />
                 </div>
               ) : (
-                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4 shrink-0 border-2 border-primary/20 shadow-sm">
-                  <span className="text-2xl font-bold text-primary">
+                <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center mb-5 shrink-0 border-2 border-primary/10 shadow-lg">
+                  <span className="text-3xl font-bold text-primary">
                     {currentBusiness.name.substring(0, 1).toUpperCase()}
                   </span>
                 </div>
               )}
               
-              <h3 className="font-bold text-lg mb-1 text-center">{currentBusiness.name}</h3>
-              <p className="text-[10px] text-muted-foreground mb-6 line-clamp-2 text-center px-4 leading-relaxed">
+              <h3 className="font-extrabold text-xl mb-2 text-center tracking-tight">{currentBusiness.name}</h3>
+              <p className="text-[11px] text-muted-foreground mb-8 line-clamp-3 text-center px-4 leading-relaxed font-medium">
                 {page.description || 'Sua descrição aparecerá aqui...'}
               </p>
               
               <div className="w-full space-y-3">
                 {links.map(l => (
-                  <div key={l.id} className="w-full h-12 rounded-lg border bg-card flex items-center px-4 gap-3 text-xs font-medium shadow-sm transition-all hover:bg-accent/50">
-                    <div className="h-6 w-6 rounded-full bg-primary/5 flex items-center justify-center shrink-0">
-                      <ImageIcon className="h-3 w-3 text-primary" />
+                  <div key={l.id} className="w-full h-14 rounded-2xl border-2 bg-background flex items-center px-4 gap-4 text-[13px] font-bold shadow-sm">
+                    <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center shrink-0 border border-border/50">
+                      {getPreviewIcon(l)}
                     </div>
-                    <span className="truncate">{l.title || 'Novo Link'}</span>
+                    <span className="truncate flex-1">{l.title || 'Novo Link'}</span>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40" />
                   </div>
                 ))}
               </div>
 
-              <div className="mt-auto pt-8 pb-4">
-                <p className="text-[8px] text-muted-foreground opacity-50 uppercase tracking-widest font-bold">
+              <div className="mt-auto pt-12 pb-4 flex flex-col items-center gap-1">
+                <p className="text-[9px] text-muted-foreground/60 uppercase tracking-[0.2em] font-black">
                   Avalia Prudente
                 </p>
+                <div className="h-0.5 w-4 bg-primary/20 rounded-full" />
               </div>
             </div>
           </div>
