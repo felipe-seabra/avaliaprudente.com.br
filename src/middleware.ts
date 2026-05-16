@@ -1,7 +1,38 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
+// Basic rate limiting configuration
+const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
+const MAX_REQUESTS = 100 // 100 requests per minute
+
+// Simple in-memory storage for rate limiting
+// Note: In production (serverless), this won't be shared across instances.
+// For true rate limiting, use Vercel KV or a similar distributed store.
+const ipCache = new Map<string, { count: number; lastReset: number }>()
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const stats = ipCache.get(ip) || { count: 0, lastReset: now }
+
+  if (now - stats.lastReset > RATE_LIMIT_WINDOW) {
+    stats.count = 1
+    stats.lastReset = now
+  } else {
+    stats.count++
+  }
+
+  ipCache.set(ip, stats)
+  return stats.count > MAX_REQUESTS
+}
+
 export async function middleware(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for') || '127.0.0.1'
+  
+  // Rate limiting check
+  if (isRateLimited(ip)) {
+    return new NextResponse('Too Many Requests', { status: 429 })
+  }
+
   const { supabaseResponse, user, role } = await updateSession(request)
 
   const isAuthPage =

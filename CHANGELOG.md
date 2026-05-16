@@ -68,9 +68,15 @@ All notable changes to this project will be documented in this file.
 - Pricing Updates: Reflected the new NFC-first physical product offering in the pricing tiers.
 - Mobile Optimizations: Ensured all CTAs and interactive elements have appropriate tap targets and animations.
 - Stabilization & Debugging: Systematic cleanup of silent failures and improvement of error handling UX.
-- Error Normalization Utility: Created `parseError` to translate technical errors (Supabase/Auth) into actionable Portuguese messages.
+- Error Normalization Utility: Created `parseError` to translate technical errors (Supabase, Auth) into actionable Portuguese messages.
 - RLS Policy Fixes: Resolved recursion issues in the `profiles` table and ensured explicit `insert` permissions for business pages.
 - Robust Middleware Roles: Updated middleware to perform direct database role checks for admin protection.
 - Enhanced Logout Flow: Added `router.refresh()` to handle session clearing more reliably.
 - Global Error UX: Updated all critical forms (Login, Register, Create Business) to surface specific errors via Sonner toasts.
 - Improved Loading/Error UI: Refined `/[slug]` page with better loading states and actionable error fallback.
+- Production & Infrastructure: Prepared the platform for real-world deployment on Vercel and Supabase Cloud.
+- Environment Validation: Implemented `src/lib/env.ts` to validate required secrets on startup.
+- Security Headers: Configured CSP, HSTS, XSS protection, and frame options in `next.config.ts`.
+- Rate Limiting Foundation: Added basic IP-based rate limiting to the middleware.
+- Image Optimization: Configured remote patterns and optimized loading for production assets.
+- Deployment Documentation: Created `docs/DEPLOYMENT.md` with checklists, backup, and rollback strategies.
