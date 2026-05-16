@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { APP_CONFIG } from '@/lib/constants'
+import { MessageCircle } from 'lucide-react'
 
 export function Footer() {
   return (
@@ -12,9 +13,18 @@ export function Footer() {
                 {APP_CONFIG.name}
               </span>
             </Link>
-            <p className="text-muted-foreground max-w-sm">
-              Ajudamos negócios locais a dominarem as buscas do Google com avaliações 5 estrelas reais de clientes satisfeitos.
+            <p className="text-muted-foreground max-w-sm mb-6">
+              Plataforma NFC inteligente para negócios locais. Aumente suas avaliações no Google e digitalize seu atendimento com uma única placa.
             </p>
+            <a 
+              href="https://wa.me/5511999999999" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-sm font-medium text-primary hover:underline"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Falar com o Comercial
+            </a>
           </div>
           
           <div>

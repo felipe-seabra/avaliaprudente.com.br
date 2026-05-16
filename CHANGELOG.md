@@ -60,3 +60,10 @@ All notable changes to this project will be documented in this file.
 - Lightweight Analytics: Foundation for tracking page visits and CTA clicks with dedicated `analytics_events` table.
 - Analytics Summary: Integrated real-time visit and click stats into the dashboard dashboard.
 - Enhanced UX: Improved visual hierarchy, premium hover/touch interactions, and refined mobile layouts.
+- Production Polish & SEO: Hardened the application for real-world usage and search engine visibility.
+- Global Error Boundaries: Added `error.tsx` and `not-found.tsx` for graceful failure handling.
+- Advanced Metadata: Configured robust OpenGraph, Twitter Cards, and dynamic SEO fields in `layout.tsx`.
+- Sitemaps & Robots: Auto-generated `sitemap.ts` and `robots.ts` for crawlers.
+- Landing Page Refinements: Restructured Hero section with physical NFC mockups and high-conversion copy.
+- Pricing Updates: Reflected the new NFC-first physical product offering in the pricing tiers.
+- Mobile Optimizations: Ensured all CTAs and interactive elements have appropriate tap targets and animations.
