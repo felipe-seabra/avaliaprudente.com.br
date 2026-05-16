@@ -4,6 +4,7 @@ import './globals.css'
 import { RootProvider } from '@/providers/root-provider'
 import { APP_CONFIG } from '@/lib/constants'
 import { validateEnv } from '@/lib/env'
+import { CookieConsent } from '@/components/shared/cookie-consent'
 
 // Validate environment variables on startup
 validateEnv()
@@ -77,7 +78,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <RootProvider>{children}</RootProvider>
+        <RootProvider>
+          {children}
+          <CookieConsent />
+        </RootProvider>
       </body>
     </html>
   )

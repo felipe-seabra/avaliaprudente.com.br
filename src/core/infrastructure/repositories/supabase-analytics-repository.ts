@@ -1,11 +1,17 @@
 import { createClient } from '@/lib/supabase/client'
 import { CreateAnalyticsEventDTO } from '@/core/domain/entities'
 import { Json } from '@/types/supabase'
+import { hasConsent } from '@/components/shared/cookie-consent'
 
 export class AnalyticsRepository {
   private supabase = createClient()
 
   async track(event: CreateAnalyticsEventDTO): Promise<void> {
+    // LGPD Gating: Only track if analytics consent is granted
+    if (!hasConsent('analytics')) {
+      return
+    }
+
     const { error } = await this.supabase
       .from('analytics_events')
       .insert({
