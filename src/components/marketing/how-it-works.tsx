@@ -29,7 +29,8 @@ const steps = [
 
 export function HowItWorks() {
   const demoUrl = `${APP_CONFIG.url}/r/demo`
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(demoUrl)}`
+  // Increased size and margin for better scannability
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(demoUrl)}&margin=1`
 
   return (
     <section id="how-it-works" className="py-24 relative overflow-hidden">
@@ -94,14 +95,14 @@ export function HowItWorks() {
               <div className="flex flex-col items-center space-y-6">
                 <div className="relative group">
                    <div className="absolute -inset-4 bg-gradient-to-tr from-primary to-purple-600 rounded-[2.5rem] opacity-20 blur-xl group-hover:opacity-40 transition-opacity" />
-                   <div className="relative bg-white p-6 rounded-[2rem] shadow-2xl border-4 border-muted">
-                      <div className="h-48 w-48 bg-muted/10 rounded-xl flex items-center justify-center border-2 border-dashed border-primary/20 relative overflow-hidden">
+                   <div className="relative bg-white p-4 md:p-6 rounded-[2rem] shadow-2xl border-4 border-muted flex items-center justify-center">
+                      <div className="relative h-44 w-44 md:h-52 md:w-52 flex items-center justify-center bg-white p-2 rounded-xl">
                          <Image 
                            src={qrCodeUrl} 
                            alt="Demo QR Code"
-                           width={200}
-                           height={200}
-                           className="rounded-lg shadow-inner scale-110"
+                           fill
+                           className="object-contain"
+                           priority
                          />
                       </div>
                    </div>
