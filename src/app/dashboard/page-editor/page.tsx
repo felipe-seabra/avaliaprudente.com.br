@@ -45,6 +45,7 @@ import {
 } from '@dnd-kit/sortable'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableLinkItem } from '@/components/dashboard/sortable-link-item'
+import { parseError, logError } from '@/lib/error-handler'
 
 export default function PageEditor() {
   const { currentBusiness } = useBusiness()
@@ -74,8 +75,10 @@ export default function PageEditor() {
       setPage(pageData)
       const linksData = await linkRepo.getByPageId(pageData.id)
       setLinks(linksData)
-    } catch {
-      toast.error('Erro ao carregar dados da página')
+    } catch (err) {
+      logError(err, 'Fetch Page Data')
+      const normalized = parseError(err)
+      toast.error('Erro ao carregar dados', { description: normalized.message })
     } finally {
       setIsLoading(false)
     }
@@ -92,8 +95,10 @@ export default function PageEditor() {
     try {
       await pageRepo.update(page.id, { description: page.description })
       toast.success('Página atualizada!')
-    } catch {
-      toast.error('Erro ao salvar alterações')
+    } catch (err) {
+      logError(err, 'Update Page Content')
+      const normalized = parseError(err)
+      toast.error('Erro ao salvar alterações', { description: normalized.message })
     } finally {
       setIsSaving(false)
     }
@@ -121,8 +126,10 @@ export default function PageEditor() {
       })
       fetchData()
       toast.success('Link adicionado!')
-    } catch {
-      toast.error('Erro ao adicionar link')
+    } catch (err) {
+      logError(err, 'Add Link')
+      const normalized = parseError(err)
+      toast.error('Erro ao adicionar link', { description: normalized.message })
     }
   }
 
@@ -132,8 +139,10 @@ export default function PageEditor() {
       await linkRepo.delete(id)
       setLinks(links.filter(l => l.id !== id))
       toast.success('Link removido')
-    } catch {
-      toast.error('Erro ao remover link')
+    } catch (err) {
+      logError(err, 'Delete Link')
+      const normalized = parseError(err)
+      toast.error('Erro ao remover link', { description: normalized.message })
     }
   }
 
@@ -141,8 +150,10 @@ export default function PageEditor() {
     try {
       await linkRepo.update(id, updates)
       setLinks(links.map(l => l.id === id ? { ...l, ...updates } : l))
-    } catch {
-      toast.error('Erro ao atualizar link')
+    } catch (err) {
+      logError(err, 'Update Link')
+      const normalized = parseError(err)
+      toast.error('Erro ao atualizar link', { description: normalized.message })
     }
   }
 
@@ -150,22 +161,26 @@ export default function PageEditor() {
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      setLinks((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id)
-        const newIndex = items.findIndex((item) => item.id === over.id)
-        const newItems = arrayMove(items, oldIndex, newIndex)
-        
-        // Update order in DB
-        const updates = newItems.map((item, index) => ({
-          id: item.id,
-          sort_order: index,
-        }))
-        linkRepo.updateOrder(updates).catch(() => {
-          toast.error('Erro ao salvar nova ordem')
-        })
+      const oldIndex = links.findIndex((item) => item.id === active.id)
+      const newIndex = links.findIndex((item) => item.id === over.id)
+      const newItems = arrayMove(links, oldIndex, newIndex)
+      
+      setLinks(newItems)
 
-        return newItems
-      })
+      // Update order in DB
+      const updates = newItems.map((item, index) => ({
+        id: item.id,
+        sort_order: index,
+      }))
+      
+      try {
+        await linkRepo.updateOrder(updates)
+      } catch (err) {
+        logError(err, 'Update Links Order')
+        const normalized = parseError(err)
+        toast.error('Erro ao salvar nova ordem', { description: normalized.message })
+        fetchData() // Revert to DB state on error
+      }
     }
   }
 

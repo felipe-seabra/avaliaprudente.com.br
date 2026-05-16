@@ -21,6 +21,7 @@ import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
 import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { useBusiness } from '@/providers/business-provider'
+import { parseError, logError } from '@/lib/error-handler'
 
 const createReviewLinkSchema = z.object({
   slug: z.string().min(2, 'Slug deve ter pelo menos 2 caracteres').regex(/^[a-z0-9-]+$/, 'Slug inválido'),
@@ -56,8 +57,9 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
       form.reset()
       onCreated?.()
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Erro desconhecido'
-      toast.error('Erro ao criar link', { description: message })
+      logError(error, 'Create Review Link')
+      const normalized = parseError(error)
+      toast.error(normalized.message)
     } finally {
       setIsLoading(false)
     }

@@ -67,3 +67,10 @@ All notable changes to this project will be documented in this file.
 - Landing Page Refinements: Restructured Hero section with physical NFC mockups and high-conversion copy.
 - Pricing Updates: Reflected the new NFC-first physical product offering in the pricing tiers.
 - Mobile Optimizations: Ensured all CTAs and interactive elements have appropriate tap targets and animations.
+- Stabilization & Debugging: Systematic cleanup of silent failures and improvement of error handling UX.
+- Error Normalization Utility: Created `parseError` to translate technical errors (Supabase/Auth) into actionable Portuguese messages.
+- RLS Policy Fixes: Resolved recursion issues in the `profiles` table and ensured explicit `insert` permissions for business pages.
+- Robust Middleware Roles: Updated middleware to perform direct database role checks for admin protection.
+- Enhanced Logout Flow: Added `router.refresh()` to handle session clearing more reliably.
+- Global Error UX: Updated all critical forms (Login, Register, Create Business) to surface specific errors via Sonner toasts.
+- Improved Loading/Error UI: Refined `/[slug]` page with better loading states and actionable error fallback.

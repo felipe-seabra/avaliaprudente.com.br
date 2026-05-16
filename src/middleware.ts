@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  const { supabaseResponse, user } = await updateSession(request)
+  const { supabaseResponse, user, role } = await updateSession(request)
 
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||
@@ -29,12 +29,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    // Role check for admin
-    // Note: In production, you'd ideally check the 'role' claim in the JWT or fetch from DB.
-    // For now, we check the metadata which is easier for MVP but less secure than a DB check.
-    // The safest way is to fetch the role in updateSession and return it.
-    const userRole = user.app_metadata?.role || 'customer'
-    if (userRole !== 'admin') {
+    if (role !== 'admin') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }

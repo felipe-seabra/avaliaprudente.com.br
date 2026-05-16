@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
+import { parseError, logError } from '@/lib/error-handler'
 
 export function ResetPasswordForm() {
   const router = useRouter()
@@ -43,15 +44,16 @@ export function ResetPasswordForm() {
       })
 
       if (error) {
-        toast.error('Erro ao atualizar senha', {
-          description: error.message,
-        })
+        logError(error, 'Reset Password')
+        const normalized = parseError(error)
+        toast.error(normalized.message)
         return
       }
 
       toast.success('Senha atualizada com sucesso!')
       router.push('/login')
-    } catch {
+    } catch (err) {
+      logError(err, 'Reset Password unexpected')
       toast.error('Ocorreu um erro inesperado')
     } finally {
       setIsLoading(false)
@@ -73,6 +75,7 @@ export function ResetPasswordForm() {
               placeholder="••••••"
               type="password"
               disabled={isLoading}
+              autoComplete="new-password"
             />
             <InputField
               name="confirmPassword"
@@ -80,6 +83,7 @@ export function ResetPasswordForm() {
               placeholder="••••••"
               type="password"
               disabled={isLoading}
+              autoComplete="new-password"
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Atualizando...' : 'Atualizar senha'}

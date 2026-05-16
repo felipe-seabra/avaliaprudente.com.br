@@ -21,6 +21,7 @@ import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
 import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
 import { useBusiness } from '@/providers/business-provider'
+import { parseError, logError } from '@/lib/error-handler'
 
 const createBusinessSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -75,8 +76,9 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
       setOpen(false)
       form.reset()
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Erro desconhecido'
-      toast.error('Erro ao criar empresa', { description: message })
+      logError(error, 'Create Business')
+      const normalized = parseError(error)
+      toast.error(normalized.message)
     } finally {
       setIsLoading(false)
     }

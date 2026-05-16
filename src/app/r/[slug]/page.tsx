@@ -13,6 +13,7 @@ import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-re
 import { toast } from 'sonner'
 import { Loader2, CheckCircle2 } from 'lucide-react'
 import Image from 'next/image'
+import { parseError, logError } from '@/lib/error-handler'
 
 export default function PublicReviewPage() {
   const { slug } = useParams()
@@ -42,8 +43,10 @@ export default function PublicReviewPage() {
         setTimeout(() => {
           window.location.href = link!.redirect_url
         }, 1500)
-      } catch {
-        toast.error('Erro ao processar avaliação')
+      } catch (err) {
+        logError(err, 'Rating Submit (Positive)')
+        const normalized = parseError(err)
+        toast.error('Erro ao processar avaliação', { description: normalized.message })
       } finally {
         setIsLoading(false)
       }
@@ -67,8 +70,10 @@ export default function PublicReviewPage() {
         source: 'qr-code',
       })
       setStep('success')
-    } catch {
-      toast.error('Erro ao enviar feedback')
+    } catch (err) {
+      logError(err, 'Feedback Submit (Negative)')
+      const normalized = parseError(err)
+      toast.error('Erro ao enviar feedback', { description: normalized.message })
     } finally {
       setIsLoading(false)
     }

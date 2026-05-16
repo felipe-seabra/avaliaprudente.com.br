@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
+import { parseError, logError } from '@/lib/error-handler'
 
 export function UserNav() {
   const router = useRouter()
@@ -35,11 +36,19 @@ export function UserNav() {
   }, [supabase])
 
   async function handleSignOut() {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      toast.error('Erro ao sair', { description: error.message })
-    } else {
-      router.push('/login')
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        logError(error, 'Sign Out')
+        const normalized = parseError(error)
+        toast.error(normalized.message)
+      } else {
+        router.push('/login')
+        router.refresh()
+      }
+    } catch (err) {
+      logError(err, 'Sign Out unexpected')
+      toast.error('Erro ao sair da conta')
     }
   }
 
@@ -77,14 +86,18 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
-            <UserIcon className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Configurações</span>
-          </DropdownMenuItem>
+          <DropdownMenuItem render={
+            <button className="w-full flex items-center" onClick={() => router.push('/dashboard/profile')}>
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>Perfil</span>
+            </button>
+          } />
+          <DropdownMenuItem render={
+            <button className="w-full flex items-center" onClick={() => router.push('/dashboard/settings')}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Configurações</span>
+            </button>
+          } />
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>

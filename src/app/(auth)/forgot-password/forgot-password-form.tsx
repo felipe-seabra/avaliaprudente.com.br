@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
+import { parseError, logError } from '@/lib/error-handler'
 
 export function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = React.useState(false)
@@ -42,16 +43,17 @@ export function ForgotPasswordForm() {
       })
 
       if (error) {
-        toast.error('Erro ao enviar e-mail', {
-          description: error.message,
-        })
+        logError(error, 'Forgot Password')
+        const normalized = parseError(error)
+        toast.error(normalized.message)
         return
       }
 
       toast.success('E-mail enviado!', {
         description: 'Verifique sua caixa de entrada para resetar sua senha.',
       })
-    } catch {
+    } catch (err) {
+      logError(err, 'Forgot Password unexpected')
       toast.error('Ocorreu um erro inesperado')
     } finally {
       setIsLoading(false)
@@ -75,6 +77,7 @@ export function ForgotPasswordForm() {
               placeholder="seu@email.com"
               type="email"
               disabled={isLoading}
+              autoComplete="email"
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Enviando...' : 'Enviar e-mail'}

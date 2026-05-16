@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
+import { parseError, logError } from '@/lib/error-handler'
 
 export function LoginForm() {
   const router = useRouter()
@@ -43,16 +44,17 @@ export function LoginForm() {
       })
 
       if (error) {
-        toast.error('Erro ao fazer login', {
-          description: error.message,
-        })
+        logError(error, 'Login')
+        const normalized = parseError(error)
+        toast.error(normalized.message)
         return
       }
 
       toast.success('Login realizado com sucesso!')
       router.push('/dashboard')
       router.refresh()
-    } catch {
+    } catch (err) {
+      logError(err, 'Login unexpected')
       toast.error('Ocorreu um erro inesperado')
     } finally {
       setIsLoading(false)
@@ -76,6 +78,7 @@ export function LoginForm() {
               placeholder="seu@email.com"
               type="email"
               disabled={isLoading}
+              autoComplete="email"
             />
             <InputField
               name="password"
@@ -83,6 +86,7 @@ export function LoginForm() {
               placeholder="••••••"
               type="password"
               disabled={isLoading}
+              autoComplete="current-password"
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Entrando...' : 'Entrar'}

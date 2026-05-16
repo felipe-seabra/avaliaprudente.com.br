@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { Business } from '@/core/domain/entities'
 import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
 import { toast } from 'sonner'
+import { parseError, logError } from '@/lib/error-handler'
 
 interface BusinessContextType {
   businesses: Business[]
@@ -35,8 +36,9 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         setCurrentBusiness(null)
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Erro desconhecido'
-      toast.error('Erro ao carregar empresas', { description: message })
+      logError(error, 'Refresh Businesses')
+      const normalized = parseError(error)
+      toast.error('Erro ao carregar empresas', { description: normalized.message })
     } finally {
       setIsLoading(false)
     }

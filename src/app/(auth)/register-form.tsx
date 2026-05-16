@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
+import { parseError, logError } from '@/lib/error-handler'
 
 export function RegisterForm() {
   const router = useRouter()
@@ -49,9 +50,9 @@ export function RegisterForm() {
       })
 
       if (error) {
-        toast.error('Erro ao cadastrar', {
-          description: error.message,
-        })
+        logError(error, 'Registration')
+        const normalized = parseError(error)
+        toast.error(normalized.message)
         return
       }
 
@@ -59,7 +60,8 @@ export function RegisterForm() {
         description: 'Verifique seu e-mail para confirmar a conta.',
       })
       router.push('/login')
-    } catch {
+    } catch (err) {
+      logError(err, 'Registration unexpected')
       toast.error('Ocorreu um erro inesperado')
     } finally {
       setIsLoading(false)
@@ -82,6 +84,7 @@ export function RegisterForm() {
               label="Nome Completo"
               placeholder="João Silva"
               disabled={isLoading}
+              autoComplete="name"
             />
             <InputField
               name="email"
@@ -89,6 +92,7 @@ export function RegisterForm() {
               placeholder="seu@email.com"
               type="email"
               disabled={isLoading}
+              autoComplete="email"
             />
             <InputField
               name="password"
@@ -96,6 +100,7 @@ export function RegisterForm() {
               placeholder="••••••"
               type="password"
               disabled={isLoading}
+              autoComplete="new-password"
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Cadastrando...' : 'Cadastrar'}
