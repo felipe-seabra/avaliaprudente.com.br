@@ -18,7 +18,7 @@ export default function AuthLayout({
               alt={APP_CONFIG.name}
               width={140}
               height={140}
-              className="h-24 w-auto object-contain dark:invert mb-2"
+              className="h-24 w-auto object-contain mb-2"
               priority
             />
           </Link>

@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import {
   LogOut,
   Settings,
-  User as UserIcon,
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
@@ -57,17 +56,11 @@ export function UserNav() {
 
   async function handleSignOut() {
     try {
-      // Clear session from Supabase
       await supabase.auth.signOut()
-      
-      // Notify user
       toast.success('Saindo...')
-      
-      // Perform a hard redirect to ensure all states are cleared
       window.location.assign('/login')
     } catch (err) {
       logError(err, 'Sign Out unexpected')
-      // Fallback redirect
       window.location.assign('/login')
     }
   }
@@ -90,58 +83,44 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button className="relative h-9 w-9 rounded-full focus-visible:ring-0 cursor-pointer outline-none hover:opacity-80 transition-opacity">
-            <Avatar className="h-9 w-9 pointer-events-none">
-              <AvatarImage
-                src={avatarUrl}
-                alt={displayName}
-              />
-              <AvatarFallback>{initials}</AvatarFallback>
+          <button className="group relative flex h-9 w-9 items-center justify-center rounded-full outline-none cursor-pointer transition-transform active:scale-95">
+            <Avatar className="h-9 w-9 pointer-events-none ring-1 ring-border group-hover:ring-primary transition-all">
+              <AvatarImage src={avatarUrl} alt={displayName} />
+              <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{initials}</AvatarFallback>
             </Avatar>
           </button>
         }
       />
-      <DropdownMenuContent className="w-56" align="end">
-        <DropdownMenuLabel>
-          <div className="flex flex-col space-y-1">
+      <DropdownMenuContent className="w-56" align="end" sideOffset={8}>
+        <DropdownMenuLabel className="font-normal p-3">
+          <div className="flex flex-col space-y-2">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium leading-none truncate">
-                {displayName}
-              </p>
+              <p className="text-sm font-bold leading-none truncate">{displayName}</p>
               {role === 'admin' && (
-                <span className="bg-destructive/10 text-destructive text-[10px] uppercase font-bold px-1.5 py-0.5 rounded shrink-0">
+                <span className="bg-destructive/10 text-destructive text-[9px] uppercase font-black px-1.5 py-0.5 rounded leading-none shrink-0 border border-destructive/20">
                   Admin
                 </span>
               )}
             </div>
-            <p className="text-xs leading-none text-muted-foreground truncate">
-              {email}
-            </p>
+            <p className="text-xs leading-none text-muted-foreground truncate opacity-70">{email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
-          className="cursor-pointer"
+          className="cursor-pointer py-3"
           onClick={() => router.push('/dashboard/settings')}
         >
-          <UserIcon className="mr-2 h-4 w-4 opacity-70" />
-          <span>Perfil</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          className="cursor-pointer"
-          onClick={() => router.push('/dashboard/settings')}
-        >
-          <Settings className="mr-2 h-4 w-4 opacity-70" />
-          <span>Configurações</span>
+          <Settings className="mr-2 h-4 w-4 opacity-60" />
+          <span className="font-medium text-sm">Configurações</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           variant="destructive"
-          className="cursor-pointer"
+          className="cursor-pointer py-3"
           onClick={handleSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
+          <span className="font-bold text-sm">Sair da conta</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -150,6 +129,6 @@ export function UserNav() {
 
 function SkeletonAvatar() {
   return (
-    <div className="h-9 w-9 animate-pulse rounded-full bg-muted"></div>
+    <div className="h-9 w-9 animate-pulse rounded-full bg-muted border border-border/20"></div>
   )
 }

@@ -54,7 +54,7 @@ export function Hero() {
                 <div className="w-16 h-1.5 bg-muted rounded-full mb-4" />
                 <div className="flex-1 w-full bg-card px-3 pt-6 space-y-4">
                   <div className="w-12 h-12 rounded-full bg-primary/10 mx-auto flex items-center justify-center border border-primary/20">
-                    <Image src="/branding/logo-vertical.webp" alt="V" width={20} height={20} className="h-4 w-auto dark:invert" />
+                    <Image src="/branding/logo-vertical.webp" alt="V" width={20} height={20} className="h-4 w-auto" />
                   </div>
                   <div className="w-20 h-2 bg-muted mx-auto rounded-full" />
                   <div className="space-y-2">
@@ -73,7 +73,7 @@ export function Hero() {
                    <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/20">
                       <SmartphoneNfc size={20} className="text-primary" />
                    </div>
-                   <Image src="/branding/logo-horizontal.webp" alt="Logo" width={80} height={20} className="h-3 w-auto invert opacity-50" />
+                   <Image src="/branding/logo-horizontal.webp" alt="Logo" width={80} height={20} className="h-3 w-auto opacity-80" />
                 </div>
                 <div className="flex flex-col items-center gap-4">
                   <div className="h-16 w-16 rounded-full border-2 border-dashed border-primary/40 flex items-center justify-center">

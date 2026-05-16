@@ -17,7 +17,7 @@ export function Footer() {
                 alt={APP_CONFIG.name}
                 width={160}
                 height={36}
-                className="h-7 w-auto object-contain dark:invert"
+                className="h-7 w-auto object-contain"
               />
             </Link>
             <p className="text-muted-foreground max-w-sm mb-6">

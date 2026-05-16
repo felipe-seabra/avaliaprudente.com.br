@@ -140,7 +140,7 @@ export default function BusinessPublicPage() {
         </div>
 
         {/* Social Proof / Reviews Section */}
-        {reviews.length > 0 && (
+        {reviews.filter(r => r.feedback && r.feedback.trim() !== '').length > 0 && (
           <div className="w-full px-2 space-y-6 text-left">
             <div className="flex items-center justify-between px-2">
                <h2 className="text-lg font-bold flex items-center gap-2">
@@ -150,7 +150,10 @@ export default function BusinessPublicPage() {
             </div>
             
             <div className="space-y-4">
-              {reviews.filter(r => !r.is_internal || r.feedback).slice(0, 3).map((review, idx) => (
+              {reviews
+                .filter(r => r.feedback && r.feedback.trim() !== '')
+                .slice(0, 5)
+                .map((review, idx) => (
                 <Card key={review.id} className="border-none shadow-sm bg-background/60 backdrop-blur-sm rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: `${idx * 150}ms` }}>
                   <CardContent className="p-5 space-y-3">
                     <div className="flex items-center justify-between">
@@ -158,7 +161,7 @@ export default function BusinessPublicPage() {
                          {[...Array(5)].map((_, i) => (
                            <Star 
                              key={i} 
-                             className={`h-3 w-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted'}`} 
+                             className={`h-3 w-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted opacity-20'}`} 
                            />
                          ))}
                        </div>
@@ -166,8 +169,8 @@ export default function BusinessPublicPage() {
                          {new Date(review.created_at).toLocaleDateString('pt-BR')}
                        </span>
                     </div>
-                    <p className="text-sm text-foreground/90 italic leading-relaxed italic">
-                      &quot;{review.feedback || (review.rating >= 4 ? 'Excelente atendimento e qualidade!' : 'Feedback enviado.')}&quot;
+                    <p className="text-sm text-foreground/90 italic leading-relaxed">
+                      &quot;{review.feedback}&quot;
                     </p>
                     <div className="flex items-center gap-2">
                        <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
