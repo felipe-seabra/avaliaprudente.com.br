@@ -20,6 +20,7 @@ import {
 import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
 import { parseError, logError } from '@/lib/error-handler'
+import { APP_CONFIG } from '@/lib/constants'
 
 export function RegisterForm() {
   const router = useRouter()
@@ -43,6 +44,7 @@ export function RegisterForm() {
         email: data.email,
         password: data.password,
         options: {
+          emailRedirectTo: `${APP_CONFIG.url}/auth/callback`,
           data: {
             full_name: data.fullName,
           },
@@ -102,7 +104,7 @@ export function RegisterForm() {
               disabled={isLoading}
               autoComplete="new-password"
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full font-bold cursor-pointer" disabled={isLoading}>
               {isLoading ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
           </form>

@@ -22,6 +22,7 @@ import {
 import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
 import { parseError, logError } from '@/lib/error-handler'
+import { APP_CONFIG } from '@/lib/constants'
 
 export function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = React.useState(false)
@@ -39,7 +40,7 @@ export function ForgotPasswordForm() {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${APP_CONFIG.url}/reset-password`,
       })
 
       if (error) {
