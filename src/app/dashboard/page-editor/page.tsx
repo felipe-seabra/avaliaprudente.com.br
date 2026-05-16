@@ -54,10 +54,19 @@ export default function PageEditor() {
   const [links, setLinks] = useState<PageLink[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null)
 
   const pageRepo = useMemo(() => new BusinessPageRepository(), [])
   const linkRepo = useMemo(() => new PageLinkRepository(), [])
   const businessRepo = useMemo(() => new BusinessRepository(), [])
+
+  useEffect(() => {
+    if (currentBusiness?.logo_url) {
+      setLocalLogoUrl(currentBusiness.logo_url)
+    } else {
+      setLocalLogoUrl(null)
+    }
+  }, [currentBusiness?.logo_url])
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -108,12 +117,14 @@ export default function PageEditor() {
 
   const handleUpdateLogo = async (url: string) => {
     if (!currentBusiness) return
+    setLocalLogoUrl(url) // Optimistic update
     try {
       await businessRepo.update(currentBusiness.id, { logo_url: url })
-      toast.success('Logo atualizado!')
+      if (!url) toast.success('Logo removido com sucesso.')
       await refreshBusinesses()
     } catch (err: unknown) {
       logError(err, 'Update Logo')
+      setLocalLogoUrl(currentBusiness.logo_url) // Rollback
       const normalized = parseError(err)
       toast.error('Erro ao atualizar logo', { description: normalized.message })
     }
@@ -205,7 +216,7 @@ export default function PageEditor() {
 
   const getPreviewIcon = (link: PageLink) => {
     const type = link.type.toLowerCase()
-    const url = link.url.toLowerCase()
+    const url = (link.url || '').toLowerCase()
 
     if (type === 'google_review') return <BrandIcons.Google size={14} className="text-[#4285F4]" />
     if (type === 'whatsapp' || url.includes('wa.me')) return <BrandIcons.WhatsApp size={16} className="text-[#25D366]" />
@@ -260,19 +271,29 @@ export default function PageEditor() {
               <CardDescription>Logo e cores da sua empresa.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col md:flex-row gap-6 items-start">
-                <div className="w-full md:w-32">
-                   <Label className="mb-2 block">Logo da Empresa</Label>
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="w-full md:w-40 shrink-0">
+                   <Label className="mb-3 block font-bold text-xs uppercase tracking-widest text-muted-foreground">Logo da Empresa</Label>
                    <ImageUpload 
-                     value={currentBusiness.logo_url}
+                     value={localLogoUrl}
                      onChange={handleUpdateLogo}
                      onRemove={() => handleUpdateLogo('')}
                      folder="logos"
                    />
                 </div>
                 <div className="flex-1 space-y-4">
-                   <div className="p-4 bg-muted/50 rounded-2xl border border-border/50 text-sm text-muted-foreground italic leading-relaxed">
-                     A logo será exibida no topo da sua página pública e também pode ser impressa em seus materiais.
+                   <div className="p-5 bg-muted/40 rounded-3xl border-2 border-dashed border-border/60 text-sm text-muted-foreground italic leading-relaxed">
+                     A logo será exibida no topo da sua página pública e também é usada para gerar as imagens de compartilhamento (OpenGraph) no WhatsApp e redes sociais.
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 rounded-2xl bg-background border shadow-sm">
+                         <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Resolução</p>
+                         <p className="text-xs font-bold">512 x 512px</p>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-background border shadow-sm">
+                         <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Formato</p>
+                         <p className="text-xs font-bold">PNG ou WebP</p>
+                      </div>
                    </div>
                 </div>
               </div>
@@ -294,8 +315,8 @@ export default function PageEditor() {
                     onChange={(e) => setPage({ ...page, description: e.target.value })}
                   />
                 </div>
-                <Button type="submit" disabled={isSaving} className="cursor-pointer">
-                  <Save className="mr-2 h-4 w-4" />
+                <Button type="submit" disabled={isSaving} className="cursor-pointer font-bold gap-2">
+                  <Save className="h-4 w-4" />
                   {isSaving ? 'Salvando...' : 'Salvar Conteúdo'}
                 </Button>
               </form>
@@ -391,17 +412,18 @@ export default function PageEditor() {
             <div className="h-full overflow-y-auto custom-scrollbar p-6 flex flex-col items-center bg-background/50">
               <div className="w-16 h-1.5 bg-muted-foreground/20 rounded-full mb-10 shrink-0" />
               
-              {currentBusiness.logo_url ? (
-                <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary/10 mb-5 shrink-0 shadow-lg bg-background">
+              {localLogoUrl ? (
+                <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary/10 mb-5 shrink-0 shadow-lg bg-background animate-in zoom-in duration-300">
                   <Image 
-                    src={currentBusiness.logo_url} 
+                    src={localLogoUrl} 
                     alt={currentBusiness.name} 
                     fill 
                     className="object-cover"
+                    key={localLogoUrl} // Force refresh on URL change
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center mb-5 shrink-0 border-2 border-primary/10 shadow-lg">
+                <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center mb-5 shrink-0 border-2 border-primary/10 shadow-lg animate-in zoom-in duration-300">
                   <span className="text-3xl font-bold text-primary">
                     {currentBusiness.name.substring(0, 1).toUpperCase()}
                   </span>

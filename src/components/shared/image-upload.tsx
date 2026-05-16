@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { Loader2, Upload, X } from 'lucide-react'
+import { Loader2, Upload, RefreshCw, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
@@ -32,7 +32,6 @@ export function ImageUpload({
   // Optimization: Resize and Compress image using Canvas
   const optimizeImage = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
-      // SVG doesn't need canvas optimization, just return as is if small enough
       if (file.type === 'image/svg+xml') {
         resolve(file)
         return
@@ -49,7 +48,6 @@ export function ImageUpload({
           let height = img.height
           const maxDimension = 512
 
-          // Resize logic
           if (width > height) {
             if (width > maxDimension) {
               height *= maxDimension / width
@@ -72,7 +70,6 @@ export function ImageUpload({
 
           ctx.drawImage(img, 0, 0, width, height)
           
-          // Export as WebP with 0.8 quality for best balance
           canvas.toBlob(
             (blob) => {
               if (blob) resolve(blob)
@@ -91,7 +88,6 @@ export function ImageUpload({
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Pre-optimization size check (soft limit)
     const absoluteMax = 5 * 1024 * 1024 // 5MB before optimization
     if (file.size > absoluteMax) {
       toast.error('Arquivo muito pesado. Utilize uma imagem de até 5MB.')
@@ -106,10 +102,8 @@ export function ImageUpload({
 
     setIsUploading(true)
     try {
-      // Optimize image
       const optimizedBlob = await optimizeImage(file)
       
-      // Post-optimization size check (strict limit)
       const maxFinalSize = 300 * 1024 // 300KB
       if (optimizedBlob.size > maxFinalSize) {
         toast.error('Logo muito grande após otimização. Utilize um arquivo mais leve (máx 300KB).')
@@ -121,9 +115,8 @@ export function ImageUpload({
       if (!userData.user) throw new Error('Usuário não autenticado')
 
       const userId = userData.user.id
-      // Change extension to .webp for optimized images, keep .svg for SVGs
       const fileExt = file.type === 'image/svg+xml' ? 'svg' : 'webp'
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
       const filePath = `${userId}/${folder}/${fileName}`
 
       const { error: uploadError } = await supabase.storage
@@ -141,14 +134,13 @@ export function ImageUpload({
         .getPublicUrl(filePath)
 
       onChange(publicUrl)
-      toast.success('Logo enviado e otimizado com sucesso!')
+      toast.success('Logo atualizado com sucesso!')
     } catch (error: unknown) {
       console.error('Upload error:', error)
       const message = error instanceof Error ? error.message : 'Erro desconhecido'
       toast.error('Erro ao enviar imagem: ' + message)
     } finally {
       setIsUploading(false)
-      // Reset input
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
@@ -158,7 +150,7 @@ export function ImageUpload({
   }
 
   return (
-    <div className={cn('space-y-4 w-full', className)}>
+    <div className={cn('space-y-4 w-full flex flex-col items-center', className)}>
       <input
         type="file"
         ref={fileInputRef}
@@ -167,60 +159,93 @@ export function ImageUpload({
         className="hidden"
       />
 
-      {value ? (
-        <div className="relative group">
-          <div className={cn(
-            'relative overflow-hidden rounded-2xl border bg-muted shadow-inner',
-            aspectRatio === 'square' && 'aspect-square',
-            aspectRatio === 'video' && 'aspect-video',
-            aspectRatio === 'portrait' && 'aspect-[3/4]'
-          )}>
+      <div className={cn(
+        'relative group overflow-hidden rounded-2xl border-2 border-muted transition-all hover:border-primary/20 shadow-sm bg-background flex items-center justify-center',
+        aspectRatio === 'square' && 'h-32 w-32 md:h-40 md:w-40',
+        aspectRatio === 'video' && 'aspect-video w-full',
+        aspectRatio === 'portrait' && 'aspect-[3/4] w-full',
+        isUploading && 'opacity-50 grayscale'
+      )}>
+        {value ? (
+          <>
             <Image
               src={value}
-              alt="Upload"
+              alt="Logo"
               fill
-              className="object-contain p-2 transition-transform group-hover:scale-105"
+              className="object-contain p-3 transition-transform group-hover:scale-105"
             />
-          </div>
-          <Button
-            type="button"
-            variant="destructive"
-            size="icon"
-            className="absolute -top-2 -right-2 h-8 w-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={onRemove}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={triggerUpload}
-          disabled={isUploading}
-          className={cn(
-            'flex flex-col items-center justify-center w-full border-2 border-dashed rounded-2xl transition-all hover:bg-muted/50 hover:border-primary/50 group cursor-pointer bg-background',
-            aspectRatio === 'square' && 'aspect-square',
-            aspectRatio === 'video' && 'aspect-video',
-            aspectRatio === 'portrait' && 'aspect-[3/4]',
-            isUploading && 'opacity-50 cursor-not-allowed'
-          )}
-        >
-          {isUploading ? (
-            <div className="flex flex-col items-center gap-3">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Otimizando...</p>
-            </div>
-          ) : (
-            <>
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Upload className="h-6 w-6 text-primary" />
+            {isUploading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-              <p className="text-sm font-bold">Clique para enviar</p>
-              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-tight">PNG, JPG ou WebP até 300KB</p>
-            </>
-          )}
-        </button>
-      )}
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center p-4">
+            {isUploading ? (
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            ) : (
+              <>
+                <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-tight">
+                  Clique para<br/>enviar logo
+                </p>
+              </>
+            )}
+          </div>
+        )}
+        
+        {/* Overlay trigger for upload when logo exists */}
+        {value && !isUploading && (
+          <button 
+            onClick={triggerUpload}
+            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+          >
+            <RefreshCw className="h-8 w-8 text-white animate-in zoom-in-50 duration-300" />
+          </button>
+        )}
+      </div>
+
+      {/* Explicit Actions */}
+      <div className="flex flex-col w-full gap-2">
+        {!value ? (
+          <Button 
+            type="button" 
+            className="w-full font-bold gap-2 cursor-pointer" 
+            onClick={triggerUpload}
+            disabled={isUploading}
+          >
+            <Upload className="h-4 w-4" />
+            Selecionar Logo
+          </Button>
+        ) : (
+          <div className="flex gap-2 w-full">
+            <Button 
+              type="button" 
+              variant="outline"
+              className="flex-1 font-bold gap-2 cursor-pointer border-2" 
+              onClick={triggerUpload}
+              disabled={isUploading}
+            >
+              <RefreshCw className={cn("h-4 w-4", isUploading && "animate-spin")} />
+              Trocar
+            </Button>
+            <Button 
+              type="button" 
+              variant="destructive"
+              size="icon"
+              className="w-10 h-10 rounded-xl cursor-pointer shadow-md" 
+              onClick={onRemove}
+              disabled={isUploading}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        <p className="text-[9px] text-center text-muted-foreground font-medium uppercase tracking-tighter">
+          Máx 300KB • Recomendado 512x512px
+        </p>
+      </div>
     </div>
   )
 }
