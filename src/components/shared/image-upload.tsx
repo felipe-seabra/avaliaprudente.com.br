@@ -29,14 +29,72 @@ export function ImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
+  // Optimization: Resize and Compress image using Canvas
+  const optimizeImage = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      // SVG doesn't need canvas optimization, just return as is if small enough
+      if (file.type === 'image/svg+xml') {
+        resolve(file)
+        return
+      }
+
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = (event) => {
+        const img = new window.Image()
+        img.src = event.target?.result as string
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          let width = img.width
+          let height = img.height
+          const maxDimension = 512
+
+          // Resize logic
+          if (width > height) {
+            if (width > maxDimension) {
+              height *= maxDimension / width
+              width = maxDimension
+            }
+          } else {
+            if (height > maxDimension) {
+              width *= maxDimension / height
+              height = maxDimension
+            }
+          }
+
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          if (!ctx) {
+            reject(new Error('Canvas context not available'))
+            return
+          }
+
+          ctx.drawImage(img, 0, 0, width, height)
+          
+          // Export as WebP with 0.8 quality for best balance
+          canvas.toBlob(
+            (blob) => {
+              if (blob) resolve(blob)
+              else reject(new Error('Image optimization failed'))
+            },
+            'image/webp',
+            0.8
+          )
+        }
+      }
+      reader.onerror = reject
+    })
+  }
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validation
-    const maxSize = 512 * 1024 // 512KB
-    if (file.size > maxSize) {
-      toast.error('Arquivo muito grande. O limite para logos é 512KB.')
+    // Pre-optimization size check (soft limit)
+    const absoluteMax = 5 * 1024 * 1024 // 5MB before optimization
+    if (file.size > absoluteMax) {
+      toast.error('Arquivo muito pesado. Utilize uma imagem de até 5MB.')
       return
     }
 
@@ -48,17 +106,33 @@ export function ImageUpload({
 
     setIsUploading(true)
     try {
+      // Optimize image
+      const optimizedBlob = await optimizeImage(file)
+      
+      // Post-optimization size check (strict limit)
+      const maxFinalSize = 300 * 1024 // 300KB
+      if (optimizedBlob.size > maxFinalSize) {
+        toast.error('Logo muito grande após otimização. Utilize um arquivo mais leve (máx 300KB).')
+        setIsUploading(false)
+        return
+      }
+
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Usuário não autenticado')
 
       const userId = userData.user.id
-      const fileExt = file.name.split('.').pop()
+      // Change extension to .webp for optimized images, keep .svg for SVGs
+      const fileExt = file.type === 'image/svg+xml' ? 'svg' : 'webp'
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
       const filePath = `${userId}/${folder}/${fileName}`
 
       const { error: uploadError } = await supabase.storage
         .from('business-assets')
-        .upload(filePath, file)
+        .upload(filePath, optimizedBlob, {
+          contentType: file.type === 'image/svg+xml' ? 'image/svg+xml' : 'image/webp',
+          cacheControl: '3600',
+          upsert: false
+        })
 
       if (uploadError) throw uploadError
 
@@ -67,12 +141,15 @@ export function ImageUpload({
         .getPublicUrl(filePath)
 
       onChange(publicUrl)
-      toast.success('Imagem enviada com sucesso!')
+      toast.success('Logo enviado e otimizado com sucesso!')
     } catch (error: unknown) {
+      console.error('Upload error:', error)
       const message = error instanceof Error ? error.message : 'Erro desconhecido'
       toast.error('Erro ao enviar imagem: ' + message)
     } finally {
       setIsUploading(false)
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
@@ -93,7 +170,7 @@ export function ImageUpload({
       {value ? (
         <div className="relative group">
           <div className={cn(
-            'relative overflow-hidden rounded-2xl border bg-muted',
+            'relative overflow-hidden rounded-2xl border bg-muted shadow-inner',
             aspectRatio === 'square' && 'aspect-square',
             aspectRatio === 'video' && 'aspect-video',
             aspectRatio === 'portrait' && 'aspect-[3/4]'
@@ -102,7 +179,7 @@ export function ImageUpload({
               src={value}
               alt="Upload"
               fill
-              className="object-cover transition-transform group-hover:scale-105"
+              className="object-contain p-2 transition-transform group-hover:scale-105"
             />
           </div>
           <Button
@@ -121,7 +198,7 @@ export function ImageUpload({
           onClick={triggerUpload}
           disabled={isUploading}
           className={cn(
-            'flex flex-col items-center justify-center w-full border-2 border-dashed rounded-2xl transition-all hover:bg-muted/50 hover:border-primary/50 group cursor-pointer',
+            'flex flex-col items-center justify-center w-full border-2 border-dashed rounded-2xl transition-all hover:bg-muted/50 hover:border-primary/50 group cursor-pointer bg-background',
             aspectRatio === 'square' && 'aspect-square',
             aspectRatio === 'video' && 'aspect-video',
             aspectRatio === 'portrait' && 'aspect-[3/4]',
@@ -129,14 +206,17 @@ export function ImageUpload({
           )}
         >
           {isUploading ? (
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Otimizando...</p>
+            </div>
           ) : (
             <>
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Upload className="h-6 w-6 text-primary" />
               </div>
-              <p className="text-sm font-medium">Clique para enviar</p>
-              <p className="text-xs text-muted-foreground mt-1">PNG, JPG ou WebP até 2MB</p>
+              <p className="text-sm font-bold">Clique para enviar</p>
+              <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-tight">PNG, JPG ou WebP até 300KB</p>
             </>
           )}
         </button>
