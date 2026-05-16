@@ -223,6 +223,7 @@ export default function PageEditor() {
         <div className="flex gap-2">
           <Button 
             variant="outline" 
+            className="cursor-pointer"
             render={
               <Link href={`/r/${currentBusiness.slug}`} target="_blank">
                 <Eye className="mr-2 h-4 w-4" />
@@ -253,7 +254,7 @@ export default function PageEditor() {
                    />
                 </div>
                 <div className="flex-1 space-y-4">
-                   <div className="p-4 bg-muted/50 rounded-2xl border border-border/50 text-sm text-muted-foreground italic">
+                   <div className="p-4 bg-muted/50 rounded-2xl border border-border/50 text-sm text-muted-foreground italic leading-relaxed">
                      A logo será exibida no topo da sua página pública e também pode ser impressa em seus materiais.
                    </div>
                 </div>
@@ -276,7 +277,7 @@ export default function PageEditor() {
                     onChange={(e) => setPage({ ...page, description: e.target.value })}
                   />
                 </div>
-                <Button type="submit" disabled={isSaving}>
+                <Button type="submit" disabled={isSaving} className="cursor-pointer">
                   <Save className="mr-2 h-4 w-4" />
                   {isSaving ? 'Salvando...' : 'Salvar Conteúdo'}
                 </Button>
@@ -286,50 +287,36 @@ export default function PageEditor() {
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Links e Botões (CTAs)</h2>
+              <h2 className="text-xl font-semibold text-gradient">Links e Botões (CTAs)</h2>
               <DropdownMenu>
                 <DropdownMenuTrigger render={
-                  <button className="h-9 px-3 inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground gap-2 text-sm font-medium transition-colors">
+                  <button className="h-9 px-3 inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground gap-2 text-sm font-medium transition-colors cursor-pointer outline-none">
                     <Plus className="h-4 w-4" />
                     Adicionar Link
                   </button>
                 } />
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem render={
-                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('google_review')}>
-                      <Star className="mr-2 h-4 w-4" /> Avaliação Google
-                    </button>
-                  } />
-                  <DropdownMenuItem render={
-                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('whatsapp')}>
-                      <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
-                    </button>
-                  } />
-                  <DropdownMenuItem render={
-                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('instagram')}>
-                      <Camera className="mr-2 h-4 w-4" /> Instagram
-                    </button>
-                  } />
-                  <DropdownMenuItem render={
-                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('facebook')}>
-                      <Share2 className="mr-2 h-4 w-4" /> Facebook
-                    </button>
-                  } />
-                  <DropdownMenuItem render={
-                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('website')}>
-                      <Globe className="mr-2 h-4 w-4" /> Website
-                    </button>
-                  } />
-                  <DropdownMenuItem render={
-                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('portfolio')}>
-                      <Briefcase className="mr-2 h-4 w-4" /> Portfólio
-                    </button>
-                  } />
-                  <DropdownMenuItem render={
-                    <button className="w-full flex items-center cursor-pointer" onClick={() => handleAddLink('custom')}>
-                      <LinkIcon className="mr-2 h-4 w-4" /> Link Personalizado
-                    </button>
-                  } />
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('google_review')}>
+                    <Star className="mr-2 h-4 w-4" /> Avaliação Google
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('whatsapp')}>
+                    <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('instagram')}>
+                    <Camera className="mr-2 h-4 w-4" /> Instagram
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('facebook')}>
+                    <Share2 className="mr-2 h-4 w-4" /> Facebook
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('website')}>
+                    <Globe className="mr-2 h-4 w-4" /> Website
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('portfolio')}>
+                    <Briefcase className="mr-2 h-4 w-4" /> Portfólio
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer" onClick={() => handleAddLink('custom')}>
+                    <LinkIcon className="mr-2 h-4 w-4" /> Link Personalizado
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

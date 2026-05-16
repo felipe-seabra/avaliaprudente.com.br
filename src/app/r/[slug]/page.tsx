@@ -120,9 +120,9 @@ export default function BusinessPublicPage() {
         </div>
 
         {/* Footer */}
-        <div className="mt-auto pt-20 pb-8 opacity-40 hover:opacity-100 transition-opacity duration-500">
+        <div className="mt-auto pt-20 pb-8 opacity-60 hover:opacity-100 transition-opacity duration-500">
           <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1 uppercase tracking-widest font-bold">
-            Desenvolvido por <span className="text-primary">Avalia Prudente</span>
+            Digital Presence by <span className="text-primary">Avalia Prudente</span>
           </p>
         </div>
       </div>

@@ -71,11 +71,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const supabase = createClient()
 
   React.useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.app_metadata?.role === 'admin') {
-        setIsAdmin(true)
+    async function checkRole() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile?.role === 'admin') {
+          setIsAdmin(true)
+        }
       }
-    })
+    }
+    checkRole()
   }, [supabase])
 
   return (
@@ -83,10 +93,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
+            <SidebarMenuButton size="lg" render={<Link href="/dashboard" className="cursor-pointer" />}>
               <div className="flex items-center gap-3">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
-                  <Star className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0 shadow-lg shadow-primary/20">
+                  <Star className="size-4 fill-white" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                   <Image
@@ -94,7 +104,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     alt={APP_CONFIG.name}
                     width={140}
                     height={32}
-                    className="h-6 w-auto object-contain dark:invert"
+                    className="h-6 w-auto object-contain"
                   />
                 </div>
               </div>
@@ -110,7 +120,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {data.navMain.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
-                render={<Link href={item.url} />}
+                render={<Link href={item.url} className="cursor-pointer" />}
                 tooltip={item.title}
                 isActive={pathname === item.url || pathname.startsWith(`${item.url}/`)}
               >
@@ -123,11 +133,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {isAdmin && (
             <SidebarMenuItem>
               <SidebarMenuButton
-                render={<Link href="/admin/dashboard" />}
+                render={<Link href="/admin/dashboard" className="cursor-pointer" />}
                 tooltip="Painel Admin"
-                className="text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 font-bold"
               >
-                <ShieldAlert />
+                <ShieldAlert className="animate-pulse" />
                 <span>Painel Admin</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -135,7 +145,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
           <SidebarMenuItem className="mt-auto">
             <SidebarMenuButton
-              render={<Link href="/dashboard/settings" />}
+              render={<Link href="/dashboard/settings" className="cursor-pointer" />}
               tooltip="Configurações"
               isActive={pathname.startsWith('/dashboard/settings')}
             >

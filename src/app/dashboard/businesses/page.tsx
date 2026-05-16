@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { useBusiness } from '@/providers/business-provider'
 import { CreateBusinessDialog } from '@/components/dashboard/create-business-dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import Link from 'next/link'
 
 export default function BusinessesPage() {
+  const router = useRouter()
   const { businesses, isLoading, setCurrentBusiness } = useBusiness()
 
   if (isLoading) {
@@ -61,20 +63,18 @@ export default function BusinessesPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
-                      <button className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-muted text-muted-foreground transition-colors">
+                      <button className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-muted text-muted-foreground transition-colors cursor-pointer outline-none">
                         <MoreVertical className="h-4 w-4" />
                       </button>
                     }
                   />
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem 
-                      render={
-                        <Link href={`/dashboard/businesses/${business.id}`} className="flex items-center w-full">
-                          <Settings className="mr-2 h-4 w-4" />
-                          Configurações
-                        </Link>
-                      }
-                    />
+                      render={<Link href={`/dashboard/businesses/${business.id}`} className="flex items-center w-full cursor-pointer" />}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Configurações
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardHeader>
@@ -87,14 +87,18 @@ export default function BusinessesPage() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="flex-1"
-                    onClick={() => setCurrentBusiness(business)}
+                    className="flex-1 cursor-pointer"
+                    onClick={() => {
+                      setCurrentBusiness(business)
+                      router.push('/dashboard')
+                    }}
                   >
                     Gerenciar
                   </Button>
                   <Button 
                     variant="ghost" 
                     size="sm" 
+                    className="cursor-pointer"
                     render={
                       <Link href={`/r/${business.slug}`} target="_blank">
                         <ExternalLink className="h-4 w-4" />

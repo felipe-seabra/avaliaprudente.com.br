@@ -106,29 +106,27 @@ export default function ReviewLinksPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           render={
-                            <button className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-muted text-muted-foreground transition-colors">
+                            <button className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-muted text-muted-foreground transition-colors cursor-pointer outline-none">
                               <MoreVertical className="h-4 w-4" />
                             </button>
                           }
                         />
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem 
-                            render={
-                              <button className="w-full flex items-center cursor-pointer" onClick={() => window.open(`/r/${link.slug}`, '_blank')}>
-                                <ExternalLink className="mr-2 h-4 w-4" />
-                                Testar Link
-                              </button>
-                            }
-                          />
+                            className="cursor-pointer"
+                            onClick={() => window.open(`/r/${link.slug}`, '_blank')}
+                          >
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            Testar Link
+                          </DropdownMenuItem>
                           <DropdownMenuItem 
                             variant="destructive"
-                            render={
-                              <button className="w-full flex items-center cursor-pointer text-destructive" onClick={() => handleDelete(link.id)}>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Excluir
-                              </button>
-                            }
-                          />
+                            className="cursor-pointer"
+                            onClick={() => handleDelete(link.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Excluir
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

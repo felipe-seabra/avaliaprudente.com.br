@@ -94,11 +94,11 @@ export default function SettingsPage() {
                 name="slug"
                 label="Slug (URL amigável)"
                 placeholder="ex: pizzaria-do-joao"
-                disabled={isLoading}
-                description="Seu link público será: avaliaprudente.com.br/seu-slug"
+                disabled={true}
+                description="O link da sua empresa é permanente para evitar a quebra de QR Codes e placas NFC já impressas."
               />
               <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={isLoading} className="cursor-pointer">
                   {isLoading ? 'Salvando...' : 'Salvar Alterações'}
                 </Button>
               </div>

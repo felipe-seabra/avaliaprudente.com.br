@@ -18,7 +18,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
@@ -90,7 +89,7 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" className="relative h-9 w-9 rounded-full focus-visible:ring-0">
+          <button className="relative h-9 w-9 rounded-full focus-visible:ring-0 cursor-pointer">
             <Avatar className="h-9 w-9">
               <AvatarImage
                 src={avatarUrl}
@@ -98,7 +97,7 @@ export function UserNav() {
               />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
-          </Button>
+          </button>
         }
       />
       <DropdownMenuContent className="w-56" align="end">
@@ -121,29 +120,30 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem render={
-            <button className="w-full flex items-center cursor-pointer" onClick={() => router.push('/dashboard/profile')}>
-              <UserIcon className="mr-2 h-4 w-4" />
-              <span>Perfil</span>
-            </button>
-          } />
-          <DropdownMenuItem render={
-            <button className="w-full flex items-center cursor-pointer" onClick={() => router.push('/dashboard/settings')}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Configurações</span>
-            </button>
-          } />
+          <DropdownMenuItem 
+            className="cursor-pointer"
+            onClick={() => router.push('/dashboard/profile')}
+          >
+            <UserIcon className="mr-2 h-4 w-4" />
+            <span>Perfil</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="cursor-pointer"
+            onClick={() => router.push('/dashboard/settings')}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Configurações</span>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           variant="destructive"
-          render={
-            <button className="w-full flex items-center cursor-pointer" onClick={handleSignOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Sair</span>
-            </button>
-          }
-        />
+          className="cursor-pointer"
+          onClick={handleSignOut}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Sair</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

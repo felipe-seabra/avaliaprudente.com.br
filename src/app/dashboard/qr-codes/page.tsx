@@ -48,14 +48,14 @@ export default function QRCodesPage() {
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">QR Codes e Materiais</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-gradient">QR Codes e Materiais</h1>
         <p className="text-muted-foreground">
           Gere materiais de alta qualidade para o seu estabelecimento.
         </p>
       </div>
 
       <div className="grid gap-8 md:grid-cols-5">
-        <Card className="md:col-span-3 flex flex-col items-center justify-center p-12 bg-zinc-950 border-none shadow-2xl relative overflow-hidden group">
+        <Card className="md:col-span-3 flex flex-col items-center justify-center p-12 bg-zinc-950 border-none shadow-2xl relative overflow-hidden group rounded-[2.5rem]">
           {/* Physical Card Mockup Look */}
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,var(--color-primary)_0%,transparent_40%)] opacity-20" />
           
@@ -66,7 +66,7 @@ export default function QRCodesPage() {
                  alt="Logo" 
                  width={100} 
                  height={100} 
-                 className="h-16 w-auto invert opacity-80"
+                 className="h-16 w-auto opacity-90"
                />
                <div className="h-px w-20 bg-white/20" />
             </div>
@@ -83,8 +83,8 @@ export default function QRCodesPage() {
                   src: "/favicon.ico",
                   x: undefined,
                   y: undefined,
-                  height: 40,
-                  width: 40,
+                  height: 24,
+                  width: 24,
                   excavate: true,
                 }}
               />
@@ -96,18 +96,18 @@ export default function QRCodesPage() {
                     <SmartphoneNfc className="h-3 w-3" />
                     Tecnologia NFC Ativa
                  </div>
-                 <p className="text-white/40 text-[9px] uppercase tracking-tighter italic">Digital Presence by Avalia Prudente</p>
+                 <p className="text-white/40 text-[9px] uppercase tracking-tighter italic text-center">Digital Presence by Avalia Prudente</p>
               </div>
 
               <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 group transition-colors hover:bg-white/10">
                 <code className="text-xs truncate flex-1 font-mono text-white/60 group-hover:text-white/100">{businessUrl}</code>
-                <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-white/60 hover:text-white hover:bg-white/10" onClick={copyLink}>
+                <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-white/60 hover:text-white hover:bg-white/10 cursor-pointer" onClick={copyLink}>
                   {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
                 </Button>
               </div>
               
               <div className="flex flex-col gap-3">
-                <Button size="lg" className="w-full gap-2 h-14 text-base rounded-2xl shadow-xl shadow-primary/30" onClick={downloadPNG}>
+                <Button size="lg" className="w-full gap-2 h-14 text-base rounded-2xl shadow-xl shadow-primary/30 cursor-pointer" onClick={downloadPNG}>
                   <Download className="h-5 w-5" />
                   Baixar para Celular (PNG)
                 </Button>
@@ -146,7 +146,7 @@ export default function QRCodesPage() {
                   {['#000000', '#7c3aed', '#2563eb', '#db2777', '#059669'].map(c => (
                     <button 
                       key={c}
-                      className="w-8 h-8 rounded-full border-2 border-background shadow-sm transition-transform hover:scale-110"
+                      className="w-8 h-8 rounded-full border-2 border-background shadow-sm transition-transform hover:scale-110 cursor-pointer"
                       style={{ backgroundColor: c }}
                       onClick={() => setQrColor(c)}
                     />
@@ -166,27 +166,27 @@ export default function QRCodesPage() {
                 </div>
                 
                 <Button variant="outline" className="w-full h-12 rounded-xl opacity-50 cursor-not-allowed" disabled>
-                  Exportar SVG (Premium)
+                  Exportar SVG (Breve)
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-muted/30 border-dashed rounded-3xl">
+          <Card className="bg-muted/30 border-dashed rounded-3xl shadow-none">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Status da Empresa</CardTitle>
+              <CardTitle className="text-sm font-semibold">Status da Empresa</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Página Pública:</span>
-                <span className="font-medium text-green-600 flex items-center gap-1">
+                <span className="font-medium text-green-600 flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   Ativa
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Slug:</span>
-                <span className="font-mono text-xs">/r/{currentBusiness.slug}</span>
+                <span className="font-mono text-xs text-primary font-bold">/r/{currentBusiness.slug}</span>
               </div>
             </CardContent>
           </Card>
