@@ -1,8 +1,13 @@
-import { createClient } from '@/lib/supabase/client'
+import { createClient as createBrowserClient } from '@/lib/supabase/client'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { BusinessPage, PageLink, CreatePageLinkDTO } from '@/core/domain/entities'
 
 export class BusinessPageRepository {
-  private supabase = createClient()
+  private supabase: SupabaseClient
+
+  constructor(supabase?: SupabaseClient) {
+    this.supabase = supabase || createBrowserClient()
+  }
 
   async getByBusinessId(businessId: string): Promise<BusinessPage | null> {
     const { data, error } = await this.supabase
@@ -32,19 +37,7 @@ export class BusinessPageRepository {
       .eq('business_id', business.id)
       .single()
 
-    if (pError || !page) {
-      // Return a virtual page if it doesn't exist yet (should be fixed by trigger, but for extra safety)
-      return {
-        id: '',
-        business_id: business.id,
-        description: 'Bem-vindo à nossa página!',
-        theme_config: { primary_color: '#7c3aed', layout: 'standard' },
-        is_published: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        businesses: business
-      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string } })
-    }
+    if (pError || !page) return null
 
     return { ...page, businesses: business }
   }
@@ -74,7 +67,11 @@ export class BusinessPageRepository {
 }
 
 export class PageLinkRepository {
-  private supabase = createClient()
+  private supabase: SupabaseClient
+
+  constructor(supabase?: SupabaseClient) {
+    this.supabase = supabase || createBrowserClient()
+  }
 
   async getByPageId(pageId: string): Promise<PageLink[]> {
     const { data, error } = await this.supabase

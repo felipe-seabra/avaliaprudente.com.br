@@ -1,8 +1,13 @@
-import { createClient } from '@/lib/supabase/client'
+import { createClient as createBrowserClient } from '@/lib/supabase/client'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { Business, CreateBusinessDTO } from '@/core/domain/entities'
 
 export class BusinessRepository {
-  private supabase = createClient()
+  private supabase: SupabaseClient
+
+  constructor(supabase?: SupabaseClient) {
+    this.supabase = supabase || createBrowserClient()
+  }
 
   async getAll(): Promise<Business[]> {
     const { data, error } = await this.supabase

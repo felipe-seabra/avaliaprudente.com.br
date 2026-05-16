@@ -1,14 +1,19 @@
-import { createClient } from '@/lib/supabase/client'
+import { createClient as createBrowserClient } from '@/lib/supabase/client'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { CreateAnalyticsEventDTO } from '@/core/domain/entities'
 import { Json } from '@/types/supabase'
 import { hasConsent } from '@/components/shared/cookie-consent'
 
 export class AnalyticsRepository {
-  private supabase = createClient()
+  private supabase: SupabaseClient
+
+  constructor(supabase?: SupabaseClient) {
+    this.supabase = supabase || createBrowserClient()
+  }
 
   async track(event: CreateAnalyticsEventDTO): Promise<void> {
-    // LGPD Gating: Only track if analytics consent is granted
-    if (!hasConsent('analytics')) {
+    // LGPD Gating: Only track if analytics consent is granted (client-side only)
+    if (typeof window !== 'undefined' && !hasConsent('analytics')) {
       return
     }
 
