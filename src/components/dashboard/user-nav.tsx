@@ -63,7 +63,6 @@ export function UserNav() {
     setIsSignOutLoading(true)
     
     try {
-      console.log('UserNav: Sign out initiated')
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       
@@ -71,15 +70,15 @@ export function UserNav() {
       window.location.href = '/login'
     } catch (err) {
       console.error('UserNav: Sign out error', err)
-      toast.error('Erro ao sair. Redirecionando...')
       window.location.href = '/login'
     } finally {
       setIsSignOutLoading(false)
     }
   }, [supabase, isSignOutLoading])
 
-  if (!mounted) return <div className="h-9 w-9 rounded-full bg-muted border border-border/20" />
-  if (!user) return <div className="h-9 w-9 rounded-full bg-muted border border-border/20" />
+  if (!mounted || !user) {
+    return <div className="h-9 w-9 rounded-full bg-muted border border-border/20 animate-pulse" />
+  }
 
   const meta = user.user_metadata || {}
   const displayName = String(meta.full_name || user.email?.split('@')[0] || 'Usuário')
@@ -96,28 +95,20 @@ export function UserNav() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <button 
-            type="button"
-            className="group relative flex h-9 w-9 items-center justify-center rounded-full outline-none cursor-pointer transition-transform active:scale-95 border-none bg-transparent p-0"
-            aria-label="Menu do usuário"
-            onClick={() => console.log('UserNav: Trigger clicked')}
-          >
-            <Avatar className="h-9 w-9 pointer-events-none ring-1 ring-border group-hover:ring-primary/50 transition-all">
-              <AvatarImage src={avatarUrl} alt={displayName} />
-              <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{initials}</AvatarFallback>
-            </Avatar>
-          </button>
-        }
-      />
+      <DropdownMenuTrigger className="group relative flex h-9 w-9 items-center justify-center rounded-full transition-transform active:scale-95 border-none bg-transparent p-0 outline-none cursor-pointer">
+        <Avatar className="h-9 w-9 pointer-events-none ring-1 ring-border group-hover:ring-primary/50 transition-all shadow-sm">
+          <AvatarImage src={avatarUrl} alt={displayName} />
+          <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{initials}</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      
       <DropdownMenuContent className="w-56" align="end" sideOffset={8}>
-        <DropdownMenuLabel className="font-normal p-3">
-          <div className="flex flex-col space-y-2">
+        <DropdownMenuLabel>
+          <div className="flex flex-col space-y-1">
             <div className="flex items-center gap-2">
               <p className="text-sm font-bold leading-none truncate">{displayName}</p>
               {role === 'admin' && (
-                <span className="bg-destructive/10 text-destructive text-[9px] uppercase font-black px-1.5 py-0.5 rounded leading-none shrink-0 border border-destructive/20">
+                <span className="bg-destructive/10 text-destructive text-[9px] uppercase font-black px-1.5 py-0.5 rounded leading-none border border-destructive/20">
                   Admin
                 </span>
               )}
@@ -127,7 +118,7 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
-          className="cursor-pointer py-3"
+          className="cursor-pointer"
           onSelect={() => router.push('/dashboard/settings')}
         >
           <Settings className="mr-2 h-4 w-4 opacity-60" />
@@ -136,7 +127,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           variant="destructive"
-          className="cursor-pointer py-3"
+          className="cursor-pointer"
           onSelect={handleSignOut}
           disabled={isSignOutLoading}
         >
