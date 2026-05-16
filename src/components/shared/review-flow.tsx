@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { toast } from 'sonner'
-import { CheckCircle2, ChevronLeft, Send } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, Send, Sparkles } from 'lucide-react'
 
 interface ReviewFlowProps {
   businessId: string
@@ -48,7 +48,7 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
       await repository.create({
         business_id: businessId,
         rating,
-        feedback: feedback.trim(),
+        feedback: feedback.trim() || undefined,
         customer_name: customerName.trim() || undefined,
         customer_email: customerEmail.trim() || undefined,
         is_internal: isInternal,
@@ -61,7 +61,7 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
       if (!isInternal) {
         setTimeout(() => {
           window.location.href = googleReviewUrl
-        }, 2000)
+        }, 2500)
       }
     } catch (err: unknown) {
       console.error('Review submission error:', err)
@@ -78,7 +78,7 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
           variant="ghost" 
           size="icon" 
           onClick={onClose} 
-          className="-ml-2 cursor-pointer"
+          className="-ml-2 cursor-pointer transition-transform hover:scale-110 active:scale-90"
           disabled={isSubmitting}
         >
           <ChevronLeft className="h-5 w-5" />
@@ -86,20 +86,23 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
         <h2 className="text-lg font-bold ml-2">Avaliar {businessName}</h2>
       </div>
 
-      <Card className="glass-effect border-none shadow-xl rounded-[2rem] overflow-hidden">
+      <Card className="glass-effect border-none shadow-xl rounded-[2.5rem] overflow-hidden">
         <CardContent className="pt-8 px-6 pb-8">
           {step === 'rating' && (
             <div className="flex flex-col items-center space-y-8 py-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-2 text-center">
-                <h3 className="text-2xl font-bold">
+                <div className="inline-flex items-center justify-center p-3 rounded-full bg-primary/10 text-primary mb-2">
+                   <Sparkles className="h-6 w-6" />
+                </div>
+                <h3 className="text-2xl font-bold tracking-tight">
                   Como foi sua experiência?
                 </h3>
-                <p className="text-muted-foreground">
-                  Sua opinião ajuda a melhorar nossos serviços.
+                <p className="text-muted-foreground text-sm">
+                  Sua opinião é fundamental para nós.
                 </p>
               </div>
               
-              <div className="scale-110">
+              <div className="scale-125 py-4">
                 <StarRating 
                   rating={rating} 
                   onRatingChange={handleRatingSelect} 
@@ -107,15 +110,15 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
                 />
               </div>
               
-              <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold opacity-60">
-                Selecione de 1 a 5 estrelas
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold opacity-60">
+                Toque em uma estrela para continuar
               </p>
             </div>
           )}
 
           {step === 'details' && (
             <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="flex flex-col items-center space-y-2 mb-4">
+              <div className="flex flex-col items-center space-y-2 mb-4 bg-muted/30 p-4 rounded-2xl">
                 <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
                     <button
@@ -124,8 +127,8 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
                       onClick={() => setRating(i + 1)}
                       className="transition-transform active:scale-90"
                     >
-                      <CheckCircle2 
-                        className={`h-6 w-6 ${i < rating ? 'text-primary fill-primary/20' : 'text-muted opacity-30'}`} 
+                      <Sparkles 
+                        className={`h-5 w-5 ${i < rating ? 'text-primary fill-primary/20' : 'text-muted opacity-30'}`} 
                       />
                     </button>
                   ))}
@@ -141,14 +144,15 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="feedback" className="text-sm font-bold">Sua mensagem</Label>
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="feedback" className="text-sm font-bold">Mensagem (opcional)</Label>
+                  </div>
                   <Textarea 
                     id="feedback" 
-                    placeholder={rating >= 4 ? "O que você mais gostou?" : "O que podemos melhorar?"}
-                    className="min-h-[120px] bg-muted/20 border-none rounded-2xl resize-none focus:ring-2 focus:ring-primary/20"
+                    placeholder={rating >= 4 ? "Conte o que você mais gostou..." : "O que podemos fazer melhor?"}
+                    className="min-h-[120px] bg-muted/20 border-none rounded-2xl resize-none focus:ring-2 focus:ring-primary/20 p-4 text-base"
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
-                    required={rating < 4}
                   />
                 </div>
                 
@@ -158,24 +162,24 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
                     <Input 
                       id="name" 
                       placeholder="Ex: João Silva"
-                      className="bg-muted/20 border-none h-12 rounded-xl"
+                      className="bg-muted/20 border-none h-12 rounded-xl px-4"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                     />
                   </div>
                   {rating < 4 && (
                     <div className="space-y-2 animate-in fade-in duration-500">
-                      <Label htmlFor="email" className="text-sm font-bold">Seu e-mail (opcional)</Label>
+                      <Label htmlFor="email" className="text-sm font-bold">E-mail para retorno (opcional)</Label>
                       <Input 
                         id="email" 
                         type="email" 
                         placeholder="Ex: joao@exemplo.com"
-                        className="bg-muted/20 border-none h-12 rounded-xl"
+                        className="bg-muted/20 border-none h-12 rounded-xl px-4"
                         value={customerEmail}
                         onChange={(e) => setCustomerEmail(e.target.value)}
                       />
-                      <p className="text-[10px] text-muted-foreground">
-                        Usaremos seu e-mail apenas para entrar em contato sobre seu feedback.
+                      <p className="text-[10px] text-muted-foreground leading-tight">
+                        Seu e-mail será usado apenas para respondermos ao seu feedback.
                       </p>
                     </div>
                   )}
@@ -185,7 +189,7 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
               <div className="flex flex-col gap-3 pt-2">
                 <Button 
                   type="submit" 
-                  className="w-full h-14 text-base rounded-2xl gap-2 shadow-lg shadow-primary/20 cursor-pointer" 
+                  className="w-full h-14 text-base rounded-2xl gap-2 shadow-lg shadow-primary/20 cursor-pointer active:scale-95 transition-transform" 
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -193,14 +197,14 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
                   ) : (
                     <>
                       <Send className="h-4 w-4" />
-                      Enviar Avaliação
+                      Concluir Avaliação
                     </>
                   )}
                 </Button>
                 <Button 
                   type="button" 
                   variant="ghost" 
-                  className="w-full cursor-pointer" 
+                  className="w-full cursor-pointer opacity-70 hover:opacity-100" 
                   onClick={() => setStep('rating')}
                   disabled={isSubmitting}
                 >
@@ -212,19 +216,19 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
 
           {step === 'success' && (
             <div className="flex flex-col items-center py-12 text-center space-y-6 animate-in zoom-in-95 duration-500">
-              <div className="h-24 w-24 rounded-full bg-green-500/10 flex items-center justify-center mb-2 shadow-inner">
+              <div className="h-24 w-24 rounded-full bg-green-500/10 flex items-center justify-center mb-2 shadow-inner border border-green-500/20">
                 <CheckCircle2 className="h-12 w-12 text-green-500" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold">Avaliação Enviada!</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Sucesso!</h2>
                 <p className="text-muted-foreground max-w-[300px] mx-auto leading-relaxed">
                   {rating >= 4 
-                    ? 'Muito obrigado! Estamos te redirecionando para o Google para concluir sua recomendação pública.' 
-                    : 'Agradecemos o seu feedback sincero. Ele foi enviado diretamente aos responsáveis para melhorarmos nosso serviço.'}
+                    ? 'Recebemos sua nota! Agora estamos te levando para o Google para finalizar sua recomendação pública.' 
+                    : 'Agradecemos sua sinceridade! Seu feedback foi enviado diretamente à gerência para análise imediata.'}
                 </p>
               </div>
               {rating < 4 && (
-                <Button variant="outline" className="mt-4 h-12 px-8 rounded-xl cursor-pointer" onClick={onClose}>
+                <Button variant="outline" className="mt-4 h-12 px-8 rounded-xl cursor-pointer hover:bg-muted" onClick={onClose}>
                   Voltar para o início
                 </Button>
               )}
