@@ -2,8 +2,6 @@
 
 import * as React from "react"
 import { Menu as MenuPrimitive } from "@base-ui/react/menu"
-import { useRender } from "@base-ui/react/use-render"
-import { mergeProps } from "@base-ui/react/merge-props"
 
 import { cn } from "@/lib/utils"
 import { ChevronRightIcon, CheckIcon } from "lucide-react"
@@ -17,20 +15,15 @@ function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
 }
 
 function DropdownMenuTrigger({
-  render,
   className,
   ...props
-}: useRender.ComponentProps<"button"> & MenuPrimitive.Trigger.Props) {
-  return useRender({
-    defaultTagName: "button",
-    props: mergeProps<"button">(
-      {
-        className: cn("outline-none cursor-pointer", className),
-      },
-      props
-    ),
-    render,
-  })
+}: MenuPrimitive.Trigger.Props) {
+  return (
+    <MenuPrimitive.Trigger
+      className={cn("outline-none cursor-pointer", className)}
+      {...props}
+    />
+  )
 }
 
 function DropdownMenuContent({
@@ -91,27 +84,22 @@ function DropdownMenuItem({
   className,
   inset,
   variant = "default",
-  render,
   ...props
-}: useRender.ComponentProps<"div"> & MenuPrimitive.Item.Props & {
+}: MenuPrimitive.Item.Props & {
   inset?: boolean
   variant?: "default" | "destructive"
 }) {
-  return useRender({
-    defaultTagName: "div",
-    props: mergeProps<"div">(
-      {
-        className: cn(
-          "group/dropdown-menu-item relative flex cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-          variant === "destructive" && "text-destructive focus:bg-destructive/10 focus:text-destructive dark:focus:bg-destructive/20 *:[svg]:text-destructive",
-          inset && "pl-7",
-          className
-        ),
-      },
-      props
-    ),
-    render,
-  })
+  return (
+    <MenuPrimitive.Item
+      className={cn(
+        "group/dropdown-menu-item relative flex cursor-default items-center gap-1.5 rounded-md px-1.5 py-1 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        variant === "destructive" && "text-destructive focus:bg-destructive/10 focus:text-destructive dark:focus:bg-destructive/20 *:[svg]:text-destructive",
+        inset && "pl-7",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
 function DropdownMenuSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
