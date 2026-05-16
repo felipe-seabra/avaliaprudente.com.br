@@ -52,11 +52,6 @@ export class BusinessRepository {
 
     if (error) throw error
 
-    // Initialize business page
-    await this.supabase
-      .from('business_pages')
-      .insert({ business_id: data.id })
-
     return data
   }
 

@@ -16,14 +16,37 @@ export class BusinessPageRepository {
   }
 
   async getBySlug(slug: string): Promise<(BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string } }) | null> {
-    const { data, error } = await this.supabase
-      .from('business_pages')
-      .select('*, businesses!inner(name, logo_url, slug)')
-      .eq('businesses.slug', slug)
+    // Resolve business by slug first
+    const { data: business, error: bError } = await this.supabase
+      .from('businesses')
+      .select('id, name, logo_url, slug')
+      .eq('slug', slug)
       .single()
 
-    if (error) return null
-    return data as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string } })
+    if (bError || !business) return null
+
+    // Fetch the page for this business
+    const { data: page, error: pError } = await this.supabase
+      .from('business_pages')
+      .select('*')
+      .eq('business_id', business.id)
+      .single()
+
+    if (pError || !page) {
+      // Return a virtual page if it doesn't exist yet (should be fixed by trigger, but for extra safety)
+      return {
+        id: '',
+        business_id: business.id,
+        description: 'Bem-vindo à nossa página!',
+        theme_config: { primary_color: '#7c3aed', layout: 'standard' },
+        is_published: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        businesses: business
+      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string } })
+    }
+
+    return { ...page, businesses: business }
   }
 
   async create(businessId: string): Promise<BusinessPage> {
