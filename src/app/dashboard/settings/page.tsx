@@ -12,6 +12,17 @@ import { z } from 'zod'
 import { toast } from 'sonner'
 import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
 import { parseError, logError } from '@/lib/error-handler'
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle,
+  DialogTrigger 
+} from '@/components/ui/dialog'
+import { AlertTriangle, Trash2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const settingsSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -23,7 +34,10 @@ type SettingsInput = z.infer<typeof settingsSchema>
 export default function SettingsPage() {
   const { currentBusiness, refreshBusinesses } = useBusiness()
   const [isLoading, setIsLoading] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const repository = new BusinessRepository()
+  const supabase = createClient()
 
   const form = useForm<SettingsInput>({
     resolver: zodResolver(settingsSchema),
@@ -57,6 +71,46 @@ export default function SettingsPage() {
     }
   }
 
+  async function onDeleteBusiness() {
+    if (!currentBusiness) return
+    setIsDeleting(true)
+    try {
+      // 1. Storage Cleanup (Optional but recommended)
+      if (currentBusiness.logo_url) {
+        try {
+          // Extract path from public URL if it's a Supabase URL
+          // Format: .../storage/v1/object/public/business-assets/PATH
+          if (currentBusiness.logo_url.includes('business-assets')) {
+            const parts = currentBusiness.logo_url.split('business-assets/')
+            if (parts.length > 1) {
+              const filePath = parts[1]
+              await supabase.storage.from('business-assets').remove([filePath])
+              console.log('✅ Storage asset cleaned up:', filePath)
+            }
+          }
+        } catch (storageErr) {
+          console.error('Failed to cleanup storage asset:', storageErr)
+        }
+      }
+
+      // 2. Database Deletion (Cascades automatically)
+      await repository.delete(currentBusiness.id)
+      
+      toast.success('Empresa excluída permanentemente.')
+      setIsDialogOpen(false)
+      
+      // 3. Refresh State
+      // The BusinessProvider will handle switching to another business if available
+      await refreshBusinesses()
+    } catch (error: unknown) {
+      logError(error, 'Delete Business')
+      const normalized = parseError(error)
+      toast.error('Erro ao excluir empresa', { description: normalized.message })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   if (!currentBusiness) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center">
@@ -66,7 +120,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-2xl mx-auto">
+    <div className="space-y-8 max-w-2xl mx-auto pb-20">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Configurações da Empresa</h1>
         <p className="text-muted-foreground">
@@ -104,6 +158,72 @@ export default function SettingsPage() {
               </div>
             </form>
           </Form>
+        </CardContent>
+      </Card>
+
+      {/* Danger Zone */}
+      <Card className="border-destructive/20 bg-destructive/5 overflow-hidden">
+        <CardHeader className="border-b border-destructive/10 pb-6">
+          <div className="flex items-center gap-2 text-destructive">
+             <AlertTriangle className="h-5 w-5" />
+             <CardTitle className="text-lg">Zona de Perigo</CardTitle>
+          </div>
+          <CardDescription className="text-destructive/80 font-medium">
+            Ações irreversíveis para sua conta.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <p className="font-bold text-foreground">Excluir Empresa</p>
+              <p className="text-sm text-muted-foreground max-w-md">
+                Isso excluirá permanentemente a empresa <strong>{currentBusiness.name}</strong>, todos os links, QR Codes, avaliações e dados analíticos associados.
+              </p>
+            </div>
+            
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" className="cursor-pointer font-bold shadow-sm shadow-destructive/20">
+                  Excluir Empresa
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2 text-destructive">
+                    <Trash2 className="h-5 w-5" />
+                    Confirmar Exclusão
+                  </DialogTitle>
+                  <DialogDescription className="pt-2 leading-relaxed">
+                    Tem certeza que deseja excluir esta empresa? Esta ação <strong>não poderá ser desfeita</strong> e todos os links públicos e tags NFC deixarão de funcionar imediatamente.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4 px-4 bg-destructive/5 rounded-lg border border-destructive/10">
+                  <p className="text-xs text-destructive font-medium flex items-center gap-2 italic">
+                    <AlertTriangle className="h-3 w-3" />
+                    Atenção: Todos os dados serão removidos permanentemente.
+                  </p>
+                </div>
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setIsDialogOpen(false)}
+                    disabled={isDeleting}
+                    className="cursor-pointer"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={onDeleteBusiness}
+                    disabled={isDeleting}
+                    className="cursor-pointer font-bold"
+                  >
+                    {isDeleting ? 'Excluindo...' : 'Sim, Excluir Permanente'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardContent>
       </Card>
     </div>
