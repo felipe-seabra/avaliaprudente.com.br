@@ -121,7 +121,7 @@ export function ImageUpload({
           onClick={triggerUpload}
           disabled={isUploading}
           className={cn(
-            'flex flex-col items-center justify-center w-full border-2 border-dashed rounded-2xl transition-all hover:bg-muted/50 hover:border-primary/50 group',
+            'flex flex-col items-center justify-center w-full border-2 border-dashed rounded-2xl transition-all hover:bg-muted/50 hover:border-primary/50 group cursor-pointer',
             aspectRatio === 'square' && 'aspect-square',
             aspectRatio === 'video' && 'aspect-video',
             aspectRatio === 'portrait' && 'aspect-[3/4]',

@@ -56,7 +56,7 @@ export function CTAButton({ link, businessId, onClick }: CTAButtonProps) {
     <Button
       variant="outline"
       size="lg"
-      className="w-full h-16 justify-start gap-4 px-6 text-lg font-medium shadow-sm hover:shadow-md transition-all hover:border-primary/50 group bg-card hover:scale-[1.01] active:scale-[0.99]"
+      className="w-full h-16 justify-start gap-4 px-6 text-lg font-medium shadow-sm hover:shadow-md transition-all hover:border-primary/50 group bg-card hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
       onClick={handleClick}
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/5 group-hover:bg-primary/10 transition-colors">

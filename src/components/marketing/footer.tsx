@@ -35,18 +35,18 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Produto</h4>
             <ul className="space-y-3">
-              <li><Link href="#features" className="text-muted-foreground hover:text-primary transition-colors">Recursos</Link></li>
-              <li><Link href="#how-it-works" className="text-muted-foreground hover:text-primary transition-colors">Como funciona</Link></li>
-              <li><Link href="#pricing" className="text-muted-foreground hover:text-primary transition-colors">Preços</Link></li>
+              <li><Link href="/#features" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Recursos</Link></li>
+              <li><Link href="/#how-it-works" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Como funciona</Link></li>
+              <li><Link href="/#pricing" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Preços</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="font-semibold mb-4">Empresa</h4>
             <ul className="space-y-3">
-              <li><Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">Termos de uso</Link></li>
-              <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Política de privacidade</Link></li>
-              <li><a href="mailto:contato@avaliaprudente.com.br" className="text-muted-foreground hover:text-primary transition-colors">Contato</a></li>
+              <li><Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Termos de uso</Link></li>
+              <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Política de privacidade</Link></li>
+              <li><a href="mailto:contato@avaliaprudente.com.br" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Contato</a></li>
             </ul>
           </div>
         </div>

@@ -90,7 +90,7 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
   const trigger = children ? (
     <>{children}</>
   ) : (
-    <Button variant="outline" size="sm" className="gap-2">
+    <Button variant="outline" size="sm" className="gap-2 cursor-pointer">
       <Plus className="h-4 w-4" />
       Nova Empresa
     </Button>
@@ -148,10 +148,10 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
             </div>
             
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="cursor-pointer">
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="cursor-pointer">
                 {isLoading ? 'Criando...' : 'Criar Empresa'}
               </Button>
             </DialogFooter>

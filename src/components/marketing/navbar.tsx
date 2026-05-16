@@ -16,28 +16,28 @@ export function Navbar() {
             alt={APP_CONFIG.name}
             width={180}
             height={40}
-            className="h-8 w-auto object-contain dark:invert"
+            className="h-8 w-auto object-contain"
             priority
           />
         </Link>
         <nav className="hidden md:flex gap-6">
-          <Link href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
             Recursos
           </Link>
-          <Link href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
             Como Funciona
           </Link>
-          <Link href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
             Preços
           </Link>
         </nav>
         <div className="flex items-center gap-4">
           <ThemeToggle />
           <Link href="/login" className="hidden md:block">
-            <Button variant="ghost">Entrar</Button>
+            <Button variant="ghost" className="cursor-pointer">Entrar</Button>
           </Link>
           <Link href="/register">
-            <Button>Começar grátis</Button>
+            <Button className="cursor-pointer">Começar grátis</Button>
           </Link>
         </div>
       </div>

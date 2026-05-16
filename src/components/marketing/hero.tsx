@@ -16,7 +16,7 @@ export function Hero() {
             alt={APP_CONFIG.name}
             width={160}
             height={160}
-            className="h-32 w-auto object-contain dark:invert mb-8 mx-auto"
+            className="h-32 w-auto object-contain mb-8 mx-auto"
             priority
           />
           <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8">

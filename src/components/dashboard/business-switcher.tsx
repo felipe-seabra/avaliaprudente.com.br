@@ -66,7 +66,7 @@ export function BusinessSwitcher() {
                       setCurrentBusiness(business)
                       setOpen(false)
                     }}
-                    className="text-sm"
+                    className="text-sm cursor-pointer"
                   >
                     <Building2 className="mr-2 h-4 w-4" />
                     <span className="truncate">{business.name}</span>
