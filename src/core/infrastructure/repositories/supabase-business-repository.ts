@@ -10,9 +10,14 @@ export class BusinessRepository {
   }
 
   async getAll(): Promise<Business[]> {
+    const { data: userData } = await this.supabase.auth.getUser()
+    if (!userData.user) return []
+
+    // Explicitly filter by owner_id for dashboard listing
     const { data, error } = await this.supabase
       .from('businesses')
       .select('*')
+      .eq('owner_id', userData.user.id)
       .order('created_at', { ascending: false })
 
     if (error) throw error
@@ -26,7 +31,7 @@ export class BusinessRepository {
       .eq('id', id)
       .single()
 
-    if (error) throw error
+    if (error) return null
     return data
   }
 
