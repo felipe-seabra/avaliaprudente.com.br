@@ -92,10 +92,10 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             <SidebarMenuButton
               render={<Link href="/dashboard" className="cursor-pointer" />}
               tooltip="Voltar ao Dashboard Principal"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-primary hover:text-primary hover:bg-primary/5 transition-colors font-semibold"
             >
-              <ArrowLeft />
-              <span>Sair do Admin</span>
+              <ArrowLeft className="h-4 w-4" />
+              <span>Voltar ao Dashboard</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 
