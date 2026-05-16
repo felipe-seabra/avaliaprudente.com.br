@@ -19,7 +19,7 @@ export function Footer() {
               />
             </Link>
             <p className="text-muted-foreground max-w-sm mb-6">
-              Plataforma NFC inteligente para negócios locais. Aumente suas avaliações no Google e digitalize seu atendimento com uma única placa.
+              Plataforma NFC inteligente para negócios locais. Aumente suas avaliações no Google e digitalize seu atendimento com uma única tag.
             </p>
             <a 
               href="https://wa.me/5511999999999" 

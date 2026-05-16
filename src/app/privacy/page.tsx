@@ -34,7 +34,7 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-bold">2. Dados que Coletamos</h2>
               <div className="space-y-2 text-muted-foreground">
                 <p><strong>Para Clientes (Empresas):</strong> Coletamos nome completo, e-mail, senha (criptografada), informações do negócio (nome, logo, redes sociais) e dados de uso da plataforma.</p>
-                <p><strong>Para Usuários Finais (Consumidores):</strong> Ao interagir com uma placa NFC ou QR Code, podemos coletar (se fornecido opcionalmente no formulário de feedback) nome, e-mail e a avaliação/comentário deixado para a empresa.</p>
+                <p><strong>Para Usuários Finais (Consumidores):</strong> Ao interagir com uma tag NFC ou QR Code, podemos coletar (se fornecido opcionalmente no formulário de feedback) nome, e-mail e a avaliação/comentário deixado para a empresa.</p>
                 <p><strong>Dados Técnicos:</strong> Coletamos automaticamente dados de acesso, como endereço IP (para rate limiting), tipo de dispositivo, navegador e logs de interação (cliques em botões e visitas à página).</p>
               </div>
             </section>

@@ -25,18 +25,18 @@ export function Hero() {
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-4xl mb-6 leading-[1.1]">
-            A placa inteligente que <span className="text-gradient">conecta seu balcão</span> ao mundo digital
+            A tag inteligente que <span className="text-gradient">conecta seu balcão</span> ao mundo digital
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed mx-auto">
-            Tenha uma página interativa da sua empresa. Basta o cliente aproximar o celular da sua placa NFC para acessar WhatsApp, Instagram e avaliar seu negócio no Google.
+            Tenha uma página interativa da sua empresa. Basta o cliente aproximar o celular da sua tag NFC para acessar WhatsApp, Instagram e avaliar seu negócio no Google.
           </p>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md animate-in fade-in slide-in-from-bottom-7 duration-700 delay-300">
           <Link href="/register" className="w-full sm:w-auto">
             <Button size="lg" className="w-full text-base h-12 px-8 shadow-lg shadow-primary/20 hover:scale-105 transition-transform rounded-xl">
-              Quero minha placa NFC
+              Quero minha tag NFC
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>

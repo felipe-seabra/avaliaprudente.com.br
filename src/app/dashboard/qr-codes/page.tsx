@@ -160,7 +160,7 @@ export default function QRCodesPage() {
                   <div className="space-y-1">
                     <p className="text-sm font-semibold">Impressão Profissional</p>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Para adesivos ou placas, utilize o formato **SVG** para garantir que o código não perca qualidade.
+                      Para adesivos ou tags, utilize o formato **SVG** para garantir que o código não perca qualidade.
                     </p>
                   </div>
                 </div>

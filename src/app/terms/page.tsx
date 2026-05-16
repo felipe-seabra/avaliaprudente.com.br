@@ -19,7 +19,7 @@ export default function TermsPage() {
             <section className="space-y-4">
               <p>Última atualização: 16 de maio de 2026</p>
               <p>
-                Bem-vindo ao <strong>Avalia Prudente</strong>. Ao acessar nossa plataforma ou adquirir nossos produtos físicos (Placas NFC), você concorda em cumprir e estar vinculado aos seguintes Termos de Uso.
+                Bem-vindo ao <strong>Avalia Prudente</strong>. Ao acessar nossa plataforma ou adquirir nossos produtos físicos (Tags NFC), você concorda em cumprir e estar vinculado aos seguintes Termos de Uso.
               </p>
             </section>
 
@@ -33,7 +33,7 @@ export default function TermsPage() {
             <section className="space-y-4 text-foreground">
               <h2 className="text-2xl font-bold">2. Uso do Produto Físico (NFC)</h2>
               <p className="text-muted-foreground">
-                As placas NFC fornecidas são de propriedade do comprador após a confirmação da assinatura/pagamento. A Avalia Prudente garante a funcionalidade do chip NFC e a durabilidade do material em condições normais de uso. Danos causados por mau uso, exposição a calor excessivo ou produtos químicos são de responsabilidade do cliente.
+                As tags NFC fornecidas são de propriedade do comprador após a confirmação da assinatura/pagamento. A Avalia Prudente garante a funcionalidade do chip NFC e a durabilidade do material em condições normais de uso. Danos causados por mau uso, exposição a calor excessivo ou produtos químicos são de responsabilidade do cliente.
               </p>
             </section>
 

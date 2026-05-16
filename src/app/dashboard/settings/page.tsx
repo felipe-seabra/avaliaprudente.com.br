@@ -95,7 +95,7 @@ export default function SettingsPage() {
                 label="Slug (URL amigável)"
                 placeholder="ex: pizzaria-do-joao"
                 disabled={true}
-                description="O link da sua empresa é permanente para evitar a quebra de QR Codes e placas NFC já impressas."
+                description="O link da sua empresa é permanente para evitar a quebra de QR Codes e tags NFC já impressas."
               />
               <div className="flex justify-end pt-4">
                 <Button type="submit" disabled={isLoading} className="cursor-pointer">

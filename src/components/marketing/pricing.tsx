@@ -9,7 +9,7 @@ export function Pricing() {
         <div className="mb-16 text-center max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold tracking-tight mb-4">Planos simples e transparentes</h2>
           <p className="text-lg text-muted-foreground">
-            Escolha o plano ideal para a sua empresa. Assine e receba sua Placa NFC em casa.
+            Escolha o plano ideal para a sua empresa. Assine e receba sua Tag NFC em casa.
           </p>
         </div>
         
@@ -43,7 +43,7 @@ export function Pricing() {
             </ul>
             
             <Link href="/register">
-              <Button variant="outline" className="w-full h-12">Assinar Digital</Button>
+              <Button variant="outline" className="w-full h-12 cursor-pointer">Assinar Digital</Button>
             </Link>
           </div>
 
@@ -64,7 +64,7 @@ export function Pricing() {
             <ul className="space-y-4 mb-8 flex-1">
               <li className="flex items-center gap-3">
                 <Check className="h-5 w-5 text-white" />
-                <span>1 Placa NFC Acrílica (Envio Grátis)</span>
+                <span>1 Tag NFC Acrílica (Envio Grátis)</span>
               </li>
               <li className="flex items-center gap-3">
                 <Check className="h-5 w-5 text-white" />
@@ -85,7 +85,7 @@ export function Pricing() {
             </ul>
             
             <Link href="/register">
-              <Button variant="secondary" className="w-full h-12 text-primary hover:scale-105 transition-transform">Quero minha Placa NFC</Button>
+              <Button variant="secondary" className="w-full h-12 text-primary hover:scale-105 transition-transform cursor-pointer">Quero minha Tag NFC</Button>
             </Link>
           </div>
         </div>
