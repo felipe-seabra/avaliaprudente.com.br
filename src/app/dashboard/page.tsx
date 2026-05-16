@@ -5,15 +5,19 @@ import { useBusiness } from '@/providers/business-provider'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase-analytics-repository'
 import { Review, AnalyticsEvent } from '@/core/domain/entities'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Star, MessageSquare, Building2, MousePointer2, Users } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Star, MessageSquare, Building2, MousePointer2, Users, Link as LinkIcon, ExternalLink, QrCode, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { APP_CONFIG } from '@/lib/constants'
 
 export default function DashboardPage() {
   const { currentBusiness, businesses, isLoading: isBusinessLoading } = useBusiness()
   const [reviews, setReviews] = useState<Review[]>([])
   const [stats, setStats] = useState<AnalyticsEvent[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const reviewRepo = useMemo(() => new ReviewRepository(), [])
   const analyticsRepo = useMemo(() => new AnalyticsRepository(), [])
@@ -72,14 +76,61 @@ export default function DashboardPage() {
   const pageVisits = stats.filter(s => s.event_type === 'page_visit').length
   const ctaClicks = stats.filter(s => s.event_type === 'cta_click').length
 
+  const publicUrl = `${APP_CONFIG.url}/${currentBusiness.slug}`
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(publicUrl)
+    setCopied(true)
+    toast.success('Link copiado para a área de transferência!')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-12">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-gradient">Olá, bem-vindo de volta!</h1>
         <p className="text-muted-foreground">
           Aqui está o resumo de <strong>{currentBusiness.name}</strong>.
         </p>
       </div>
+
+      {/* Public Link UX */}
+      <Card className="bg-primary/5 border-primary/20 overflow-hidden relative">
+        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+          <LinkIcon className="h-32 w-32" />
+        </div>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <LinkIcon className="h-5 w-5 text-primary" />
+            Sua Página Pública
+          </CardTitle>
+          <CardDescription>
+            Este é o link oficial da sua empresa. Compartilhe com seus clientes ou acesse seu QR Code.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex-1 w-full flex items-center justify-between bg-background border rounded-xl p-3 shadow-sm">
+              <span className="font-mono text-sm truncate px-2 text-muted-foreground">
+                {publicUrl}
+              </span>
+              <Button variant="ghost" size="icon" className="shrink-0" onClick={copyToClipboard}>
+                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button className="flex-1 sm:flex-none gap-2" render={<Link href={`/${currentBusiness.slug}`} target="_blank" />}>
+                <ExternalLink className="h-4 w-4" />
+                Abrir
+              </Button>
+              <Button variant="outline" className="flex-1 sm:flex-none gap-2" render={<Link href="/dashboard/qr-codes" />}>
+                <QrCode className="h-4 w-4" />
+                QR Code
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="glass-effect">

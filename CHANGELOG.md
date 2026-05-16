@@ -83,3 +83,9 @@ All notable changes to this project will be documented in this file.
 - Supabase Cloud Migration: Transitioned database, authentication, and storage from local Docker to Supabase Cloud infrastructure.
 - Migrations Validation: Ensured all local migrations are compatible with production schema via `npx supabase db push`.
 - Environment Hardening: Validated environment variable separation and publishable key support.
+- Legal & Compliance: Added LGPD-compliant Privacy Policy (`/privacy`) and Terms of Use (`/terms`).
+- Business Branding: Implemented logo uploads via Supabase Storage with secure RLS policies and `ImageUpload` UI.
+- Critical Routing & SSR Fixes: Resolved public page direct access failures and missing 404s.
+- RLS Permissions Update: Added public read access to `businesses` to allow anonymous slug resolution. Fixed `page_links` insert/update policies.
+- Missing Routes: Implemented the `/dashboard/settings` page for basic business management (name and slug updates).
+- Dashboard UX Enhancement: Added a highly visible "Public Link" card to the dashboard with one-click copy, QR shortcut, and new-tab preview.
