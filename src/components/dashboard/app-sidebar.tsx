@@ -10,6 +10,7 @@ import {
   Star,
   ShieldAlert,
   ExternalLink,
+  ShoppingBag,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -29,6 +30,7 @@ import {
 import { UserNav } from './user-nav'
 import { BusinessSwitcher } from './business-switcher'
 import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/ui/button'
 
 const data = {
   navMain: [
@@ -87,6 +89,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
     checkRole()
   }, [supabase])
+
+  const orderUrl = `https://wa.me/${APP_CONFIG.whatsappOrderNumber}?text=${encodeURIComponent('Olá! Gostaria de comprar minha Tag NFC da Avalia Prudente no valor de R$ 69,90.')}`
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -154,6 +158,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+
+        {/* Growth CTA */}
+        <div className="mt-auto px-4 py-6 group-data-[collapsible=icon]:hidden">
+          <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 space-y-3 relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-2 opacity-10 rotate-12 pointer-events-none">
+                <ShoppingBag className="h-12 w-12" />
+             </div>
+             <p className="text-xs font-bold text-primary uppercase tracking-widest">NFC Experience</p>
+             <p className="text-[11px] text-muted-foreground leading-relaxed">
+               Potencialize suas avaliações com tags físicas inteligentes.
+             </p>
+             <Button 
+               size="sm" 
+               className="w-full h-8 text-[11px] font-bold gap-2 cursor-pointer shadow-sm shadow-primary/20"
+               onClick={() => window.open(orderUrl, '_blank')}
+             >
+                <ShoppingBag className="h-3 w-3" />
+                Comprar Tag NFC
+             </Button>
+          </div>
+        </div>
       </SidebarContent>
       <SidebarFooter>
         <div className="p-2 flex justify-center w-full">

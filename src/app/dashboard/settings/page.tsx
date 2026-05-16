@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog'
 import { AlertTriangle, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Business } from '@/core/domain/entities'
 
 const settingsSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -119,6 +120,8 @@ export default function SettingsPage() {
     )
   }
 
+  const hasNfcTag = (currentBusiness as Business & { has_nfc_tag?: boolean }).has_nfc_tag || false
+
   return (
     <div className="space-y-8 max-w-2xl mx-auto pb-20">
       <div>
@@ -195,7 +198,12 @@ export default function SettingsPage() {
                     <Trash2 className="h-5 w-5" />
                     Confirmar Exclusão
                   </DialogTitle>
-                  <DialogDescription className="pt-2 leading-relaxed">
+                  <DialogDescription className="pt-2 leading-relaxed text-sm">
+                    {hasNfcTag ? (
+                      <span className="text-destructive font-bold block mb-4 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                        Esta empresa possui uma Tag NFC associada. Ao excluir a empresa, a Tag deixará de funcionar permanentemente.
+                      </span>
+                    ) : null}
                     Tem certeza que deseja excluir esta empresa? Esta ação <strong>não poderá ser desfeita</strong> e todos os links públicos e tags NFC deixarão de funcionar imediatamente.
                   </DialogDescription>
                 </DialogHeader>
