@@ -86,6 +86,7 @@ export default function BusinessPublicPage() {
               <CTAButton 
                 key={link.id} 
                 link={link} 
+                businessId={page.business_id}
                 onClick={link.type === 'google_review' ? () => setActiveReviewLink(link) : undefined}
               />
             ))

@@ -6,14 +6,11 @@ import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructur
 import { BusinessPage, PageLink } from '@/core/domain/entities'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { 
   Plus, 
-  Trash2, 
-  GripVertical, 
   Eye, 
   Save,
   Star,
@@ -31,6 +28,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { SortableLinkItem } from '@/components/dashboard/sortable-link-item'
 
 export default function PageEditor() {
   const { currentBusiness } = useBusiness()
@@ -41,6 +55,13 @@ export default function PageEditor() {
 
   const pageRepo = useMemo(() => new BusinessPageRepository(), [])
   const linkRepo = useMemo(() => new PageLinkRepository(), [])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   const fetchData = useCallback(async () => {
     if (!currentBusiness) return
@@ -122,6 +143,29 @@ export default function PageEditor() {
       setLinks(links.map(l => l.id === id ? { ...l, ...updates } : l))
     } catch {
       toast.error('Erro ao atualizar link')
+    }
+  }
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      setLinks((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id)
+        const newIndex = items.findIndex((item) => item.id === over.id)
+        const newItems = arrayMove(items, oldIndex, newIndex)
+        
+        // Update order in DB
+        const updates = newItems.map((item, index) => ({
+          id: item.id,
+          sort_order: index,
+        }))
+        linkRepo.updateOrder(updates).catch(() => {
+          toast.error('Erro ao salvar nova ordem')
+        })
+
+        return newItems
+      })
     }
   }
 
@@ -224,56 +268,34 @@ export default function PageEditor() {
                   Nenhum link adicionado. Clique no botão acima para começar.
                 </div>
               ) : (
-                links.map((link) => (
-                  <Card key={link.id} className="group overflow-hidden">
-                    <div className="p-4 flex gap-4 items-start">
-                      <div className="mt-2 cursor-grab text-muted-foreground/30 hover:text-muted-foreground transition-colors">
-                        <GripVertical className="h-5 w-5" />
-                      </div>
-                      
-                      <div className="flex-1 space-y-3">
-                        <div className="flex gap-4">
-                          <div className="flex-1 space-y-1">
-                            <Label className="text-[10px] uppercase font-bold text-muted-foreground/50">Título do Botão</Label>
-                            <Input 
-                              value={link.title}
-                              onChange={(e) => handleUpdateLink(link.id, { title: e.target.value })}
-                              className="h-8 border-none px-0 focus-visible:ring-0 text-base font-semibold"
-                            />
-                          </div>
-                          <div className="pt-2">
-                             <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => handleDeleteLink(link.id)}
-                              >
-                               <Trash2 className="h-4 w-4" />
-                             </Button>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <Label className="text-[10px] uppercase font-bold text-muted-foreground/50">URL / Destino</Label>
-                          <div className="flex gap-2">
-                            <Input 
-                              placeholder={link.type === 'whatsapp' ? 'Ex: https://wa.me/...' : 'https://...'}
-                              value={link.url}
-                              onChange={(e) => handleUpdateLink(link.id, { url: e.target.value })}
-                              className="h-8 text-xs font-mono"
-                            />
-                          </div>
-                        </div>
-                      </div>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                  modifiers={[restrictToVerticalAxis]}
+                >
+                  <SortableContext
+                    items={links.map((l) => l.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-3">
+                      {links.map((link) => (
+                        <SortableLinkItem
+                          key={link.id}
+                          link={link}
+                          onDelete={handleDeleteLink}
+                          onUpdate={handleUpdateLink}
+                        />
+                      ))}
                     </div>
-                  </Card>
-                ))
+                  </SortableContext>
+                </DndContext>
               )}
             </div>
           </div>
         </div>
 
-        {/* Preview Column (Hidden on small screens) */}
+        {/* Preview Column */}
         <div className="hidden md:block">
           <div className="sticky top-24 border-8 border-muted rounded-[3rem] h-[600px] w-full overflow-hidden shadow-2xl bg-background">
             <div className="h-full overflow-y-auto custom-scrollbar p-6 flex flex-col items-center">
@@ -284,16 +306,16 @@ export default function PageEditor() {
                   {currentBusiness.name.substring(0, 1).toUpperCase()}
                 </span>
               </div>
-              <h3 className="font-bold text-lg mb-1">{currentBusiness.name}</h3>
-              <p className="text-[10px] text-muted-foreground mb-6 line-clamp-2">{page.description}</p>
+              <h3 className="font-bold text-lg mb-1 text-center">{currentBusiness.name}</h3>
+              <p className="text-[10px] text-muted-foreground mb-6 line-clamp-2 text-center px-4">{page.description}</p>
               
               <div className="w-full space-y-3">
                 {links.map(l => (
-                  <div key={l.id} className="w-full h-12 rounded-lg border bg-card flex items-center px-4 gap-3 text-xs font-medium shadow-sm">
+                  <div key={l.id} className="w-full h-12 rounded-lg border bg-card flex items-center px-4 gap-3 text-xs font-medium shadow-sm transition-all hover:bg-accent/50">
                     <div className="h-6 w-6 rounded-full bg-primary/5 flex items-center justify-center shrink-0">
                       <Star className="h-3 w-3 text-primary" />
                     </div>
-                    {l.title}
+                    <span className="truncate">{l.title}</span>
                   </div>
                 ))}
               </div>

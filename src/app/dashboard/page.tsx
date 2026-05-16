@@ -3,32 +3,44 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useBusiness } from '@/providers/business-provider'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
-import { Review } from '@/core/domain/entities'
+import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase-analytics-repository'
+import { Review, AnalyticsEvent } from '@/core/domain/entities'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Star, MessageSquare, Building2, TrendingUp } from 'lucide-react'
+import { Star, MessageSquare, Building2, MousePointer2, Users } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function DashboardPage() {
   const { currentBusiness, businesses, isLoading: isBusinessLoading } = useBusiness()
   const [reviews, setReviews] = useState<Review[]>([])
-  const repository = useMemo(() => new ReviewRepository(), [])
+  const [stats, setStats] = useState<AnalyticsEvent[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const reviewRepo = useMemo(() => new ReviewRepository(), [])
+  const analyticsRepo = useMemo(() => new AnalyticsRepository(), [])
 
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchData = async () => {
       if (!currentBusiness) return
+      setIsLoading(true)
       try {
-        const data = await repository.getByBusinessId(currentBusiness.id)
-        setReviews(data)
+        const [reviewsData, statsData] = await Promise.all([
+          reviewRepo.getByBusinessId(currentBusiness.id),
+          analyticsRepo.getStatsByBusinessId(currentBusiness.id)
+        ])
+        setReviews(reviewsData)
+        setStats(statsData as AnalyticsEvent[])
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Erro desconhecido'
-        toast.error('Erro ao carregar resumo', { description: message })
+        toast.error('Erro ao carregar dados', { description: message })
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    fetchReviews()
-  }, [currentBusiness, repository])
+    fetchData()
+  }, [currentBusiness, reviewRepo, analyticsRepo])
 
-  if (isBusinessLoading) {
+  if (isBusinessLoading || (isLoading && stats.length === 0)) {
     return <div className="p-8 animate-pulse space-y-4">
       <div className="h-10 w-64 bg-muted rounded" />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -57,8 +69,8 @@ export default function DashboardPage() {
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
     : '0.0'
 
-  const internalFeedbacks = reviews.filter(r => r.is_internal).length
-  const externalRedirects = reviews.filter(r => !r.is_internal).length
+  const pageVisits = stats.filter(s => s.event_type === 'page_visit').length
+  const ctaClicks = stats.filter(s => s.event_type === 'cta_click').length
 
   return (
     <div className="space-y-8">
@@ -72,12 +84,34 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="glass-effect">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Visitas na Página</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{pageVisits}</div>
+            <p className="text-xs text-muted-foreground">Leituras NFC / QR</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-effect">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Cliques em CTAs</CardTitle>
+            <MousePointer2 className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{ctaClicks}</div>
+            <p className="text-xs text-muted-foreground">Engajamento total</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-effect">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Avaliações</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{reviews.length}</div>
-            <p className="text-xs text-muted-foreground">Acumulado total</p>
+            <p className="text-xs text-muted-foreground">Acumulado</p>
           </CardContent>
         </Card>
 
@@ -91,31 +125,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">Satiscação média</p>
           </CardContent>
         </Card>
-
-        <Card className="glass-effect">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Redirecionamentos</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{externalRedirects}</div>
-            <p className="text-xs text-muted-foreground">Enviados para o Google</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-effect">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Feedbacks Internos</CardTitle>
-            <MessageSquare className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{internalFeedbacks}</div>
-            <p className="text-xs text-muted-foreground">Críticas preservadas</p>
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Quick Actions or charts would go here in next phases */}
     </div>
   )
 }

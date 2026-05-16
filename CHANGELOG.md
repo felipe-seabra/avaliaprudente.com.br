@@ -55,3 +55,8 @@ All notable changes to this project will be documented in this file.
 - Admin Foundation: Created `/admin` route with layout shell and role-aware navigation.
 - Automatic Page Initialization: New businesses now automatically generate a public page shell.
 - Reusable `ReviewFlow` component integrated into the modular page experience.
+- Drag-and-Drop CTA Ordering: Implemented mobile-friendly reordering for page links using `dnd-kit`.
+- Production QR System: Branded QR code generation with color customization and PNG download.
+- Lightweight Analytics: Foundation for tracking page visits and CTA clicks with dedicated `analytics_events` table.
+- Analytics Summary: Integrated real-time visit and click stats into the dashboard dashboard.
+- Enhanced UX: Improved visual hierarchy, premium hover/touch interactions, and refined mobile layouts.

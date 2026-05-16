@@ -6,6 +6,7 @@ export type Review = Tables<'reviews'>
 export type Profile = Tables<'profiles'>
 export type BusinessPage = Tables<'business_pages'>
 export type PageLink = Tables<'page_links'>
+export type AnalyticsEvent = Tables<'analytics_events'>
 
 export type UserRole = 'admin' | 'customer'
 
@@ -40,4 +41,14 @@ export interface CreatePageLinkDTO {
   url: string
   icon_name?: string
   sort_order?: number
+}
+
+export interface CreateAnalyticsEventDTO {
+  business_id?: string
+  page_id?: string
+  link_id?: string
+  event_type: 'page_visit' | 'cta_click' | 'qr_scan'
+  source?: string
+  user_agent?: string
+  metadata?: Record<string, unknown>
 }
