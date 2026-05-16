@@ -8,6 +8,7 @@ import {
   Settings,
   Users,
   ShieldAlert,
+  ArrowLeft,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -86,6 +87,18 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
+
+          <SidebarMenuItem className="mt-4 border-t border-border/50 pt-4">
+            <SidebarMenuButton
+              render={<Link href="/dashboard" className="cursor-pointer" />}
+              tooltip="Voltar ao Dashboard Principal"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft />
+              <span>Sair do Admin</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
           <SidebarMenuItem className="mt-auto">
             <SidebarMenuButton
               render={<Link href="/admin/settings" className="cursor-pointer" />}

@@ -120,10 +120,25 @@ export class PageLinkRepository {
   }
 
   async updateOrder(links: { id: string, sort_order: number }[]): Promise<void> {
-    const { error } = await this.supabase
-      .from('page_links')
-      .upsert(links as unknown as PageLink[])
+    try {
+      // Use a batch of updates instead of upsert for better RLS compatibility
+      const promises = links.map(link => 
+        this.supabase
+          .from('page_links')
+          .update({ sort_order: link.sort_order })
+          .eq('id', link.id)
+      )
 
-    if (error) throw error
+      const results = await Promise.all(promises)
+      const error = results.find(r => r.error)?.error
+
+      if (error) {
+        console.error('❌ Error updating links order:', error)
+        throw error
+      }
+    } catch (err) {
+      console.error('❌ Unexpected error in updateOrder:', err)
+      throw err
+    }
   }
 }
