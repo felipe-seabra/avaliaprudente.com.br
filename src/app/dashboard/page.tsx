@@ -24,27 +24,27 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!currentBusiness) return
+      if (!currentBusiness?.id) return
       setIsLoading(true)
       try {
         const [reviewsData, statsData] = await Promise.all([
           reviewRepo.getByBusinessId(currentBusiness.id),
           analyticsRepo.getStatsByBusinessId(currentBusiness.id)
         ])
-        setReviews(reviewsData)
-        setStats(statsData as AnalyticsEvent[])
+        setReviews(reviewsData || [])
+        setStats((statsData as AnalyticsEvent[]) || [])
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Erro desconhecido'
-        toast.error('Erro ao carregar dados', { description: message })
+        console.error('Failed to load dashboard data:', error)
+        // Only show toast, don't crash
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchData()
-  }, [currentBusiness, reviewRepo, analyticsRepo])
+  }, [currentBusiness?.id, reviewRepo, analyticsRepo])
 
-  if (isBusinessLoading || (isLoading && stats.length === 0)) {
+  if (isBusinessLoading) {
     return <div className="p-8 animate-pulse space-y-4">
       <div className="h-10 w-64 bg-muted rounded" />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -67,26 +67,36 @@ export default function DashboardPage() {
     )
   }
 
-  if (!currentBusiness) return null
+  if (!currentBusiness) {
+    return (
+      <div className="p-8 flex flex-col items-center justify-center text-center space-y-4">
+        <p className="text-muted-foreground">Selecione uma empresa para ver os dados.</p>
+      </div>
+    )
+  }
 
   const avgRating = reviews.length > 0 
-    ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+    ? (reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0) / reviews.length).toFixed(1)
     : '0.0'
 
-  const pageVisits = stats.filter(s => s.event_type === 'page_visit').length
-  const ctaClicks = stats.filter(s => s.event_type === 'cta_click').length
+  const pageVisits = (stats || []).filter(s => s?.event_type === 'page_visit').length
+  const ctaClicks = (stats || []).filter(s => s?.event_type === 'cta_click').length
 
   const publicUrl = `${APP_CONFIG.url}/r/${currentBusiness.slug}`
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(publicUrl)
-    setCopied(true)
-    toast.success('Link copiado para a área de transferência!')
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      navigator.clipboard.writeText(publicUrl)
+      setCopied(true)
+      toast.success('Link copiado!')
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
   }
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-12 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-gradient">Olá, bem-vindo de volta!</h1>
         <p className="text-muted-foreground">
@@ -110,7 +120,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row items-center gap-4">
-            <div className="flex-1 w-full flex items-center justify-between bg-background border rounded-xl p-3 shadow-sm">
+            <div className="flex-1 w-full flex items-center justify-between bg-background border rounded-xl p-3 shadow-sm overflow-hidden">
               <span className="font-mono text-sm truncate px-2 text-muted-foreground">
                 {publicUrl}
               </span>
@@ -123,7 +133,7 @@ export default function DashboardPage() {
                 <ExternalLink className="h-4 w-4" />
                 Abrir
               </Button>
-              <Button variant="outline" className="flex-1 sm:flex-none gap-2" render={<Link href="/dashboard/qr-codes" />}>
+              <Button variant="outline" className="flex-1 sm:flex-none gap-2 cursor-pointer" render={<Link href="/dashboard/qr-codes" />}>
                 <QrCode className="h-4 w-4" />
                 QR Code
               </Button>
@@ -139,7 +149,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pageVisits}</div>
+            <div className="text-2xl font-bold">{isLoading && stats.length === 0 ? '...' : pageVisits}</div>
             <p className="text-xs text-muted-foreground">Leituras NFC / QR</p>
           </CardContent>
         </Card>
@@ -150,7 +160,7 @@ export default function DashboardPage() {
             <MousePointer2 className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{ctaClicks}</div>
+            <div className="text-2xl font-bold">{isLoading && stats.length === 0 ? '...' : ctaClicks}</div>
             <p className="text-xs text-muted-foreground">Engajamento total</p>
           </CardContent>
         </Card>
@@ -161,7 +171,7 @@ export default function DashboardPage() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{reviews.length}</div>
+            <div className="text-2xl font-bold">{isLoading && reviews.length === 0 ? '...' : reviews.length}</div>
             <p className="text-xs text-muted-foreground">Acumulado</p>
           </CardContent>
         </Card>
@@ -172,7 +182,7 @@ export default function DashboardPage() {
             <Star className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{avgRating}</div>
+            <div className="text-2xl font-bold">{isLoading && reviews.length === 0 ? '...' : avgRating}</div>
             <p className="text-xs text-muted-foreground">Satiscação média</p>
           </CardContent>
         </Card>
