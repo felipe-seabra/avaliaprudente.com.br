@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-Este guia descreve os procedimentos para colocar a plataforma Avalia Prudente em produção.
+Este guia descreve os procedimentos para colocar a plataforma Avalia Prudente em produção, migrando do ambiente local para o Supabase Cloud.
 
 ## Infraestrutura Recomendada
 
@@ -8,30 +8,49 @@ Este guia descreve os procedimentos para colocar a plataforma Avalia Prudente em
 - **Backend/DB/Auth:** Supabase Cloud
 - **Domínio:** Vercel DNS ou Cloudflare
 
+## Migração para Supabase Cloud
+
+Siga estes passos para migrar seu banco de dados local para a nuvem:
+
+### 1. Vincular o Projeto
+No terminal, execute o comando abaixo para vincular seu repositório local ao seu projeto do Supabase Cloud:
+```bash
+npx supabase link --project-ref <project-id>
+```
+*O `project-id` pode ser encontrado na URL do seu dashboard do Supabase.*
+
+### 2. Push do Schema (Migrações)
+Após vincular, envie todas as migrações criadas localmente para o banco de dados de produção:
+```bash
+npx supabase db push
+```
+*Isso garantirá que todas as tabelas, RLS, triggers e funções sejam criadas exatamente como no ambiente local.*
+
+### 3. Configuração de Auth (Dashboard)
+No dashboard do Supabase Cloud, vá em **Authentication -> URL Configuration**:
+- **Site URL:** `https://avaliaprudente.com.br`
+- **Redirect URLs:** Adicione `https://avaliaprudente.com.br/auth/callback`
+
 ## Checklist de Produção
 
 ### 1. Configuração do Supabase (Produção)
-- [ ] Criar novo projeto no Supabase Cloud.
-- [ ] Rodar as migrações locais no projeto de produção:
-  ```bash
-  npx supabase db push
-  ```
+- [x] Criar novo projeto no Supabase Cloud.
+- [x] Rodar as migrações locais no projeto de produção (`npx supabase db push`).
 - [ ] Habilitar **Point-in-Time Recovery (PITR)** se disponível.
-- [ ] Configurar os domínios permitidos no Supabase Auth (Redirect URLs).
 - [ ] Configurar o provedor de e-mail (SMTP próprio ou SendGrid/Resend).
 
 ### 2. Configuração da Vercel
 - [ ] Conectar o repositório GitHub à Vercel.
-- [ ] Configurar as **Environment Variables** (idênticas ao `.env.example`).
-- [ ] Habilitar o **Vercel KV** para Rate Limiting distribuído (opcional, mas recomendado).
-- [ ] Configurar o domínio customizado (`avaliaprudente.com.br`).
+- [ ] Configurar as **Environment Variables** (usando as chaves do Supabase Cloud).
+- [ ] Configurar o domínio customizado.
 
 ### 3. Segurança
-- [ ] Validar que `validateEnv()` está sendo chamado no Root Layout.
-- [ ] Revisar as políticas de **RLS (Row Level Security)** no banco de dados.
-- [ ] Garantir que o **CSP (Content Security Policy)** no `next.config.ts` não está bloqueando recursos essenciais.
+- [x] Validar que `validateEnv()` está ativo.
+- [x] Políticas de **RLS** validadas e aplicadas.
+- [x] Headers de segurança (CSP) configurados.
 
-## Estratégia de Backup
+## Estratégia de Backup e Rollback
+...
 
 - **Banco de Dados:** O Supabase realiza backups diários automaticamente. Para o plano Pro, o PITR permite restaurar o banco para qualquer segundo nos últimos 7 dias.
 - **Storage:** Recomenda-se um script periódico para espelhar o bucket do Supabase Storage para um AWS S3 ou similar.

@@ -80,3 +80,6 @@ All notable changes to this project will be documented in this file.
 - Rate Limiting Foundation: Added basic IP-based rate limiting to the middleware.
 - Image Optimization: Configured remote patterns and optimized loading for production assets.
 - Deployment Documentation: Created `docs/DEPLOYMENT.md` with checklists, backup, and rollback strategies.
+- Supabase Cloud Migration: Transitioned database, authentication, and storage from local Docker to Supabase Cloud infrastructure.
+- Migrations Validation: Ensured all local migrations are compatible with production schema via `npx supabase db push`.
+- Environment Hardening: Validated environment variable separation and publishable key support.
