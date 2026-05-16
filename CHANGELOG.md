@@ -46,3 +46,12 @@ All notable changes to this project will be documented in this file.
 - Dashboard summary with total reviews, average rating, and redirection stats.
 - Robust data fetching hooks (`useBusiness`, `useReviewLink`).
 - Full TypeScript validation and lint cleanup across the entire Phase 4 implementation.
+- NFC-First Product Evolution: Transitioned from simple review site to NFC-powered business platform.
+- Modular Business Pages: Created `business_pages` and `page_links` tables for customizable landing pages.
+- Public Page Root Route: Implemented `/[slug]` to serve business pages with modular CTAs.
+- Page Editor: Built a comprehensive dashboard interface for customizing business description and CTA links.
+- Modular CTA System: Support for Google Reviews, WhatsApp, Instagram, Facebook, Website, and Portfolio buttons.
+- Role-Based Access Control (RBAC): Implemented 'admin' and 'customer' roles in `profiles` and Middleware.
+- Admin Foundation: Created `/admin` route with layout shell and role-aware navigation.
+- Automatic Page Initialization: New businesses now automatically generate a public page shell.
+- Reusable `ReviewFlow` component integrated into the modular page experience.

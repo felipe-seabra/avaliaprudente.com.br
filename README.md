@@ -1,54 +1,40 @@
 # Avalia Prudente
 
-Sistema inteligente de aquisição de avaliações Google via QR Code e redirecionamento estratégico.
+Plataforma NFC inteligente para negócios locais. Transforme seu balcão em uma central de conexões digitais.
+
+## O Produto
+
+O Avalia Prudente é uma solução baseada em NFC (Near Field Communication) que permite que empresas criem páginas públicas personalizadas acessíveis via aproximação ou QR Code.
+
+### Principais Funcionalidades
+
+- **Páginas de Negócio Personalizáveis:** Crie uma vitrine digital com sua marca, logo e descrição.
+- **Sistema de CTAs Modular:** Adicione botões para WhatsApp, Instagram, Website, Portfólio e mais.
+- **Filtro Inteligente de Avaliações Google:** Capture feedbacks internos para notas baixas e direcione notas altas direto para o Google.
+- **Gestão Multi-empresa:** Gerencie múltiplos locais em um único painel.
+- **Painel Administrativo (RBAC):** Estrutura preparada para gestão global da plataforma.
 
 ## Tech Stack
 
 - **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS 4 + shadcn/ui
-- **Backend/Auth:** Supabase
-- **Icons:** Lucide React
-- **Theme:** next-themes (Dark/Light mode)
+- **Backend/Auth:** Supabase (SSR)
+- **Design System:** OKLCH Colors + Modern SaaS Identity
 
-## Architecture
+## Arquitetura (Clean Architecture)
 
-O projeto segue os princípios da **Clean Architecture** para garantir escalabilidade e manutenibilidade:
+- `src/core/domain`: Entidades e regras de negócio puras.
+- `src/core/application`: Casos de uso.
+- `src/core/infrastructure`: Repositórios Supabase e implementações técnicas.
+- `src/components`: UI (shadcn), Shared, Marketing, Dashboard e Admin.
 
-- `src/core/domain`: Entidades e interfaces de contrato.
-- `src/core/application`: Casos de uso e lógica de negócio.
-- `src/core/infrastructure`: Implementações técnicas (clientes de API, Supabase, etc).
-- `src/components/ui`: Componentes base (shadcn).
-- `src/components/shared`: Componentes reutilizáveis entre páginas.
-- `src/providers`: Provedores de contexto React.
+## Desenvolvimento Local
 
-## Getting Started
+Consulte [docs/LOCAL_SUPABASE.md](docs/LOCAL_SUPABASE.md) para configurar o ambiente Docker.
 
-1. Clone o repositório
-2. Instale as dependências: `npm install`
-3. Configure o arquivo `.env.local` baseado no `.env.example`
-4. Inicie o ambiente local do Supabase:
-   ```bash
-   npm run supabase:start
-   ```
-5. Inicie o servidor de desenvolvimento: `npm run dev`
-
-## Local Development (Supabase)
-
-O projeto utiliza o Supabase CLI com Docker para desenvolvimento local.
-
-- **Iniciar:** `npm run supabase:start`
-- **Parar:** `npm run supabase:stop`
-- **Status:** `npm run supabase:status`
-- **Resetar Banco:** `npm run supabase:reset`
-- **Nova Migração:** `npm run supabase:migration <nome>`
-
-O Dashboard local do Supabase estará disponível em: `http://localhost:54323`
-A interface do Mailpit (para testes de email) em: `http://localhost:54324`
-
-## Project Rules
-
-- **Strict Typing:** Uso obrigatório de TypeScript sem `any`.
-- **Clean Code:** Seguir princípios SOLID, DRY, KISS.
-- **Accessibility:** Componentes devem ser acessíveis (WAI-ARIA).
-- **Mobile-first:** Design responsivo priorizando dispositivos móveis.
+```bash
+npm install
+npm run supabase:start
+npm run dev
+```

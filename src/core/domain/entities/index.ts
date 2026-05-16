@@ -4,6 +4,10 @@ export type Business = Tables<'businesses'>
 export type ReviewLink = Tables<'review_links'>
 export type Review = Tables<'reviews'>
 export type Profile = Tables<'profiles'>
+export type BusinessPage = Tables<'business_pages'>
+export type PageLink = Tables<'page_links'>
+
+export type UserRole = 'admin' | 'customer'
 
 export interface CreateBusinessDTO {
   name: string
@@ -27,4 +31,13 @@ export interface CreateReviewDTO {
   customer_email?: string
   source?: string
   is_internal: boolean
+}
+
+export interface CreatePageLinkDTO {
+  page_id: string
+  type: string
+  title: string
+  url: string
+  icon_name?: string
+  sort_order?: number
 }

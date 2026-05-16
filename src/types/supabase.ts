@@ -34,6 +34,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_pages: {
+        Row: {
+          business_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          theme_config: Json
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          theme_config?: Json
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          theme_config?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_pages_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           address: string | null
@@ -70,11 +108,59 @@ export type Database = {
         }
         Relationships: []
       }
+      page_links: {
+        Row: {
+          created_at: string
+          icon_name: string | null
+          id: string
+          is_active: boolean
+          page_id: string
+          sort_order: number
+          title: string
+          type: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean
+          page_id: string
+          sort_order?: number
+          title: string
+          type: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean
+          page_id?: string
+          sort_order?: number
+          title?: string
+          type?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_links_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "business_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           full_name: string | null
           id: string
+          role: string
           updated_at: string | null
           username: string | null
           website: string | null
@@ -83,6 +169,7 @@ export type Database = {
           avatar_url?: string | null
           full_name?: string | null
           id: string
+          role?: string
           updated_at?: string | null
           username?: string | null
           website?: string | null
@@ -91,6 +178,7 @@ export type Database = {
           avatar_url?: string | null
           full_name?: string | null
           id?: string
+          role?: string
           updated_at?: string | null
           username?: string | null
           website?: string | null

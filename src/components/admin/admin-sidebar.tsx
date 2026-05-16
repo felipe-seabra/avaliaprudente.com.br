@@ -5,11 +5,9 @@ import {
   BarChart3,
   Building2,
   LayoutDashboard,
-  QrCode,
   Settings,
-  Star,
+  Users,
   ShieldAlert,
-  ExternalLink,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -25,79 +23,54 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { UserNav } from './user-nav'
-import { BusinessSwitcher } from './business-switcher'
-import { createClient } from '@/lib/supabase/client'
+import { UserNav } from '@/components/dashboard/user-nav'
 
 const data = {
   navMain: [
     {
-      title: 'Dashboard',
-      url: '/dashboard',
+      title: 'Visão Geral',
+      url: '/admin/dashboard',
       icon: LayoutDashboard,
     },
     {
-      title: 'Página Pública',
-      url: '/dashboard/page-editor',
-      icon: ExternalLink,
+      title: 'Clientes',
+      url: '/admin/customers',
+      icon: Users,
     },
     {
       title: 'Empresas',
-      url: '/dashboard/businesses',
+      url: '/admin/businesses',
       icon: Building2,
     },
     {
-      title: 'Avaliações',
-      url: '/dashboard/reviews',
-      icon: Star,
-    },
-    {
-      title: 'QR Codes',
-      url: '/dashboard/qr-codes',
-      icon: QrCode,
-    },
-    {
-      title: 'Analytics',
-      url: '/dashboard/analytics',
+      title: 'Estatísticas',
+      url: '/admin/stats',
       icon: BarChart3,
     },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
-  const [isAdmin, setIsAdmin] = React.useState(false)
-  const supabase = createClient()
-
-  React.useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.app_metadata?.role === 'admin') {
-        setIsAdmin(true)
-      }
-    })
-  }, [supabase])
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Star className="size-4" />
+            <SidebarMenuButton size="lg" render={<Link href="/admin/dashboard" />}>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-destructive text-destructive-foreground">
+                <ShieldAlert className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
                   {APP_CONFIG.name}
                 </span>
-                <span className="truncate text-xs">Gestão</span>
+                <span className="truncate text-xs">Admin</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <div className="px-2 pb-2 group-data-[collapsible=icon]:hidden">
-          <BusinessSwitcher />
-        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
@@ -113,25 +86,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-
-          {isAdmin && (
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                render={<Link href="/admin/dashboard" />}
-                tooltip="Painel Admin"
-                className="text-destructive hover:text-destructive"
-              >
-                <ShieldAlert />
-                <span>Painel Admin</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
-
           <SidebarMenuItem className="mt-auto">
             <SidebarMenuButton
-              render={<Link href="/dashboard/settings" />}
+              render={<Link href="/admin/settings" />}
               tooltip="Configurações"
-              isActive={pathname.startsWith('/dashboard/settings')}
+              isActive={pathname.startsWith('/admin/settings')}
             >
               <Settings />
               <span>Configurações</span>

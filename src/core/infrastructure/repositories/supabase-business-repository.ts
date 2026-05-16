@@ -40,6 +40,7 @@ export class BusinessRepository {
     const { data: userData } = await this.supabase.auth.getUser()
     if (!userData.user) throw new Error('User not authenticated')
 
+    // Create business
     const { data, error } = await this.supabase
       .from('businesses')
       .insert({
@@ -50,6 +51,12 @@ export class BusinessRepository {
       .single()
 
     if (error) throw error
+
+    // Initialize business page
+    await this.supabase
+      .from('business_pages')
+      .insert({ business_id: data.id })
+
     return data
   }
 
