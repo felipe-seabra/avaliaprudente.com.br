@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { useBusiness } from '@/providers/business-provider'
 import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
+import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
 import { BusinessPage, PageLink } from '@/core/domain/entities'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,9 +20,11 @@ import {
   Briefcase,
   Link as LinkIcon,
   Camera,
-  Share2
+  Share2,
+  Image as ImageIcon
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,10 +48,11 @@ import {
 } from '@dnd-kit/sortable'
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableLinkItem } from '@/components/dashboard/sortable-link-item'
+import { ImageUpload } from '@/components/shared/image-upload'
 import { parseError, logError } from '@/lib/error-handler'
 
 export default function PageEditor() {
-  const { currentBusiness } = useBusiness()
+  const { currentBusiness, refreshBusinesses } = useBusiness()
   const [page, setPage] = useState<BusinessPage | null>(null)
   const [links, setLinks] = useState<PageLink[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -56,6 +60,7 @@ export default function PageEditor() {
 
   const pageRepo = useMemo(() => new BusinessPageRepository(), [])
   const linkRepo = useMemo(() => new PageLinkRepository(), [])
+  const businessRepo = useMemo(() => new BusinessRepository(), [])
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -95,12 +100,25 @@ export default function PageEditor() {
     try {
       await pageRepo.update(page.id, { description: page.description })
       toast.success('Página atualizada!')
-    } catch (err) {
+    } catch (err: unknown) {
       logError(err, 'Update Page Content')
       const normalized = parseError(err)
       toast.error('Erro ao salvar alterações', { description: normalized.message })
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  const handleUpdateLogo = async (url: string) => {
+    if (!currentBusiness) return
+    try {
+      await businessRepo.update(currentBusiness.id, { logo_url: url })
+      toast.success('Logo atualizado!')
+      await refreshBusinesses()
+    } catch (err: unknown) {
+      logError(err, 'Update Logo')
+      const normalized = parseError(err)
+      toast.error('Erro ao atualizar logo', { description: normalized.message })
     }
   }
 
@@ -126,7 +144,7 @@ export default function PageEditor() {
       })
       fetchData()
       toast.success('Link adicionado!')
-    } catch (err) {
+    } catch (err: unknown) {
       logError(err, 'Add Link')
       const normalized = parseError(err)
       toast.error('Erro ao adicionar link', { description: normalized.message })
@@ -139,7 +157,7 @@ export default function PageEditor() {
       await linkRepo.delete(id)
       setLinks(links.filter(l => l.id !== id))
       toast.success('Link removido')
-    } catch (err) {
+    } catch (err: unknown) {
       logError(err, 'Delete Link')
       const normalized = parseError(err)
       toast.error('Erro ao remover link', { description: normalized.message })
@@ -150,7 +168,7 @@ export default function PageEditor() {
     try {
       await linkRepo.update(id, updates)
       setLinks(links.map(l => l.id === id ? { ...l, ...updates } : l))
-    } catch (err) {
+    } catch (err: unknown) {
       logError(err, 'Update Link')
       const normalized = parseError(err)
       toast.error('Erro ao atualizar link', { description: normalized.message })
@@ -175,7 +193,7 @@ export default function PageEditor() {
       
       try {
         await linkRepo.updateOrder(updates)
-      } catch (err) {
+      } catch (err: unknown) {
         logError(err, 'Update Links Order')
         const normalized = parseError(err)
         toast.error('Erro ao salvar nova ordem', { description: normalized.message })
@@ -194,7 +212,7 @@ export default function PageEditor() {
   }
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-4xl mx-auto pb-20">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Editor da Página Pública</h1>
@@ -218,6 +236,31 @@ export default function PageEditor() {
       <div className="grid gap-8 md:grid-cols-3">
         {/* Settings Column */}
         <div className="md:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Identidade Visual</CardTitle>
+              <CardDescription>Logo e cores da sua empresa.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className="w-full md:w-32">
+                   <Label className="mb-2 block">Logo da Empresa</Label>
+                   <ImageUpload 
+                     value={currentBusiness.logo_url}
+                     onChange={handleUpdateLogo}
+                     onRemove={() => handleUpdateLogo('')}
+                     folder="logos"
+                   />
+                </div>
+                <div className="flex-1 space-y-4">
+                   <div className="p-4 bg-muted/50 rounded-2xl border border-border/50 text-sm text-muted-foreground italic">
+                     A logo será exibida no topo da sua página pública e também pode ser impressa em seus materiais.
+                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Conteúdo da Página</CardTitle>
@@ -316,21 +359,35 @@ export default function PageEditor() {
             <div className="h-full overflow-y-auto custom-scrollbar p-6 flex flex-col items-center">
               <div className="w-16 h-1 bg-muted-foreground/20 rounded-full mb-8 shrink-0" />
               
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4 shrink-0">
-                <span className="text-2xl font-bold text-primary">
-                  {currentBusiness.name.substring(0, 1).toUpperCase()}
-                </span>
-              </div>
+              {currentBusiness.logo_url ? (
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-primary/20 mb-4 shrink-0 shadow-sm bg-background">
+                  <Image 
+                    src={currentBusiness.logo_url} 
+                    alt={currentBusiness.name} 
+                    fill 
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4 shrink-0 border-2 border-primary/20 shadow-sm">
+                  <span className="text-2xl font-bold text-primary">
+                    {currentBusiness.name.substring(0, 1).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              
               <h3 className="font-bold text-lg mb-1 text-center">{currentBusiness.name}</h3>
-              <p className="text-[10px] text-muted-foreground mb-6 line-clamp-2 text-center px-4">{page.description}</p>
+              <p className="text-[10px] text-muted-foreground mb-6 line-clamp-2 text-center px-4 leading-relaxed">
+                {page.description || 'Sua descrição aparecerá aqui...'}
+              </p>
               
               <div className="w-full space-y-3">
                 {links.map(l => (
                   <div key={l.id} className="w-full h-12 rounded-lg border bg-card flex items-center px-4 gap-3 text-xs font-medium shadow-sm transition-all hover:bg-accent/50">
                     <div className="h-6 w-6 rounded-full bg-primary/5 flex items-center justify-center shrink-0">
-                      <Star className="h-3 w-3 text-primary" />
+                      <ImageIcon className="h-3 w-3 text-primary" />
                     </div>
-                    <span className="truncate">{l.title}</span>
+                    <span className="truncate">{l.title || 'Novo Link'}</span>
                   </div>
                 ))}
               </div>

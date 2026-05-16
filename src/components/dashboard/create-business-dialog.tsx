@@ -17,8 +17,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Form } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
+import { ImageUpload } from '@/components/shared/image-upload'
 import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
 import { useBusiness } from '@/providers/business-provider'
 import { parseError, logError } from '@/lib/error-handler'
@@ -26,6 +27,7 @@ import { parseError, logError } from '@/lib/error-handler'
 const createBusinessSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   slug: z.string().min(2, 'Slug deve ter pelo menos 2 caracteres').regex(/^[a-z0-9-]+$/, 'Slug inválido'),
+  logo_url: z.string().optional(),
 })
 
 type CreateBusinessInput = z.infer<typeof createBusinessSchema>
@@ -41,6 +43,7 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
     defaultValues: {
       name: '',
       slug: '',
+      logo_url: '',
     },
   })
 
@@ -96,7 +99,7 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger as React.ReactElement} />
-      <DialogContent>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Cadastrar Empresa</DialogTitle>
           <DialogDescription>
@@ -104,20 +107,46 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <InputField
-              name="name"
-              label="Nome da Empresa"
-              placeholder="Ex: Pizzaria do João"
-              disabled={isLoading}
-            />
-            <InputField
-              name="slug"
-              label="Slug (URL amigável)"
-              placeholder="ex: pizzaria-do-joao"
-              disabled={isLoading}
-              description="Isso será usado no link de avaliações: avaliaprudente.com.br/r/seu-slug"
-            />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="w-full md:w-32 shrink-0">
+                <FormField
+                  control={form.control}
+                  name="logo_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Logo</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          value={field.value}
+                          onChange={field.onChange}
+                          onRemove={() => field.onChange('')}
+                          folder="logos"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="flex-1 space-y-4">
+                <InputField
+                  name="name"
+                  label="Nome da Empresa"
+                  placeholder="Ex: Pizzaria do João"
+                  disabled={isLoading}
+                />
+                <InputField
+                  name="slug"
+                  label="Slug (URL amigável)"
+                  placeholder="ex: pizzaria-do-joao"
+                  disabled={isLoading}
+                  description="Link: avaliaprudente.com.br/r/seu-slug"
+                />
+              </div>
+            </div>
+            
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancelar
