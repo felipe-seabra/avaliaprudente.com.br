@@ -19,16 +19,18 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
-import { parseError, logError } from '@/lib/error-handler'
+import { useEffect, useState, useMemo } from 'react'
+import { logError } from '@/lib/error-handler'
 
 export function UserNav() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [user, setUser] = useState<User | null>(null)
   const [role, setRole] = useState<string>('customer')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     async function getProfile() {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -55,22 +57,22 @@ export function UserNav() {
 
   async function handleSignOut() {
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        logError(error, 'Sign Out')
-        const normalized = parseError(error)
-        toast.error(normalized.message)
-      } else {
-        router.push('/login')
-        router.refresh()
-      }
+      // Clear session from Supabase
+      await supabase.auth.signOut()
+      
+      // Notify user
+      toast.success('Saindo...')
+      
+      // Perform a hard redirect to ensure all states are cleared
+      window.location.assign('/login')
     } catch (err) {
       logError(err, 'Sign Out unexpected')
-      toast.error('Erro ao sair da conta')
+      // Fallback redirect
+      window.location.assign('/login')
     }
   }
 
-  if (!user) return <SkeletonAvatar />
+  if (!mounted || !user) return <SkeletonAvatar />
 
   const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário'
   const email = user.email || ''
@@ -88,8 +90,8 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button className="relative h-9 w-9 rounded-full focus:visible:ring-0 cursor-pointer outline-none hover:opacity-80 transition-opacity">
-            <Avatar className="h-9 w-9">
+          <button className="relative h-9 w-9 rounded-full focus-visible:ring-0 cursor-pointer outline-none hover:opacity-80 transition-opacity">
+            <Avatar className="h-9 w-9 pointer-events-none">
               <AvatarImage
                 src={avatarUrl}
                 alt={displayName}
@@ -118,19 +120,18 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {/* Removed DropdownMenuGroup to simplify tree and avoid Base UI error #31 */}
         <DropdownMenuItem 
           className="cursor-pointer"
           onClick={() => router.push('/dashboard/settings')}
         >
-          <UserIcon className="mr-2 h-4 w-4" />
+          <UserIcon className="mr-2 h-4 w-4 opacity-70" />
           <span>Perfil</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           className="cursor-pointer"
           onClick={() => router.push('/dashboard/settings')}
         >
-          <Settings className="mr-2 h-4 w-4" />
+          <Settings className="mr-2 h-4 w-4 opacity-70" />
           <span>Configurações</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

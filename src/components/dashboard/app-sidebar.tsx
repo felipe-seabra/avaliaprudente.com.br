@@ -68,7 +68,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const [isAdmin, setIsAdmin] = React.useState(false)
-  const supabase = createClient()
+  const supabase = React.useMemo(() => createClient(), [])
 
   React.useEffect(() => {
     async function checkRole() {

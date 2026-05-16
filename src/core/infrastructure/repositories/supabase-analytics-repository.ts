@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import { CreateAnalyticsEventDTO } from '@/core/domain/entities'
+import { Json } from '@/types/supabase'
 
 export class AnalyticsRepository {
   private supabase = createClient()
@@ -8,7 +9,12 @@ export class AnalyticsRepository {
     const { error } = await this.supabase
       .from('analytics_events')
       .insert({
-        ...event,
+        business_id: event.business_id,
+        page_id: event.page_id,
+        link_id: event.link_id,
+        event_type: event.event_type,
+        source: event.source,
+        metadata: (event.metadata || {}) as Json,
         user_agent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
       })
 

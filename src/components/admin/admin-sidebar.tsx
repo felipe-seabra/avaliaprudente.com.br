@@ -75,6 +75,22 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
+          {/* Dashboard Escape Route */}
+          <SidebarMenuItem className="mb-4 px-2">
+            <SidebarMenuButton
+              render={<Link href="/dashboard" className="cursor-pointer" />}
+              variant="outline"
+              className="border-primary/20 hover:bg-primary/5 hover:text-primary text-primary font-medium"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Voltar ao Dashboard</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <div className="px-2 py-1 text-[10px] uppercase font-bold text-muted-foreground opacity-50 group-data-[collapsible=icon]:hidden">
+            Administração
+          </div>
+
           {data.navMain.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
@@ -87,18 +103,6 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-
-          <SidebarMenuItem className="mt-4 border-t border-border/50 pt-4">
-            <SidebarMenuButton
-              render={<Link href="/dashboard" className="cursor-pointer" />}
-              tooltip="Voltar ao Dashboard Principal"
-              className="text-primary hover:text-primary hover:bg-primary/5 transition-colors font-semibold"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Voltar ao Dashboard</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
           <SidebarMenuItem className="mt-auto">
             <SidebarMenuButton
               render={<Link href="/admin/settings" className="cursor-pointer" />}
