@@ -4,7 +4,7 @@ import React from 'react'
 import { Check, Sparkles, Tag, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { PRICING_PLANS } from '@/lib/constants'
+import { PRICING_PLANS, APP_CONFIG } from '@/lib/constants'
 import Link from 'next/link'
 
 export function Pricing() {
@@ -122,7 +122,7 @@ export function Pricing() {
         <div className="mt-20 text-center">
            <p className="text-sm text-muted-foreground font-medium">
              Precisa de um plano personalizado para sua rede ou franquia? 
-             <a href="https://wa.me/5518997380486" className="text-primary font-bold ml-1 hover:underline">Fale com nosso time</a>
+             <a href={`https://wa.me/${APP_CONFIG.whatsappOrderNumber}`} className="text-primary font-bold ml-1 hover:underline">Fale com nosso team</a>
            </p>
         </div>
       </div>
