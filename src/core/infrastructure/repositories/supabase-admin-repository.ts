@@ -16,7 +16,7 @@ export class AdminRepository {
 
   async getPlatformStats(): Promise<AdminStats> {
     try {
-      // Fetch totals
+      // Fetch totals safely
       const [customers, businesses, reviews] = await Promise.all([
         this.supabase.from('profiles').select('*', { count: 'exact', head: true }),
         this.supabase.from('businesses').select('*', { count: 'exact', head: true }),
@@ -35,22 +35,48 @@ export class AdminRepository {
   }
 
   async getAllBusinesses() {
+    // We select email from profiles (added via migration)
     const { data, error } = await this.supabase
       .from('businesses')
       .select('*, profiles(full_name, email)')
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('AdminRepo: getAllBusinesses error', error)
+      // Fallback if email field is not yet hydrated in profiles
+      const { data: fallbackData, error: fallbackError } = await this.supabase
+        .from('businesses')
+        .select('*, profiles(full_name)')
+        .order('created_at', { ascending: false })
+        
+      if (fallbackError) throw fallbackError
+      return fallbackData
+    }
     return data
   }
 
   async getAllCustomers() {
-    const { data, error } = await this.supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
+    // Try to order by created_at (added via migration)
+    try {
+      const { data, error } = await this.supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-    if (error) throw error
-    return data
+      if (error) {
+        // Fallback to updated_at if created_at doesn't exist yet
+        const { data: fallbackData, error: fallbackError } = await this.supabase
+          .from('profiles')
+          .select('*')
+          .order('updated_at', { ascending: false })
+          
+        if (fallbackError) throw fallbackError
+        return fallbackData
+      }
+      return data
+    } catch (err) {
+      console.error('AdminRepo: getAllCustomers error', err)
+      throw err
+    }
   }
 }

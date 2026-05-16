@@ -48,15 +48,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? page.description 
     : `Avaliações, contato e redes sociais da ${businessName} através da plataforma NFC da Avalia Prudente.`
 
-  // Requirement: Business logo OR Avalia Prudente default OG image
-  // Ensure image URL is absolute
-  let imageUrl = page.businesses.logo_url
-  if (!imageUrl) {
-    imageUrl = `${APP_CONFIG.url}/branding/logo-horizontal.webp`
-  } else if (!imageUrl.startsWith('http')) {
-    // Fallback if logo_url is relative (unlikely but safe)
-    imageUrl = `${APP_CONFIG.url}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
-  }
+  // Standardization: Use the new dynamic opengraph-image generator
+  // Next.js automatically detects opengraph-image.tsx, but we can be explicit
+  const ogImageUrl = `${APP_CONFIG.url}/r/${slug}/opengraph-image`
 
   return {
     title,
@@ -73,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: 'pt_BR',
       images: [
         {
-          url: imageUrl,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: businessName,
@@ -84,7 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: [ogImageUrl],
     },
   }
 }

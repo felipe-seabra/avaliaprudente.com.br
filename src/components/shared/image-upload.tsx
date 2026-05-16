@@ -34,9 +34,9 @@ export function ImageUpload({
     if (!file) return
 
     // Validation
-    const maxSize = 2 * 1024 * 1024 // 2MB
+    const maxSize = 512 * 1024 // 512KB
     if (file.size > maxSize) {
-      toast.error('Arquivo muito grande. O limite é 2MB.')
+      toast.error('Arquivo muito grande. O limite para logos é 512KB.')
       return
     }
 
