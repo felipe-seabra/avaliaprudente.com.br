@@ -119,7 +119,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="cursor-pointer"
-          onSelect={() => router.push('/dashboard/settings')}
+          onClick={() => router.push('/dashboard/settings')}
         >
           <Settings className="mr-2 h-4 w-4 opacity-60" />
           <span className="font-medium text-sm">Configurações</span>
@@ -128,7 +128,7 @@ export function UserNav() {
         <DropdownMenuItem 
           variant="destructive"
           className="cursor-pointer"
-          onSelect={handleSignOut}
+          onClick={handleSignOut}
           disabled={isSignOutLoading}
         >
           <LogOut className="mr-2 h-4 w-4" />
