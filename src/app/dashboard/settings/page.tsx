@@ -182,11 +182,13 @@ export default function SettingsPage() {
             </div>
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="destructive" className="cursor-pointer font-bold shadow-sm shadow-destructive/20">
-                  Excluir Empresa
-                </Button>
-              </DialogTrigger>
+              <DialogTrigger
+                render={
+                  <Button variant="destructive" className="cursor-pointer font-bold shadow-sm shadow-destructive/20">
+                    Excluir Empresa
+                  </Button>
+                }
+              />
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-destructive">
