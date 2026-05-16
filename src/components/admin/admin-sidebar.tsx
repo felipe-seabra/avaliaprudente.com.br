@@ -58,15 +58,15 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/admin/dashboard" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-destructive text-destructive-foreground">
+            <SidebarMenuButton size="lg" render={<Link href="/admin/dashboard" className="cursor-pointer" />}>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-destructive text-destructive-foreground shrink-0 shadow-lg shadow-destructive/20">
                 <ShieldAlert className="size-4" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                <span className="truncate font-bold">
                   {APP_CONFIG.name}
                 </span>
-                <span className="truncate text-xs">Admin</span>
+                <span className="truncate text-xs opacity-70 uppercase tracking-widest font-bold">Admin</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -77,7 +77,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           {data.navMain.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
-                render={<Link href={item.url} />}
+                render={<Link href={item.url} className="cursor-pointer" />}
                 tooltip={item.title}
                 isActive={pathname === item.url || pathname.startsWith(`${item.url}/`)}
               >
@@ -88,7 +88,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           ))}
           <SidebarMenuItem className="mt-auto">
             <SidebarMenuButton
-              render={<Link href="/admin/settings" />}
+              render={<Link href="/admin/settings" className="cursor-pointer" />}
               tooltip="Configurações"
               isActive={pathname.startsWith('/admin/settings')}
             >

@@ -11,7 +11,6 @@ import type { User } from '@supabase/supabase-js'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -36,7 +35,6 @@ export function UserNav() {
         if (authUser) {
           setUser(authUser)
           
-          // Try to get role from profile table
           const { data: profile } = await supabase
             .from('profiles')
             .select('role')
@@ -80,6 +78,7 @@ export function UserNav() {
   
   const initials = displayName
     .split(' ')
+    .filter(Boolean)
     .map((n: string) => n[0])
     .join('')
     .substring(0, 2)
@@ -89,7 +88,7 @@ export function UserNav() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <button className="relative h-9 w-9 rounded-full focus-visible:ring-0 cursor-pointer">
+          <button className="relative h-9 w-9 rounded-full focus:visible:ring-0 cursor-pointer outline-none hover:opacity-80 transition-opacity">
             <Avatar className="h-9 w-9">
               <AvatarImage
                 src={avatarUrl}
@@ -101,14 +100,14 @@ export function UserNav() {
         }
       />
       <DropdownMenuContent className="w-56" align="end">
-        <DropdownMenuLabel className="font-normal">
+        <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium leading-none">
+              <p className="text-sm font-medium leading-none truncate">
                 {displayName}
               </p>
               {role === 'admin' && (
-                <span className="bg-destructive/10 text-destructive text-[10px] uppercase font-bold px-1.5 py-0.5 rounded">
+                <span className="bg-destructive/10 text-destructive text-[10px] uppercase font-bold px-1.5 py-0.5 rounded shrink-0">
                   Admin
                 </span>
               )}
@@ -119,22 +118,21 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem 
-            className="cursor-pointer"
-            onClick={() => router.push('/dashboard/profile')}
-          >
-            <UserIcon className="mr-2 h-4 w-4" />
-            <span>Perfil</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            className="cursor-pointer"
-            onClick={() => router.push('/dashboard/settings')}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Configurações</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        {/* Removed DropdownMenuGroup to simplify tree and avoid Base UI error #31 */}
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => router.push('/dashboard/settings')}
+        >
+          <UserIcon className="mr-2 h-4 w-4" />
+          <span>Perfil</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => router.push('/dashboard/settings')}
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Configurações</span>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           variant="destructive"
