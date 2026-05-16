@@ -148,7 +148,7 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
         </div>
 
         {/* Social Proof / Reviews Section */}
-        {reviews.filter(r => r.feedback && r.feedback.trim() !== '').length > 0 && (
+        {reviews.length > 0 && (
           <div className="w-full px-2 space-y-6 text-left">
             <div className="flex items-center justify-between px-2">
                <h2 className="text-lg font-bold flex items-center gap-2">
@@ -159,7 +159,6 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
             
             <div className="space-y-4">
               {reviews
-                .filter(r => r.feedback && r.feedback.trim() !== '')
                 .slice(0, 5)
                 .map((review, idx) => (
                 <Card key={review.id} className="border-none shadow-sm bg-background/60 backdrop-blur-sm rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: `${idx * 150}ms` }}>
@@ -177,9 +176,11 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
                          {new Date(review.created_at).toLocaleDateString('pt-BR')}
                        </span>
                     </div>
-                    <p className="text-sm text-foreground/90 italic leading-relaxed">
-                      &quot;{review.feedback}&quot;
-                    </p>
+                    {review.feedback && review.feedback.trim() !== '' && (
+                      <p className="text-sm text-foreground/90 italic leading-relaxed">
+                        &quot;{review.feedback}&quot;
+                      </p>
+                    )}
                     <div className="flex items-center gap-2">
                        <div 
                          className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"

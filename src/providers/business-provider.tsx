@@ -1,10 +1,12 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { Business } from '@/core/domain/entities'
 import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
 import { toast } from 'sonner'
 import { parseError, logError } from '@/lib/error-handler'
+
+const STORAGE_KEY = 'avaliaprudente_selected_business_id'
 
 interface BusinessContextType {
   businesses: Business[]
@@ -20,16 +22,26 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const [businesses, setBusinesses] = useState<Business[]>([])
   const [currentBusiness, setCurrentBusiness] = useState<Business | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const isInitialLoad = useRef(true)
   const repository = useMemo(() => new BusinessRepository(), [])
+
+  const selectBusiness = useCallback((business: Business) => {
+    setCurrentBusiness(business)
+    localStorage.setItem(STORAGE_KEY, business.id)
+  }, [])
 
   const refreshBusinesses = useCallback(async () => {
     try {
       const data = await repository.getAll()
       setBusinesses(data)
       
-      // Select first business by default if none selected or current not in list
       if (data.length > 0) {
-        if (!currentBusiness || !data.find(b => b.id === currentBusiness.id)) {
+        const storedId = localStorage.getItem(STORAGE_KEY)
+        const storedBusiness = data.find(b => b.id === storedId)
+        
+        if (storedBusiness) {
+          setCurrentBusiness(storedBusiness)
+        } else if (isInitialLoad.current || !currentBusiness || !data.find(b => b.id === currentBusiness.id)) {
           setCurrentBusiness(data[0])
         }
       } else {
@@ -41,19 +53,20 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       toast.error('Erro ao carregar empresas', { description: normalized.message })
     } finally {
       setIsLoading(false)
+      isInitialLoad.current = false
     }
   }, [currentBusiness, repository])
 
   useEffect(() => {
     refreshBusinesses()
-  }, [refreshBusinesses])
+  }, [refreshBusinesses]) // Run once on mount and when refreshBusinesses changes
 
   return (
     <BusinessContext.Provider
       value={{
         businesses,
         currentBusiness,
-        setCurrentBusiness,
+        setCurrentBusiness: selectBusiness,
         isLoading,
         refreshBusinesses,
       }}

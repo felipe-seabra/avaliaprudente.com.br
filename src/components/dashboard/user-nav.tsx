@@ -18,49 +18,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { useEffect, useState, useMemo, Component, ReactNode } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { logError } from '@/lib/error-handler'
 
-// Internal Error Boundary for debugging crashes in UserNav
-class UserNavErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: ReactNode }) {
-    super(props)
-    this.state = { hasError: false }
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true }
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("🛑 UserNav CRASH DETECTED:", error, errorInfo)
-    logError(error, "UserNav Runtime Crash")
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <button 
-          onClick={() => window.location.assign('/login')}
-          className="h-9 w-9 rounded-full bg-destructive/10 text-destructive flex items-center justify-center border border-destructive/20 text-[10px] font-bold"
-        >
-          ERR
-        </button>
-      )
-    }
-    return this.props.children
-  }
-}
-
 export function UserNav() {
-  return (
-    <UserNavErrorBoundary>
-      <UserNavContent />
-    </UserNavErrorBoundary>
-  )
-}
-
-function UserNavContent() {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
   const [user, setUser] = useState<User | null>(null)
@@ -95,12 +56,18 @@ function UserNavContent() {
 
   async function handleSignOut() {
     try {
-      await supabase.auth.signOut()
+      console.log('🚀 Initiating sign out...')
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+      
       toast.success('Saindo...')
-      window.location.assign('/login')
+      
+      // Force a full page reload to clear all states and redirect
+      window.location.href = '/login'
     } catch (err) {
       logError(err, 'Sign Out unexpected')
-      window.location.assign('/login')
+      // Fallback redirect even if signOut fails
+      window.location.href = '/login'
     }
   }
 
@@ -121,15 +88,13 @@ function UserNavContent() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={
-          <button className="group relative flex h-9 w-9 items-center justify-center rounded-full outline-none cursor-pointer transition-transform active:scale-95 border-none bg-transparent p-0">
-            <Avatar className="h-9 w-9 pointer-events-none ring-1 ring-border group-hover:ring-primary/50 transition-all">
-              <AvatarImage src={avatarUrl} alt={displayName} />
-              <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{initials}</AvatarFallback>
-            </Avatar>
-          </button>
-        }
-      />
+        className="group relative flex h-9 w-9 items-center justify-center rounded-full outline-none cursor-pointer transition-transform active:scale-95 border-none bg-transparent p-0"
+      >
+        <Avatar className="h-9 w-9 pointer-events-none ring-1 ring-border group-hover:ring-primary/50 transition-all">
+          <AvatarImage src={avatarUrl} alt={displayName} />
+          <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">{initials}</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" sideOffset={8}>
         <DropdownMenuLabel className="font-normal p-3">
           <div className="flex flex-col space-y-2">
