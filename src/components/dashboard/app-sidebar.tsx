@@ -93,7 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/dashboard" className="cursor-pointer" />}>
+            <SidebarMenuButton size="lg" render={<Link href="/dashboard" className="cursor-pointer transition-opacity hover:opacity-90" />}>
               <div className="flex items-center gap-3">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0 shadow-lg shadow-primary/20">
                   <Star className="size-4 fill-white" />

@@ -66,7 +66,7 @@ export default function QRCodesPage() {
                  alt="Logo" 
                  width={100} 
                  height={100} 
-                 className="h-16 w-auto opacity-90"
+                 className="h-16 w-auto"
                />
                <div className="h-px w-20 bg-white/20" />
             </div>

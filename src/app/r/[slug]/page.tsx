@@ -189,12 +189,12 @@ export default function BusinessPublicPage() {
         <div className="mt-auto pt-20 pb-8">
           <Link 
             href="/" 
-            className="group flex flex-col items-center gap-1 transition-all duration-300 hover:opacity-100 opacity-60"
+            className="group flex flex-col items-center gap-1 transition-all duration-300"
           >
             <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold group-hover:text-primary transition-colors">
               Digital Presence by <span className="text-primary font-bold">Avalia Prudente</span>
             </p>
-            <span className="text-[8px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-[8px] text-muted-foreground opacity-70 group-hover:opacity-100 transition-opacity">
               Conheça a plataforma
             </span>
           </Link>
