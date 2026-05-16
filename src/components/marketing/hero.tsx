@@ -46,7 +46,7 @@ export function Hero() {
         <div className="mt-20 relative w-full max-w-4xl mx-auto animate-in fade-in zoom-in-95 duration-1000 delay-500">
           <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10 h-full w-full pointer-events-none" />
           <div className="relative aspect-video w-full bg-card rounded-[2.5rem] border-4 border-muted overflow-hidden shadow-2xl flex items-center justify-center rotate-x-6 transform-gpu perspective-1000">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary),0.05)_0%,transparent_70%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-primary)_0%,transparent_70%)] opacity-5" />
             
             <div className="flex flex-col md:flex-row gap-12 items-center justify-center w-full px-12">
               {/* Phone Mockup */}
