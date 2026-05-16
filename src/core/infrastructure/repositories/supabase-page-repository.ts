@@ -20,7 +20,7 @@ export class BusinessPageRepository {
     return data
   }
 
-  async getBySlug(slug: string): Promise<(BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string } }) | null> {
+  async getBySlug(slug: string): Promise<(BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string } }) | null> {
     // 1. Check for Virtual Demo Profile
     if (slug === 'demo' || slug === 'demonstracao') {
       const demoBusiness = {
@@ -39,7 +39,7 @@ export class BusinessPageRepository {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         businesses: demoBusiness
-      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string } })
+      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string } })
     }
 
     // 2. Resolve business by slug first
@@ -58,7 +58,19 @@ export class BusinessPageRepository {
       .eq('business_id', business.id)
       .single()
 
-    if (pError || !page) return null
+    // 4. Handle newly created businesses without a page entry yet
+    if (pError || !page) {
+      return {
+        id: 'initial-page',
+        business_id: business.id,
+        description: `Bem-vindo à página oficial de ${business.name}. Em breve, mais informações e links úteis.`,
+        theme_config: { primary_color: '#7c3aed', layout: 'standard' },
+        is_published: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        businesses: business
+      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string } })
+    }
 
     return { ...page, businesses: business }
   }
