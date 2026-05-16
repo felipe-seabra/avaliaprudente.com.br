@@ -119,7 +119,7 @@ export default function DashboardPage() {
               </Button>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button className="flex-1 sm:flex-none gap-2" render={<Link href={`/${currentBusiness.slug}`} target="_blank" />}>
+              <Button className="flex-1 sm:flex-none gap-2 cursor-pointer" render={<Link href={`/r/${currentBusiness.slug}`} target="_blank" />}>
                 <ExternalLink className="h-4 w-4" />
                 Abrir
               </Button>
