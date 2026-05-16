@@ -21,7 +21,28 @@ export class BusinessPageRepository {
   }
 
   async getBySlug(slug: string): Promise<(BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string } }) | null> {
-    // Resolve business by slug first
+    // 1. Check for Virtual Demo Profile
+    if (slug === 'demo' || slug === 'demonstracao') {
+      const demoBusiness = {
+        id: '00000000-0000-0000-0000-000000000000',
+        name: 'Avalia Prudente Demo',
+        logo_url: '/branding/logo-vertical.webp',
+        slug: 'demo'
+      }
+      
+      return {
+        id: 'demo-page',
+        business_id: demoBusiness.id,
+        description: 'Esta é uma página de demonstração. Veja como sua empresa pode brilhar com o Avalia Prudente e nossas tags NFC inteligentes.',
+        theme_config: { primary_color: '#7c3aed', layout: 'standard' },
+        is_published: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        businesses: demoBusiness
+      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string } })
+    }
+
+    // 2. Resolve business by slug first
     const { data: business, error: bError } = await this.supabase
       .from('businesses')
       .select('id, name, logo_url, slug')
@@ -30,7 +51,7 @@ export class BusinessPageRepository {
 
     if (bError || !business) return null
 
-    // Fetch the page for this business
+    // 3. Fetch the page for this business
     const { data: page, error: pError } = await this.supabase
       .from('business_pages')
       .select('*')

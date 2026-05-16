@@ -1,4 +1,9 @@
-import { ArrowRight, QrCode, Smartphone, Star } from 'lucide-react'
+'use client'
+
+import { QrCode, Smartphone, Star, ExternalLink, ShieldCheck } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import Image from 'next/image'
 
 const steps = [
   {
@@ -17,46 +22,97 @@ const steps = [
     id: '03',
     title: 'Filtro em ação',
     description: 'Se for 4 ou 5 estrelas, ele é levado ao Google. Se for 1 a 3, o feedback vai só para você.',
-    icon: ArrowRight,
+    icon: ShieldCheck,
   },
 ]
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-24">
-      <div className="container mx-auto max-w-6xl px-4 md:px-8">
-        <div className="mb-16 text-center max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold tracking-tight mb-4">Como funciona?</h2>
-          <p className="text-lg text-muted-foreground">
-            Três passos simples para multiplicar suas avaliações positivas e conter as negativas.
+    <section id="how-it-works" className="py-24 relative overflow-hidden">
+      <div className="container mx-auto max-w-6xl px-4 md:px-8 relative z-10">
+        <div className="mb-20 text-center max-w-3xl mx-auto space-y-4">
+          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-bold text-primary uppercase tracking-widest">
+            Metodologia
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight text-gradient">Como o Avalia Prudente funciona?</h2>
+          <p className="text-lg text-muted-foreground font-medium">
+            Três passos simples para transformar o balcão da sua empresa em uma máquina de avaliações positivas.
           </p>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-8 relative">
-          <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-0.5 bg-border z-0"></div>
+        <div className="grid md:grid-cols-3 gap-12 relative mb-32">
+          {/* Connector Line */}
+          <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-transparent via-border to-transparent z-0"></div>
           
           {steps.map((step, index) => (
-            <div key={index} className="relative z-10 flex flex-col items-center text-center">
-              <div className="h-24 w-24 rounded-full bg-background border-4 border-muted flex items-center justify-center mb-6 shadow-sm">
+            <div key={index} className="relative z-10 flex flex-col items-center text-center group">
+              <div className="h-24 w-24 rounded-3xl bg-background border-2 border-muted flex items-center justify-center mb-8 shadow-sm group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/5 transition-all group-hover:-translate-y-1">
                 <step.icon className="h-10 w-10 text-primary" />
               </div>
-              <div className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full mb-4">
-                PASSO {step.id}
+              <div className="bg-primary/10 text-primary text-[10px] font-black px-3 py-1 rounded-full mb-4 uppercase tracking-widest border border-primary/10">
+                Fase {step.id}
               </div>
-              <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
-              <p className="text-muted-foreground leading-relaxed max-w-xs">
+              <h3 className="text-xl font-bold mb-3 tracking-tight">{step.title}</h3>
+              <p className="text-muted-foreground leading-relaxed max-w-xs text-sm font-medium">
                 {step.description}
               </p>
             </div>
           ))}
         </div>
         
-        <div className="mt-20 glass-effect rounded-3xl p-8 md:p-12 text-center max-w-4xl mx-auto flex flex-col items-center">
-          <QrCode className="h-16 w-16 text-primary mb-6" />
-          <h3 className="text-2xl md:text-3xl font-bold mb-4">Teste você mesmo</h3>
-          <p className="text-lg text-muted-foreground mb-8 max-w-xl">
-            Escaneie ou clique no botão abaixo para ver a experiência exata que o seu cliente terá.
-          </p>
+        {/* Interactive Demo Section */}
+        <div className="mt-20 relative">
+          <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full -z-10 opacity-50" />
+          <div className="bg-background/60 backdrop-blur-xl border-2 border-primary/10 rounded-[3rem] p-8 md:p-16 text-center max-w-5xl mx-auto shadow-2xl relative overflow-hidden">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-6">
+                <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  Demonstração Real
+                </div>
+                <h3 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">
+                  Experimente agora a jornada do seu cliente
+                </h3>
+                <p className="text-muted-foreground font-medium leading-relaxed">
+                  Escaneie o QR Code ao lado com seu celular ou clique no botão abaixo para abrir a página de demonstração e ver como o sistema se comporta.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 w-full">
+                  <Button size="lg" className="h-14 px-8 rounded-2xl font-bold gap-2 cursor-pointer shadow-lg shadow-primary/20" render={<Link href="/r/demo" target="_blank" />}>
+                    <ExternalLink className="h-5 w-5" />
+                    Abrir Página Demo
+                  </Button>
+                  <Button variant="outline" size="lg" className="h-14 px-8 rounded-2xl font-bold cursor-pointer" render={<Link href="/register" />}>
+                    Criar Minha Empresa
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center space-y-6">
+                <div className="relative group">
+                   <div className="absolute -inset-4 bg-gradient-to-tr from-primary to-purple-600 rounded-[2.5rem] opacity-20 blur-xl group-hover:opacity-40 transition-opacity" />
+                   <div className="relative bg-white p-6 rounded-[2rem] shadow-2xl border-4 border-muted">
+                      {/* Real looking QR placeholder since we don't have a generator component here yet */}
+                      <div className="h-48 w-48 bg-muted/10 rounded-xl flex items-center justify-center border-2 border-dashed border-primary/20 relative">
+                         <QrCode className="h-32 w-32 text-primary opacity-20" />
+                         <div className="absolute inset-0 flex items-center justify-center">
+                            <Image 
+                              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://avaliaprudente.com.br/r/demo" 
+                              alt="Scan me"
+                              width={200}
+                              height={200}
+                              className="rounded-lg shadow-inner"
+                            />
+                         </div>
+                      </div>
+                   </div>
+                </div>
+                <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                   <Smartphone className="h-4 w-4 animate-bounce" />
+                   Aponte a câmera do celular
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
