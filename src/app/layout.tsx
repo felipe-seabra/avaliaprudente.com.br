@@ -38,23 +38,14 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'pt_BR',
     url: 'https://avaliaprudente.com.br',
-    title: 'Avalia Prudente | Plataforma NFC',
-    description: 'Transforme seu balcão em uma central de conexões digitais. Aumente suas avaliações no Google.',
+    title: 'Avalia Prudente | Plataforma NFC Inteligente',
+    description: 'A plataforma definitiva para avaliações e reputação digital via NFC.',
     siteName: 'Avalia Prudente',
-    images: [
-      {
-        url: '/branding/logo-horizontal.webp',
-        width: 1200,
-        height: 630,
-        alt: 'Avalia Prudente - Plataforma NFC',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Avalia Prudente | Plataforma NFC',
-    description: 'Transforme seu balcão em uma central de conexões digitais.',
-    images: ['/branding/logo-horizontal.webp'],
+    title: 'Avalia Prudente | Plataforma NFC Inteligente',
+    description: 'Transforme clientes em avaliações reais com tecnologia NFC.',
   },
 }
 
