@@ -87,7 +87,7 @@ export function CTAButton({ link, businessId, onClick }: CTAButtonProps) {
     if (!link.url || link.url.startsWith('tel:') || link.url.startsWith('mailto:')) return null
     try {
       return new URL(link.url.startsWith('http') ? link.url : `https://${link.url}`).hostname.replace('www.', '')
-    } catch (e) {
+    } catch {
       return null
     }
   }, [link.url])

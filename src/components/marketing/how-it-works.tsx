@@ -1,9 +1,10 @@
 'use client'
 
-import { QrCode, Smartphone, Star, ExternalLink, ShieldCheck } from 'lucide-react'
+import { Smartphone, Star, ExternalLink, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
+import { APP_CONFIG } from '@/lib/constants'
 
 const steps = [
   {
@@ -27,6 +28,9 @@ const steps = [
 ]
 
 export function HowItWorks() {
+  const demoUrl = `${APP_CONFIG.url}/r/demo`
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(demoUrl)}`
+
   return (
     <section id="how-it-works" className="py-24 relative overflow-hidden">
       <div className="container mx-auto max-w-6xl px-4 md:px-8 relative z-10">
@@ -91,18 +95,14 @@ export function HowItWorks() {
                 <div className="relative group">
                    <div className="absolute -inset-4 bg-gradient-to-tr from-primary to-purple-600 rounded-[2.5rem] opacity-20 blur-xl group-hover:opacity-40 transition-opacity" />
                    <div className="relative bg-white p-6 rounded-[2rem] shadow-2xl border-4 border-muted">
-                      {/* Real looking QR placeholder since we don't have a generator component here yet */}
-                      <div className="h-48 w-48 bg-muted/10 rounded-xl flex items-center justify-center border-2 border-dashed border-primary/20 relative">
-                         <QrCode className="h-32 w-32 text-primary opacity-20" />
-                         <div className="absolute inset-0 flex items-center justify-center">
-                            <Image 
-                              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://avaliaprudente.com.br/r/demo" 
-                              alt="Scan me"
-                              width={200}
-                              height={200}
-                              className="rounded-lg shadow-inner"
-                            />
-                         </div>
+                      <div className="h-48 w-48 bg-muted/10 rounded-xl flex items-center justify-center border-2 border-dashed border-primary/20 relative overflow-hidden">
+                         <Image 
+                           src={qrCodeUrl} 
+                           alt="Demo QR Code"
+                           width={200}
+                           height={200}
+                           className="rounded-lg shadow-inner scale-110"
+                         />
                       </div>
                    </div>
                 </div>

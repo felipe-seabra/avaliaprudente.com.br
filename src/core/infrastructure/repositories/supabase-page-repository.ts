@@ -95,6 +95,48 @@ export class PageLinkRepository {
   }
 
   async getByPageId(pageId: string): Promise<PageLink[]> {
+    // Virtual Demo Links
+    if (pageId === 'demo-page') {
+      return [
+        {
+          id: 'demo-link-1',
+          page_id: 'demo-page',
+          type: 'google_review',
+          title: 'Avalie-nos no Google',
+          url: 'https://maps.google.com',
+          icon_name: null,
+          sort_order: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_active: true
+        },
+        {
+          id: 'demo-link-2',
+          page_id: 'demo-page',
+          type: 'whatsapp',
+          title: 'Fale conosco no WhatsApp',
+          url: 'https://wa.me/5518998230188',
+          icon_name: null,
+          sort_order: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_active: true
+        },
+        {
+          id: 'demo-link-3',
+          page_id: 'demo-page',
+          type: 'instagram',
+          title: 'Siga-nos no Instagram',
+          url: 'https://instagram.com/avaliaprudenteoficial',
+          icon_name: null,
+          sort_order: 2,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_active: true
+        }
+      ]
+    }
+
     const { data, error } = await this.supabase
       .from('page_links')
       .select('*')

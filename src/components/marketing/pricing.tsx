@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Check, Sparkles, Tag, ShieldCheck } from 'lucide-react'
+import { Check, Sparkles, Tag, ShieldCheck, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { PRICING_PLANS, APP_CONFIG } from '@/lib/constants'
@@ -23,14 +23,14 @@ export function Pricing() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:gap-12 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:gap-12 max-w-6xl mx-auto items-stretch">
           {/* FREE PLAN */}
           <Card className="flex flex-col border-2 border-border/50 bg-background/50 backdrop-blur-sm relative transition-all hover:border-primary/20 rounded-3xl overflow-hidden">
             <CardHeader className="p-8">
               <CardTitle className="text-xl font-bold">{PRICING_PLANS.FREE.name}</CardTitle>
               <CardDescription className="text-sm font-medium">Para começar agora</CardDescription>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-black">R$ 0</span>
+                <span className="text-4xl font-black text-foreground">R$ 0</span>
                 <span className="text-muted-foreground font-bold">/mês</span>
               </div>
             </CardHeader>
@@ -48,7 +48,7 @@ export function Pricing() {
                 </li>
               </ul>
             </CardContent>
-            <CardFooter className="p-8">
+            <CardFooter className="p-8 pt-0">
               <Button className="w-full font-bold h-12 rounded-xl cursor-pointer" variant="outline" render={<Link href="/register" />}>
                 Começar Grátis
               </Button>
@@ -59,7 +59,7 @@ export function Pricing() {
           <Card className="flex flex-col border-2 border-primary bg-primary/[0.02] relative shadow-2xl shadow-primary/10 scale-105 z-20 overflow-hidden rounded-3xl">
             <div className="absolute top-0 right-0">
                <div className="bg-primary text-white text-[10px] font-black uppercase tracking-widest py-1.5 px-8 rotate-45 translate-x-6 translate-y-3">
-                  Recomendado
+                  Melhor Valor
                </div>
             </div>
             <CardHeader className="p-8">
@@ -67,12 +67,21 @@ export function Pricing() {
                 <Sparkles className="h-5 w-5 text-primary fill-primary" />
                 <CardTitle className="text-xl font-bold">{PRICING_PLANS.BUSINESS.name}</CardTitle>
               </div>
-              <CardDescription className="text-sm font-medium text-primary/80">O poder total do NFC</CardDescription>
-              <div className="mt-4 flex items-baseline gap-1 text-primary">
-                <span className="text-4xl font-black">R$ 69,90</span>
-                <span className="font-bold opacity-80">/único*</span>
+              <CardDescription className="text-sm font-medium text-primary/80">A experiência completa NFC</CardDescription>
+              
+              <div className="mt-4 flex flex-col gap-1">
+                <div className="flex items-baseline gap-1 text-primary">
+                  <span className="text-4xl font-black">R$ 19,90</span>
+                  <span className="font-bold opacity-80">/mês</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider bg-muted/50 px-2 py-1 rounded w-fit">
+                   <Zap className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                   + R$ 69,90 taxa de ativação
+                </div>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-2">*Taxa única de ativação + 1 Tag NFC inclusa</p>
+              <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
+                A taxa de ativação inclui sua primeira **Tag NFC Profissional** com envio para todo o Brasil.
+              </p>
             </CardHeader>
             <CardContent className="flex-1 p-8 pt-0">
               <ul className="space-y-4">
@@ -84,7 +93,7 @@ export function Pricing() {
                 ))}
               </ul>
             </CardContent>
-            <CardFooter className="p-8">
+            <CardFooter className="p-8 pt-0">
               <Button className="w-full font-bold h-12 rounded-xl shadow-lg shadow-primary/20 cursor-wait opacity-80" disabled>
                 Em breve
               </Button>
@@ -95,9 +104,9 @@ export function Pricing() {
           <Card className="flex flex-col border-2 border-border/50 bg-background/50 backdrop-blur-sm relative transition-all hover:border-primary/20 rounded-3xl overflow-hidden">
             <CardHeader className="p-8">
               <CardTitle className="text-xl font-bold">{PRICING_PLANS.PRO.name}</CardTitle>
-              <CardDescription className="text-sm font-medium">Para negócios em crescimento</CardDescription>
+              <CardDescription className="text-sm font-medium">Foco em Software & Digital</CardDescription>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-black">R$ 9,90</span>
+                <span className="text-4xl font-black text-foreground">R$ 9,90</span>
                 <span className="text-muted-foreground font-bold">/mês</span>
               </div>
             </CardHeader>
@@ -111,7 +120,7 @@ export function Pricing() {
                 ))}
               </ul>
             </CardContent>
-            <CardFooter className="p-8">
+            <CardFooter className="p-8 pt-0">
               <Button className="w-full font-bold h-12 rounded-xl cursor-wait opacity-80" variant="outline" disabled>
                 Em breve
               </Button>
@@ -122,7 +131,7 @@ export function Pricing() {
         <div className="mt-20 text-center">
            <p className="text-sm text-muted-foreground font-medium">
              Precisa de um plano personalizado para sua rede ou franquia? 
-             <a href={`https://wa.me/${APP_CONFIG.whatsappOrderNumber}`} className="text-primary font-bold ml-1 hover:underline">Fale com nosso team</a>
+             <a href={`https://wa.me/${APP_CONFIG.whatsappOrderNumber}`} className="text-primary font-bold ml-1 hover:underline">Fale com nosso time</a>
            </p>
         </div>
       </div>

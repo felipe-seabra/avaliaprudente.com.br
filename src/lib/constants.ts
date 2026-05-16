@@ -17,14 +17,15 @@ export const PRICING_PLANS = {
     name: 'Pro',
     price: 9.90,
     maxBusinesses: 4,
-    features: ['Até 4 empresas', 'Analytics avançado', 'Customização avançada', 'Suporte prioritário'],
+    features: ['Até 4 empresas', 'Analytics avançado', 'Customização avançada', 'Tags vendidas separadamente'],
     enabled: false, // Coming soon
   },
   BUSINESS: {
     name: 'Business',
-    price: 69.90,
+    price: 19.90, // Recurring
+    setupFee: 69.90, // One-time (Activation + 1st Tag)
     maxBusinesses: 10,
-    features: ['Até 10 empresas', 'Incluso 1 Tag NFC', 'Premium Analytics', 'Destaque na Home', 'Suporte VIP'],
+    features: ['Até 10 empresas', 'Incluso 1 Tag NFC (ativação)', 'Premium Analytics', 'Destaque na Home', 'Suporte VIP'],
     enabled: false, // Coming soon
   }
 }

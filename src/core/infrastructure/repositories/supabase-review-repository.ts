@@ -10,6 +10,45 @@ export class ReviewRepository {
   }
 
   async getByBusinessId(businessId: string): Promise<Review[]> {
+    // Virtual Demo Reviews
+    if (businessId === '00000000-0000-0000-0000-000000000000') {
+      return [
+        {
+          id: 'demo-review-1',
+          business_id: businessId,
+          rating: 5,
+          customer_name: 'Felipe Amorim',
+          feedback: 'Excelente atendimento e tecnologia inovadora! O NFC facilita muito.',
+          created_at: new Date().toISOString(),
+          is_internal: true,
+          source: 'nfc',
+          customer_email: null
+        },
+        {
+          id: 'demo-review-2',
+          business_id: businessId,
+          rating: 5,
+          customer_name: 'Maria Silva',
+          feedback: 'Muito prático para deixar minha opinião.',
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          is_internal: true,
+          source: 'qr_code',
+          customer_email: null
+        },
+        {
+          id: 'demo-review-3',
+          business_id: businessId,
+          rating: 4,
+          customer_name: 'João Pedro',
+          feedback: null,
+          created_at: new Date(Date.now() - 172800000).toISOString(),
+          is_internal: true,
+          source: 'nfc',
+          customer_email: null
+        }
+      ] as unknown as Review[]
+    }
+
     const { data, error } = await this.supabase
       .from('reviews')
       .select('*')
