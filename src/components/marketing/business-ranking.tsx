@@ -66,12 +66,14 @@ export function BusinessRanking() {
             avg_rating: avg,
             review_count: reviews.length,
             visit_count: Math.floor(Math.random() * 1000),
-            is_verified: true // Visual only for now
+            is_verified: true 
           }
         })
 
-        setTopRated([...processed].sort((a, b) => b.avg_rating - a.avg_rating).slice(0, 6))
-        setMostViewed([...processed].sort((a, b) => b.visit_count - a.visit_count).slice(0, 6))
+        // Standardize lengths to ensure perfect column balance
+        const count = 5
+        setTopRated([...processed].sort((a, b) => b.avg_rating - a.avg_rating).slice(0, count))
+        setMostViewed([...processed].sort((a, b) => b.visit_count - a.visit_count).slice(0, count))
       } catch (err) {
         console.error('Failed to load ranking:', err)
       } finally {
@@ -91,31 +93,23 @@ export function BusinessRanking() {
   }
 
   const RankingSection = ({ title, icon: Icon, items, badgeColor, description }: { title: string, icon: LucideIcon, items: RankedBusiness[], badgeColor: string, description: string }) => (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-3">
-          <div className={cn("p-2 rounded-xl shadow-sm", badgeColor)}>
-            <Icon className="h-5 w-5" />
+    <div className="flex flex-col h-full">
+      <div className="mb-10">
+        <div className="flex items-center gap-3 mb-2">
+          <div className={cn("p-2.5 rounded-xl shadow-sm", badgeColor)}>
+            <Icon className="h-6 w-6" />
           </div>
           <h3 className="text-2xl font-black tracking-tight">{title}</h3>
         </div>
-        <p className="text-sm text-muted-foreground font-medium ml-12">{description}</p>
+        <p className="text-sm text-muted-foreground font-medium">{description}</p>
       </div>
       
-      <div className="grid gap-4">
+      <div className="grid gap-4 flex-1">
         {items.map((item, index) => (
           <Link key={item.id} href={`/r/${item.slug}`} className="group block">
-            <Card className="border-none bg-background/40 backdrop-blur-sm transition-all hover:bg-background hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 rounded-[1.5rem] overflow-hidden ring-1 ring-border/50 group-hover:ring-primary/30 relative">
-              {item.is_promoted && (
-                <div className="absolute top-0 right-0 p-2">
-                   <div className="bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-primary/20">
-                     Patrocinado
-                   </div>
-                </div>
-              )}
-              <CardContent className="p-5 flex items-center gap-5">
-                {/* Ranking Position */}
-                <div className="hidden sm:flex h-8 w-8 items-center justify-center font-black text-lg text-muted-foreground/20 group-hover:text-primary/20 transition-colors">
+            <Card className="border-none bg-background/40 backdrop-blur-sm transition-all hover:bg-background hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 rounded-[1.5rem] overflow-hidden ring-1 ring-border/50 group-hover:ring-primary/30 relative h-full min-h-[88px] flex items-center">
+              <CardContent className="p-5 flex items-center gap-5 w-full">
+                <div className="hidden sm:flex h-8 w-8 shrink-0 items-center justify-center font-black text-lg text-muted-foreground/20 group-hover:text-primary/20 transition-colors">
                    #{index + 1}
                 </div>
 
@@ -161,21 +155,23 @@ export function BusinessRanking() {
   )
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-7xl mx-auto px-4">
-      <RankingSection 
-        title="Elite da Cidade" 
-        description="Os estabelecimentos com as maiores notas de satisfação."
-        icon={Trophy} 
-        items={topRated} 
-        badgeColor="bg-yellow-500/10 text-yellow-600" 
-      />
-      <RankingSection 
-        title="Em Alta Agora" 
-        description="Negócios com maior volume de acessos e interações NFC."
-        icon={Zap} 
-        items={mostViewed} 
-        badgeColor="bg-primary/10 text-primary" 
-      />
+    <div className="mx-auto max-w-7xl px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-24 gap-y-16 items-start">
+        <RankingSection 
+          title="Elite da Cidade" 
+          description="Os estabelecimentos com as maiores notas de satisfação."
+          icon={Trophy} 
+          items={topRated} 
+          badgeColor="bg-yellow-500/10 text-yellow-600" 
+        />
+        <RankingSection 
+          title="Em Alta Agora" 
+          description="Negócios com maior volume de acessos e interações NFC."
+          icon={Zap} 
+          items={mostViewed} 
+          badgeColor="bg-primary/10 text-primary" 
+        />
+      </div>
     </div>
   )
 }
