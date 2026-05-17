@@ -14,7 +14,7 @@ export class BusinessPageRepository {
       .from('business_pages')
       .select('*')
       .eq('business_id', businessId)
-      .single()
+      .maybeSingle()
 
     if (error) return null
     return data
@@ -43,24 +43,27 @@ export class BusinessPageRepository {
       } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean } })
     }
 
-    // 2. Resolve business by slug first
+    // 2. Resolve business by slug first (Publicly accessible)
     const { data: business, error: bError } = await this.supabase
       .from('businesses')
       .select('id, name, logo_url, slug, is_verified')
       .eq('slug', slug)
-      .single()
+      .maybeSingle()
 
-    if (bError || !business) return null
+    if (bError || !business) {
+       if (bError) console.error('BusinessPageRepo: Error fetching business', bError)
+       return null
+    }
 
     // 3. Fetch the page for this business
-    const { data: page, error: pError } = await this.supabase
+    const { data: page } = await this.supabase
       .from('business_pages')
       .select('*')
       .eq('business_id', business.id)
-      .single()
+      .maybeSingle()
 
     // 4. Handle newly created businesses without a page entry yet
-    if (pError || !page) {
+    if (!page) {
       return {
         id: 'initial-page',
         business_id: business.id,
@@ -194,7 +197,6 @@ export class PageLinkRepository {
 
   async updateOrder(links: { id: string, sort_order: number }[]): Promise<void> {
     try {
-      // Use a batch of updates instead of upsert for better RLS compatibility
       const promises = links.map(link => 
         this.supabase
           .from('page_links')
