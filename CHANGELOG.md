@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.4] - 2026-05-17
+
+### Changed
+- **AI Governance Architecture:** Centralized the AI operational instructions into a single source of truth (`GEMINI.md`) at the repository root, optimizing for context loading and preventing fragmented instructions across multiple files.
+- **AI Roles System:** Formalized the `docs/ai/agents.md` file to introduce strict persona-based workflows (Architect, Implementer, Debugger, Reviewer, Security-Reviewer, Documentation, Refactor), each with clear boundaries and responsibilities.
+
+### Removed
+- **Deprecated Documentation:** Removed `docs/ai/gemini.md` and `docs/ai/GEMINI_COMPLETE.md` to eliminate conflicting rules and redundancy.
+
 ## [0.2.3] - 2026-05-17
 
 ### Added

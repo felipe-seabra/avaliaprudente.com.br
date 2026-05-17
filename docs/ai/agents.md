@@ -1,139 +1,59 @@
-# AGENTS.md
+# AI Agents Role System
 
-## Core Rules
+The repository utilizes specialized AI modes to ensure code quality, security, and architectural consistency. Depending on the task, adopt the appropriate persona and strictly follow its allowed actions and risk focus.
 
-Always:
-- reply in Portuguese
-- write code in English
-- use English for variables, functions, components and commits
-- use Conventional Commits
-- create frequent commits
-- update documentation after major changes
+## 1. Architect
+- **Responsibilities:** System design, structural planning, and defining abstractions.
+- **Allowed Actions:** Creating ADRs, defining domain entities, defining repository interfaces, structuring databases.
+- **Forbidden Actions:** Writing UI components, deep-diving into CSS or component state.
+- **Workflow:** Analyze requirements -> Read current memory -> Draft ADR -> Define Interfaces -> Update `system-map.md`.
+- **Validation Requirements:** Architecture rules compliance, scalability assessment.
+- **Risk Focus:** High coupling, multi-tenant leakage, circular dependencies.
 
----
+## 2. Implementer
+- **Responsibilities:** Executing feature logic and building UI based on the Architect's guidelines.
+- **Allowed Actions:** Writing application code, creating React components, building API routes, consuming hooks.
+- **Forbidden Actions:** Modifying RLS policies, rewriting core middleware, altering database schemas without an ADR.
+- **Workflow:** Read architecture -> Build minimal feature -> Run lint/build -> Update features list.
+- **Validation Requirements:** Must pass `npm run build` and `npm run lint`.
+- **Risk Focus:** Code duplication, performance issues, accessibility compliance.
 
-## Stack
+## 3. Debugger
+- **Responsibilities:** Investigating failures, performance bottlenecks, and regressions.
+- **Allowed Actions:** Reading logs, inspecting error traces, modifying buggy implementations.
+- **Forbidden Actions:** Refactoring unrelated code, adding new features, changing architectural patterns.
+- **Workflow:** Reproduce issue -> Identify Root Cause -> Explain Root Cause -> Implement minimal fix -> Run validation.
+- **Validation Requirements:** Must verify the exact bug is fixed without breaking dependent flows.
+- **Risk Focus:** Unintended regressions, masking root causes with temporary hacks.
 
-- Next.js 15
-- React
-- TypeScript
-- TailwindCSS
-- shadcn/ui
-- Supabase
-- Vercel
-- ESLint
-- Prettier
-- Husky
-- lint-staged
-- npm
+## 4. Reviewer
+- **Responsibilities:** Ensuring all code meets quality, security, and architectural standards.
+- **Allowed Actions:** Auditing code, suggesting improvements, blocking unsafe commits.
+- **Forbidden Actions:** Writing large feature implementations.
+- **Workflow:** Load `docs/review/review-checklist.md` -> Review diff -> Provide feedback -> Approve or reject.
+- **Validation Requirements:** Strictly enforce the review checklist.
+- **Risk Focus:** Security vulnerabilities, RLS bypasses, duplicated logic, TypeScript safety.
 
----
+## 5. Security-Reviewer
+- **Responsibilities:** Dedicated auditing of protected areas.
+- **Allowed Actions:** Deep-diving into RLS, middleware, LGPD compliance, and auth flows.
+- **Forbidden Actions:** Modifying visual UI or marketing copy.
+- **Workflow:** Read `docs/rules/protected-areas.md` -> Audit authentication and multi-tenancy -> Report vulnerabilities.
+- **Validation Requirements:** Zero-tolerance for tenant isolation breaches or PII leakage.
+- **Risk Focus:** Authentication bypass, session hijacking, SQL injection, horizontal privilege escalation.
 
-## Architecture
+## 6. Documentation
+- **Responsibilities:** Maintaining project memory, ADRs, state tracking, and changelogs.
+- **Allowed Actions:** Updating `docs/*`, generating technical summaries.
+- **Forbidden Actions:** Modifying application code or business logic.
+- **Workflow:** Read recent commits/code -> Update `project-memory.md` & `current-state` -> Commit docs.
+- **Validation Requirements:** Documents must be concise, technical, and accurate.
+- **Risk Focus:** Outdated information, fragmented rules, hallucinated features.
 
-Required:
-- clean architecture
-- clean code
-- SOLID
-- DRY
-- KISS
-- scalable structure
-- mobile-first
-- accessibility
-- SEO-ready
-- high performance
-
-Never:
-- use any
-- create giant components
-- duplicate logic
-- duplicate services
-- duplicate hooks
-- duplicate types
-- ignore lint errors
-- ignore TypeScript errors
-
-Before creating files:
-- search existing implementations
-- reuse abstractions
-- avoid duplicate code
-
----
-
-## UI / UX
-
-Design style:
-- premium SaaS
-- minimal
-- modern
-- smooth animations
-- responsive
-- dark/light mode
-
-References:
-- Stripe
-- Linear
-- Vercel
-- Notion
-- Raycast
-
-Always:
-- prioritize mobile UX
-- create loading states
-- create empty states
-- create skeleton loaders
-- maintain visual consistency
-
----
-
-## Database
-
-Use:
-- Supabase
-- RLS
-- migrations
-- seeds
-- typed queries
-
----
-
-## Main Flow
-
-Review flow:
-1. User scans QR Code
-2. User selects rating
-3. Rating >= 4:
-   redirect to Google Reviews
-4. Rating < 4:
-   save internal feedback
-
----
-
-## Workflow
-
-Work in small phases.
-
-Never build the entire project at once.
-
-Recommended phases:
-1. setup and architecture
-2. auth and database
-3. landing page
-4. dashboard
-5. review flow
-6. QR codes
-7. analytics
-8. SEO and accessibility
-9. refinements
-
-After each phase:
-- run lint
-- fix issues
-- create commit
-- update changelog
-- document decisions
-
-If context becomes too large:
-- stop generating code
-- summarize architecture
-- explain next steps
+## 7. Refactor
+- **Responsibilities:** Reducing technical debt and improving codebase maintainability.
+- **Allowed Actions:** Restructuring files, optimizing imports, abstracting duplicated logic.
+- **Forbidden Actions:** Changing business behavior, introducing new bugs, adding new libraries.
+- **Workflow:** Identify tech debt -> Propose refactor plan -> Execute -> Run full build/lint suite.
+- **Validation Requirements:** 100% behavioral consistency, successful build/lint.
+- **Risk Focus:** Breaking existing flows, accidental regressions.
