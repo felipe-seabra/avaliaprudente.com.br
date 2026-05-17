@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, Search, Loader2, Calendar, ShieldCheck, User, MoreHorizontal, Ban, ShieldAlert } from 'lucide-react'
+import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -16,29 +16,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-interface ProfileWithModeration extends Profile {
-  is_blocked?: boolean
-  blocked_at?: string
-  blocked_reason?: string
-}
-
 export default function AdminCustomersPage() {
-  const [customers, setCustomers] = useState<ProfileWithModeration[]>([])
+  const [customers, setCustomers] = useState<Profile[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const repo = new AdminRepository()
+  const [repo] = useState(() => new AdminRepository())
 
   const loadCustomers = useCallback(async () => {
     try {
       const data = await repo.getAllCustomers()
-      setCustomers(data as ProfileWithModeration[] || [])
+      setCustomers(data as Profile[] || [])
     } catch (err) {
       console.error('Admin Customers: Failed to load', err)
       toast.error('Erro ao carregar clientes')
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [repo])
 
   useEffect(() => {
     loadCustomers()

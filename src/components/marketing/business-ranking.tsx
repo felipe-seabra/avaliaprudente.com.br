@@ -246,7 +246,7 @@ export function BusinessRanking() {
                {emptyMsg}
             </div>
           ) : (
-            items.map((item, index) => (
+            items.map((item) => (
               <Link 
                 key={item.id} 
                 href={`/r/${item.slug}`} 

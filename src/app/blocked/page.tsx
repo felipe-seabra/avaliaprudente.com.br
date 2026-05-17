@@ -20,9 +20,11 @@ export default function BlockedPage() {
           Se você acredita que isso é um erro, entre em contato com nosso suporte para solicitar uma revisão do seu caso.
         </CardContent>
         <CardFooter className="flex justify-center border-t bg-muted/10 pt-6">
-          <Button variant="outline" className="font-bold" asChild>
-            <Link href="mailto:suporte@avaliaprudente.com.br">Contatar Suporte</Link>
-          </Button>
+          <Link href="mailto:suporte@avaliaprudente.com.br" className="w-full">
+            <Button variant="outline" className="font-bold w-full">
+              Contatar Suporte
+            </Button>
+          </Link>
         </CardFooter>
       </Card>
     </div>

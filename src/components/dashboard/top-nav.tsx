@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { usePathname } from 'next/navigation'
 import React from 'react'
+import { NotificationBell } from './notification-bell'
 
 export function TopNav() {
   const pathname = usePathname()
@@ -50,7 +51,8 @@ export function TopNav() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <div className="px-4">
+      <div className="px-4 flex items-center gap-2">
+        <NotificationBell />
         <ThemeToggle />
       </div>
     </header>

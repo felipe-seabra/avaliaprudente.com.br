@@ -21,8 +21,9 @@ import {
   DialogTitle,
   DialogTrigger 
 } from '@/components/ui/dialog'
-import { AlertTriangle, Trash2 } from 'lucide-react'
+import { AlertTriangle, Trash2, ShieldCheck } from 'lucide-react'
 import { Business } from '@/core/domain/entities'
+import { VerificationRequestModal } from '@/components/dashboard/verification-request-modal'
 
 const settingsSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -36,6 +37,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false)
   const repository = new BusinessRepository()
 
   const form = useForm<SettingsInput>({
@@ -100,6 +102,7 @@ export default function SettingsPage() {
   }
 
   const hasNfcTag = (currentBusiness as Business & { has_nfc_tag?: boolean }).has_nfc_tag || false
+  const isVerified = (currentBusiness as Business & { is_verified?: boolean }).is_verified || false
 
   return (
     <div className="space-y-8 max-w-2xl mx-auto pb-20">
@@ -140,6 +143,43 @@ export default function SettingsPage() {
               </div>
             </form>
           </Form>
+        </CardContent>
+      </Card>
+
+      <Card className="border-primary/10 bg-primary/5">
+        <CardHeader>
+          <div className="flex items-center gap-2 text-primary">
+             <ShieldCheck className="h-5 w-5" />
+             <CardTitle className="text-lg">Selo Verificado</CardTitle>
+          </div>
+          <CardDescription>
+            Aumente a confiança dos seus clientes com o selo oficial de verificação.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <p className="font-bold text-foreground">Status da Verificação</p>
+            <p className="text-sm text-muted-foreground">
+              {isVerified 
+                ? 'Sua empresa está verificada e exibe o selo oficial.' 
+                : 'Sua empresa ainda não possui o selo de verificação oficial.'}
+            </p>
+          </div>
+          <Button 
+            variant={isVerified ? "outline" : "default"} 
+            className="cursor-pointer font-bold shadow-sm"
+            onClick={() => setIsVerificationModalOpen(true)}
+          >
+            {isVerified ? 'Ver Detalhes' : 'Solicitar Verificação'}
+          </Button>
+
+          <VerificationRequestModal 
+            businessId={currentBusiness.id}
+            businessName={currentBusiness.name}
+            isVerified={isVerified}
+            open={isVerificationModalOpen}
+            onOpenChange={setIsVerificationModalOpen}
+          />
         </CardContent>
       </Card>
 

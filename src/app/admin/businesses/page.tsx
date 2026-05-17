@@ -2,12 +2,11 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Building2, Search, Loader2, ExternalLink, Calendar, MoreHorizontal, ShieldCheck, Clock, XCircle, Filter } from 'lucide-react'
+import { Building2, Search, Loader2, ExternalLink, Calendar, MoreHorizontal, ShieldCheck, Clock, XCircle } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
 import { Business } from '@/core/domain/entities'
 import {
   DropdownMenu,
@@ -39,7 +38,7 @@ export default function AdminBusinessesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
-  const repo = new AdminRepository()
+  const [repo] = useState(() => new AdminRepository())
 
   const loadBusinesses = useCallback(async () => {
     try {
@@ -51,7 +50,7 @@ export default function AdminBusinessesPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [repo])
 
   useEffect(() => {
     loadBusinesses()
@@ -246,7 +245,7 @@ export default function AdminBusinessesPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
-                          <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer" />}>
+                          <DropdownMenuTrigger className="h-8 w-8 p-0 cursor-pointer flex items-center justify-center rounded-md hover:bg-muted outline-none border-none">
                               <span className="sr-only">Abrir menu</span>
                               <MoreHorizontal className="h-4 w-4" />
                             </DropdownMenuTrigger>
