@@ -46,7 +46,7 @@ export class BusinessPageRepository {
     // 2. Resolve business by slug first (Publicly accessible)
     const { data: business, error: bError } = await this.supabase
       .from('businesses')
-      .select('id, name, logo_url, slug, is_verified')
+      .select('*')
       .eq('slug', slug)
       .maybeSingle()
 
@@ -111,6 +111,10 @@ export class PageLinkRepository {
   }
 
   async getByPageId(pageId: string): Promise<PageLink[]> {
+    if (pageId === 'initial-page') {
+      return []
+    }
+
     // Virtual Demo Links
     if (pageId === 'demo-page') {
       return [
@@ -159,7 +163,10 @@ export class PageLinkRepository {
       .eq('page_id', pageId)
       .order('sort_order', { ascending: true })
 
-    if (error) throw error
+    if (error) {
+      console.error('PageLinkRepo: Error fetching links', error)
+      return []
+    }
     return data || []
   }
 

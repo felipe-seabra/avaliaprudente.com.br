@@ -26,7 +26,14 @@ export class AdminRepository {
 
       const customersRes = await this.supabase.from('profiles').select('*', { count: 'exact', head: true })
       const businessesRes = await this.supabase.from('businesses').select('*', { count: 'exact', head: true })
-      const verifiedRes = await this.supabase.from('businesses').select('*', { count: 'exact', head: true }).eq('is_verified', true)
+      
+      // Safe check for verified businesses (won't crash if column is missing)
+      let verifiedCount = 0
+      const verifiedRes = await this.supabase.from('businesses').select('id', { count: 'exact', head: true }).eq('is_verified', true)
+      if (!verifiedRes.error) {
+         verifiedCount = verifiedRes.count || 0
+      }
+
       const reviewsRes = await this.supabase.from('reviews').select('rating')
       const visitsRes = await this.supabase.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'page_visit')
       const scansRes = await this.supabase.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'nfc_scan')
@@ -44,7 +51,7 @@ export class AdminRepository {
       return {
         totalCustomers: customersRes.count || 0,
         totalBusinesses: businessesRes.count || 0,
-        verifiedBusinesses: verifiedRes.count || 0,
+        verifiedBusinesses: verifiedCount,
         totalReviews: reviewList.length,
         averageRating: Number(averageRating.toFixed(1)),
         totalVisits: visitsRes.count || 0,
