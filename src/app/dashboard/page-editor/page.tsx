@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { useBusiness } from '@/providers/business-provider'
 import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
+import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { BusinessPage, PageLink, Business } from '@/core/domain/entities'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,9 @@ import {
   Link as LinkIcon,
   ChevronRight,
   ShieldCheck,
-  Clock
+  Clock,
+  ShieldAlert,
+  Loader2
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -51,6 +54,7 @@ import { VerificationRequestModal } from '@/components/dashboard/verification-re
 import { parseError, logError } from '@/lib/error-handler'
 import { BrandIcons } from '@/components/shared/brand-icons'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 
 export default function PageEditor() {
   const { currentBusiness, refreshBusinesses } = useBusiness()
@@ -60,10 +64,29 @@ export default function PageEditor() {
   const [isSaving, setIsSaving] = useState(false)
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false)
   const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<'admin' | 'customer'>('customer')
+  const [isAdminActionLoading, setIsAdminActionLoading] = useState(false)
 
   const pageRepo = useMemo(() => new BusinessPageRepository(), [])
   const linkRepo = useMemo(() => new PageLinkRepository(), [])
   const businessRepo = useMemo(() => new BusinessRepository(), [])
+  const adminRepo = useMemo(() => new AdminRepository(), [])
+  const supabase = useMemo(() => createClient(), [])
+
+  useEffect(() => {
+    async function getRole() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        if (profile) setUserRole(profile.role)
+      }
+    }
+    getRole()
+  }, [supabase])
 
   useEffect(() => {
     if (currentBusiness?.logo_url) {
@@ -132,6 +155,37 @@ export default function PageEditor() {
       setLocalLogoUrl(currentBusiness.logo_url) // Rollback
       const normalized = parseError(err)
       toast.error('Erro ao atualizar logo', { description: normalized.message })
+    }
+  }
+
+  const handleAdminVerify = async () => {
+    if (!currentBusiness) return
+    setIsAdminActionLoading(true)
+    try {
+      await adminRepo.verifyBusiness(currentBusiness.id)
+      toast.success('Empresa verificada instantaneamente!')
+      await refreshBusinesses()
+    } catch (err) {
+      logError(err, 'Admin Verify')
+      toast.error('Erro ao verificar empresa')
+    } finally {
+      setIsAdminActionLoading(false)
+    }
+  }
+
+  const handleAdminUnverify = async () => {
+    if (!currentBusiness) return
+    if (!confirm('Tem certeza que deseja remover a verificação?')) return
+    setIsAdminActionLoading(true)
+    try {
+      await adminRepo.removeBusinessVerification(currentBusiness.id)
+      toast.success('Verificação removida.')
+      await refreshBusinesses()
+    } catch (err) {
+      logError(err, 'Admin Unverify')
+      toast.error('Erro ao remover verificação')
+    } finally {
+      setIsAdminActionLoading(false)
     }
   }
 
@@ -247,6 +301,7 @@ export default function PageEditor() {
   const biz = currentBusiness as Business
   const isVerified = biz.is_verified
   const verificationStatus = biz.verification_status
+  const isAdmin = userRole === 'admin'
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-20">
@@ -298,6 +353,30 @@ export default function PageEditor() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {isAdmin && (
+                <div className="mb-6 p-4 bg-primary/5 rounded-xl border border-primary/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                   <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                         <ShieldAlert className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                         <p className="text-sm font-bold">Controle de Administrador</p>
+                         <p className="text-xs text-muted-foreground">Você pode alterar o status instantaneamente.</p>
+                      </div>
+                   </div>
+                   <Button 
+                     size="sm" 
+                     variant={isVerified ? "destructive" : "default"}
+                     className="font-bold gap-2 cursor-pointer"
+                     onClick={isVerified ? handleAdminUnverify : handleAdminVerify}
+                     disabled={isAdminActionLoading}
+                   >
+                     {isAdminActionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                     {isVerified ? "Remover Verificação" : "Verificar Agora"}
+                   </Button>
+                </div>
+              )}
+
               {!isVerified ? (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="text-xs text-muted-foreground max-w-sm">

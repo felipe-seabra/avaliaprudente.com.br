@@ -115,7 +115,7 @@ export class VerificationRepository {
         is_verified: true,
         verified_at: new Date().toISOString(),
         verified_by: user.id,
-        verification_status: 'verified'
+        verification_status: 'approved'
       })
       .eq('id', request.business_id)
 
