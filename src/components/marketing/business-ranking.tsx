@@ -18,8 +18,9 @@ interface RankedBusiness {
   review_count: number
   visit_count: number
   is_verified?: boolean
-  is_promoted?: boolean
+  is_featured?: boolean
   rank_score: number
+  trending_score: number
 }
 
 interface SupabaseBusinessResponse {
@@ -27,8 +28,10 @@ interface SupabaseBusinessResponse {
   name: string
   slug: string
   logo_url: string | null
-  reviews: { rating: number }[]
-  analytics_events: { event_type: string }[]
+  is_verified: boolean
+  is_featured: boolean
+  reviews: { rating: number, created_at: string }[]
+  analytics_events: { event_type: string, created_at: string }[]
 }
 
 export function BusinessRanking() {
@@ -40,6 +43,10 @@ export function BusinessRanking() {
   useEffect(() => {
     async function loadRanking() {
       try {
+        const thirtyDaysAgo = new Date()
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+        
+        // Fetch businesses with reviews and analytics
         const { data: businesses, error } = await supabase
           .from('businesses')
           .select(`
@@ -47,15 +54,23 @@ export function BusinessRanking() {
             name, 
             slug, 
             logo_url,
-            reviews (rating),
-            analytics_events (event_type)
+            is_verified,
+            is_featured,
+            reviews (rating, created_at),
+            analytics_events (event_type, created_at)
           `)
-          .limit(50)
+          .limit(100)
 
         if (error) throw error
 
         const typedBusinesses = businesses as unknown as SupabaseBusinessResponse[]
 
+        // Algorithm Constants
+        const MIN_REVIEWS_THRESHOLD = 2
+        const GLOBAL_MEAN_RATING = 4.0
+        const FEATURED_BOOST = 0.5
+
+        // Process data
         const processed = (typedBusinesses || []).map(b => {
           const reviews = b.reviews || []
           const analytics = b.analytics_events || []
@@ -65,12 +80,20 @@ export function BusinessRanking() {
             ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount 
             : 0
 
-          const visitCount = analytics.filter(e => e.event_type === 'page_visit').length
+          // 1. Elite Score (Bayesian Average)
+          let eliteScore = reviewCount >= MIN_REVIEWS_THRESHOLD
+            ? (reviewCount * avgRating + MIN_REVIEWS_THRESHOLD * GLOBAL_MEAN_RATING) / (reviewCount + MIN_REVIEWS_THRESHOLD)
+            : (reviewCount * avgRating) / 2 // Penalty for very low volume
+
+          if (b.is_featured) eliteScore += FEATURED_BOOST
+
+          // 2. Trending Score (Recent Engagement)
+          const recentAnalytics = analytics.filter(e => {
+             const eventDate = new Date(e.created_at)
+             return eventDate >= thirtyDaysAgo && e.event_type === 'page_visit'
+          })
           
-          // Elite Score: (Weighted Average)
-          const eliteScore = reviewCount >= 3 
-            ? (avgRating * reviewCount + 12) / (reviewCount + 3)
-            : 0
+          const trendingScore = recentAnalytics.length + (b.is_featured ? 10 : 0)
 
           return {
             id: b.id,
@@ -79,23 +102,35 @@ export function BusinessRanking() {
             logo_url: b.logo_url,
             avg_rating: avgRating || 5.0,
             review_count: reviewCount,
-            visit_count: visitCount,
+            visit_count: recentAnalytics.length,
             rank_score: eliteScore,
-            is_verified: true 
+            trending_score: trendingScore,
+            is_verified: b.is_verified, // Use real DB value
+            is_featured: b.is_featured
           }
         })
 
         const limit = 5
-        setTopRated([...processed]
-          .filter(b => b.review_count >= 1)
-          .sort((a, b) => b.rank_score - a.rank_score)
-          .slice(0, limit))
+        
+        // Final Sorting: Stable Descending
+        const eliteRanking = [...processed]
+          .filter(b => b.review_count > 0)
+          .sort((a, b) => {
+            if (b.rank_score !== a.rank_score) return b.rank_score - a.rank_score
+            return b.review_count - a.review_count // Tie-break with volume
+          })
+          .slice(0, limit)
 
-        setMostViewed([...processed]
-          .filter(b => b.visit_count >= 1)
-          .sort((a, b) => b.visit_count - a.visit_count)
-          .slice(0, limit))
+        const trendingRanking = [...processed]
+          .filter(b => b.visit_count > 0 || b.is_featured)
+          .sort((a, b) => {
+            if (b.trending_score !== a.trending_score) return b.trending_score - a.trending_score
+            return b.rank_score - a.rank_score // Tie-break with rating
+          })
+          .slice(0, limit)
 
+        setTopRated(eliteRanking)
+        setMostViewed(trendingRanking)
       } catch (err) {
         console.error('Failed to load ranking:', err)
       } finally {
@@ -176,8 +211,8 @@ export function BusinessRanking() {
                 variant="outline" 
                 size="icon" 
                 className={cn(
-                  "h-8 w-8 rounded-full transition-all duration-300", 
-                  !canScrollLeft && "opacity-20 cursor-not-allowed"
+                  "h-8 w-8 rounded-full transition-all duration-300 shadow-sm hover:border-primary/50", 
+                  !canScrollLeft && "opacity-20 cursor-not-allowed border-muted"
                 )}
                 onClick={() => scroll('left')}
                 disabled={!canScrollLeft}
@@ -188,8 +223,8 @@ export function BusinessRanking() {
                 variant="outline" 
                 size="icon" 
                 className={cn(
-                  "h-8 w-8 rounded-full transition-all duration-300", 
-                  !canScrollRight && "opacity-20 cursor-not-allowed"
+                  "h-8 w-8 rounded-full transition-all duration-300 shadow-sm hover:border-primary/50", 
+                  !canScrollRight && "opacity-20 cursor-not-allowed border-muted"
                 )}
                 onClick={() => scroll('right')}
                 disabled={!canScrollRight}
@@ -211,15 +246,20 @@ export function BusinessRanking() {
                {emptyMsg}
             </div>
           ) : (
-            items.map((item) => (
+            items.map((item, index) => (
               <Link 
                 key={item.id} 
                 href={`/r/${item.slug}`} 
                 className="flex-none w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)] snap-start group/card"
               >
-                <Card className="border-none bg-background/40 backdrop-blur-sm transition-all hover:bg-background hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 rounded-[2rem] overflow-hidden ring-1 ring-border/50 group-hover/card:ring-primary/30 h-full">
+                <Card className="border-none bg-background/40 backdrop-blur-sm transition-all hover:bg-background hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 rounded-[2rem] overflow-hidden ring-1 ring-border/50 group-hover/card:ring-primary/30 h-full relative">
+                  {item.is_featured && (
+                    <div className="absolute top-4 right-4 z-10">
+                       <Zap className="h-4 w-4 text-yellow-500 fill-yellow-500 animate-pulse" />
+                    </div>
+                  )}
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-4 h-full justify-between">
-                    <div className="space-y-4 flex flex-col items-center">
+                    <div className="space-y-4 flex flex-col items-center w-full">
                       <div className="relative h-16 w-16 rounded-2xl overflow-hidden border-2 border-muted bg-white shrink-0 shadow-sm transition-transform group-hover/card:scale-110">
                         {item.logo_url ? (
                           <Image src={item.logo_url} alt={item.name} fill className="object-contain p-1.5" />
@@ -234,10 +274,14 @@ export function BusinessRanking() {
                         <h4 className="font-bold text-base truncate group-hover/card:text-primary transition-colors tracking-tight px-2">
                           {item.name}
                         </h4>
-                        <div className="flex items-center justify-center gap-1.5">
-                          {item.is_verified && <ShieldCheck className="h-3.5 w-3.5 text-blue-500 fill-blue-500/10" />}
-                          <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">Verificado</span>
-                        </div>
+                        {(item.is_verified || item.is_featured) && (
+                          <div className="flex items-center justify-center gap-1.5">
+                            {item.is_verified && <ShieldCheck className="h-3.5 w-3.5 text-blue-500 fill-blue-500/10" />}
+                            <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60">
+                               {item.is_featured ? 'Destaque' : 'Verificado'}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -272,11 +316,11 @@ export function BusinessRanking() {
       />
       <RankingCarousel 
         title="Em Alta Agora" 
-        description="Negócios com maior volume de acessos e interações NFC."
+        description="Negócios com maior volume de acessos e interações NFC recentes."
         icon={Zap} 
         items={mostViewed} 
         badgeColor="bg-primary/10 text-primary" 
-        emptyMsg="Aguardando dados de tráfego..."
+        emptyMsg="Aguardando dados de tráfego recentes..."
       />
     </div>
   )

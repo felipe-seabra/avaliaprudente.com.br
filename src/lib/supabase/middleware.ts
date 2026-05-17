@@ -36,17 +36,20 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   let role = 'customer'
+  let isBlocked = false
+
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, is_blocked')
       .eq('id', user.id)
       .single()
     
     if (profile) {
       role = profile.role
+      isBlocked = profile.is_blocked
     }
   }
 
-  return { supabaseResponse, user, role }
+  return { supabaseResponse, user, role, isBlocked }
 }

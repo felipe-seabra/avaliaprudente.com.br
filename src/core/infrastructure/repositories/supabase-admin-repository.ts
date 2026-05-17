@@ -72,6 +72,9 @@ export class AdminRepository {
         profiles!businesses_owner_id_fkey (
           full_name,
           email
+        ),
+        verifier:profiles!businesses_verified_by_fkey (
+          full_name
         )
       `)
       .order('created_at', { ascending: false })
@@ -132,5 +135,98 @@ export class AdminRepository {
       console.error('AdminRepo: getRecentActivity unexpected error', err)
       return []
     }
+  }
+
+  // --- Moderation Methods ---
+
+  async blockUser(userId: string, reason: string = 'Violou os termos de uso') {
+    const { error } = await this.supabase
+      .from('profiles')
+      .update({
+        is_blocked: true,
+        blocked_at: new Date().toISOString(),
+        blocked_reason: reason
+      })
+      .eq('id', userId)
+
+    if (error) throw error
+  }
+
+  async unblockUser(userId: string) {
+    const { error } = await this.supabase
+      .from('profiles')
+      .update({
+        is_blocked: false,
+        blocked_at: null,
+        blocked_reason: null
+      })
+      .eq('id', userId)
+
+    if (error) throw error
+  }
+
+  async setAdminRole(userId: string, isAdmin: boolean) {
+    const { error } = await this.supabase
+      .from('profiles')
+      .update({
+        role: isAdmin ? 'admin' : 'customer'
+      })
+      .eq('id', userId)
+
+    if (error) throw error
+  }
+
+  // --- Verification Methods ---
+
+  async verifyBusiness(businessId: string) {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    const { error } = await this.supabase
+      .from('businesses')
+      .update({
+        verification_status: 'verified',
+        verified_by: user?.id,
+        verified_at: new Date().toISOString(),
+        is_verified: true
+      })
+      .eq('id', businessId)
+
+    if (error) throw error
+  }
+
+  async rejectBusiness(businessId: string) {
+    const { error } = await this.supabase
+      .from('businesses')
+      .update({
+        verification_status: 'rejected',
+        verified_by: null,
+        verified_at: null,
+        is_verified: false
+      })
+      .eq('id', businessId)
+
+    if (error) throw error
+  }
+
+  async removeBusinessVerification(businessId: string) {
+    const { error } = await this.supabase
+      .from('businesses')
+      .update({
+        verification_status: 'pending',
+        verified_by: null,
+        verified_at: null,
+        is_verified: false
+      })
+      .eq('id', businessId)
+
+    if (error) throw error
+  }
+
+  async deleteBusiness(businessId: string) {
+    const { error } = await this.supabase
+      .from('businesses')
+      .delete()
+      .eq('id', businessId)
+
+    if (error) throw error
   }
 }

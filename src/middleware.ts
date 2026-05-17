@@ -6,8 +6,6 @@ const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
 const MAX_REQUESTS = 100 // 100 requests per minute
 
 // Simple in-memory storage for rate limiting
-// Note: In production (serverless), this won't be shared across instances.
-// For true rate limiting, use Vercel KV or a similar distributed store.
 const ipCache = new Map<string, { count: number; lastReset: number }>()
 
 function isRateLimited(ip: string): boolean {
@@ -33,7 +31,7 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 })
   }
 
-  const { supabaseResponse, user, role } = await updateSession(request)
+  const { supabaseResponse, user, role, isBlocked } = await updateSession(request)
 
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||
@@ -43,6 +41,17 @@ export async function middleware(request: NextRequest) {
 
   const isDashboardPage = request.nextUrl.pathname.startsWith('/dashboard')
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin')
+  const isBlockedPage = request.nextUrl.pathname.startsWith('/blocked')
+
+  if (user && isBlocked && !isBlockedPage) {
+    // If blocked user tries to access anything other than /blocked, sign them out / redirect
+    // Redirect to blocked page
+    return NextResponse.redirect(new URL('/blocked', request.url))
+  }
+
+  if (user && !isBlocked && isBlockedPage) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
 
   // Redirect logged in users away from auth pages
   if (user && isAuthPage) {
@@ -70,13 +79,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

@@ -20,14 +20,15 @@ export class BusinessPageRepository {
     return data
   }
 
-  async getBySlug(slug: string): Promise<(BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string } }) | null> {
+  async getBySlug(slug: string): Promise<(BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean } }) | null> {
     // 1. Check for Virtual Demo Profile
     if (slug === 'demo' || slug === 'demonstracao') {
       const demoBusiness = {
         id: '00000000-0000-0000-0000-000000000000',
         name: 'Avalia Prudente Demo',
         logo_url: '/branding/logo-vertical.webp',
-        slug: 'demo'
+        slug: 'demo',
+        is_verified: true
       }
       
       return {
@@ -39,13 +40,13 @@ export class BusinessPageRepository {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         businesses: demoBusiness
-      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string } })
+      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean } })
     }
 
     // 2. Resolve business by slug first
     const { data: business, error: bError } = await this.supabase
       .from('businesses')
-      .select('id, name, logo_url, slug')
+      .select('id, name, logo_url, slug, is_verified')
       .eq('slug', slug)
       .single()
 
@@ -69,7 +70,7 @@ export class BusinessPageRepository {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         businesses: business
-      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string } })
+      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean } })
     }
 
     return { ...page, businesses: business }

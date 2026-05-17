@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { CTAButton } from '@/components/shared/cta-button'
 import { ReviewFlow } from '@/components/shared/review-flow'
-import { Star, CheckCircle2, MessageSquare } from 'lucide-react'
+import { Star, ShieldCheck, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
 import { PageLink, BusinessPage, Review } from '@/core/domain/entities'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase
 
 interface BusinessPageClientProps {
   data: {
-    page: BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string } }
+    page: BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, is_verified?: boolean } }
     links: PageLink[]
     reviews: Review[]
   }
@@ -110,11 +110,16 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
                 <span className="text-foreground font-bold">{avgRating}</span>
                 <span className="opacity-70">({reviews.length || '10+'})</span>
              </div>
-             <div className="h-3 w-px bg-border" />
-             <div className="flex items-center gap-1 text-green-600">
-                <CheckCircle2 className="h-3 w-3" />
-                <span>Verificado</span>
-             </div>
+             
+             {page.businesses.is_verified && (
+               <>
+                 <div className="h-3 w-px bg-border" />
+                 <div className="flex items-center gap-1 text-blue-600">
+                    <ShieldCheck className="h-3 w-3 fill-blue-500/10" />
+                    <span className="font-bold uppercase tracking-wider text-[10px]">Verificado</span>
+                 </div>
+               </>
+             )}
           </div>
 
           {page.description && (
