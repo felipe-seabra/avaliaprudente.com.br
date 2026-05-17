@@ -74,12 +74,15 @@ export class VerificationRepository {
       .from('verification_requests')
       .select(`
         *,
-        businesses (name, slug),
-        profiles (full_name, email)
+        businesses!business_id (name, slug),
+        profiles!user_id (full_name, email)
       `)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('VerificationRepo: getAllForAdmin error', error)
+      throw error
+    }
     return data || []
   }
 

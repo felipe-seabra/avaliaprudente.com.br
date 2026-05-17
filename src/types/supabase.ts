@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       analytics_events: {
@@ -75,21 +50,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "businesses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "analytics_events_link_id_fkey"
-            columns: ["link_id"]
-            isOneToOne: false
-            referencedRelation: "page_links"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "analytics_events_page_id_fkey"
-            columns: ["page_id"]
-            isOneToOne: false
-            referencedRelation: "business_pages"
-            referencedColumns: ["id"]
-          },
+          }
         ]
       }
       business_pages: {
@@ -127,7 +88,7 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "businesses"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       businesses: {
@@ -141,6 +102,13 @@ export type Database = {
           owner_id: string
           slug: string
           updated_at: string
+          is_verified: boolean
+          is_featured: boolean
+          has_nfc_tag: boolean
+          plan_type: string
+          verified_at: string | null
+          verified_by: string | null
+          verification_status: string
         }
         Insert: {
           address?: string | null
@@ -152,6 +120,13 @@ export type Database = {
           owner_id: string
           slug: string
           updated_at?: string
+          is_verified?: boolean
+          is_featured?: boolean
+          has_nfc_tag?: boolean
+          plan_type?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          verification_status?: string
         }
         Update: {
           address?: string | null
@@ -163,6 +138,13 @@ export type Database = {
           owner_id?: string
           slug?: string
           updated_at?: string
+          is_verified?: boolean
+          is_featured?: boolean
+          has_nfc_tag?: boolean
+          plan_type?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          verification_status?: string
         }
         Relationships: []
       }
@@ -210,51 +192,54 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "business_pages"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       profiles: {
         Row: {
           avatar_url: string | null
-          blocked_at: string | null
-          blocked_reason: string | null
-          created_at: string
-          email: string | null
           full_name: string | null
           id: string
-          is_blocked: boolean
           role: string
           updated_at: string | null
           username: string | null
           website: string | null
+          email: string | null
+          is_blocked: boolean
+          blocked_at: string | null
+          blocked_reason: string | null
+          last_login_at: string | null
+          created_at: string
         }
         Insert: {
           avatar_url?: string | null
-          blocked_at?: string | null
-          blocked_reason?: string | null
-          created_at?: string
-          email?: string | null
           full_name?: string | null
           id: string
-          is_blocked?: boolean
           role?: string
           updated_at?: string | null
           username?: string | null
           website?: string | null
+          email?: string | null
+          is_blocked?: boolean
+          blocked_at?: string | null
+          blocked_reason?: string | null
+          last_login_at?: string | null
+          created_at?: string
         }
         Update: {
           avatar_url?: string | null
-          blocked_at?: string | null
-          blocked_reason?: string | null
-          created_at?: string
-          email?: string | null
           full_name?: string | null
           id?: string
-          is_blocked?: boolean
           role?: string
           updated_at?: string | null
           username?: string | null
           website?: string | null
+          email?: string | null
+          is_blocked?: boolean
+          blocked_at?: string | null
+          blocked_reason?: string | null
+          last_login_at?: string | null
+          created_at?: string
         }
         Relationships: []
       }
@@ -283,22 +268,7 @@ export type Database = {
           style_config?: Json
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "qr_codes_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "businesses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "qr_codes_review_link_id_fkey"
-            columns: ["review_link_id"]
-            isOneToOne: false
-            referencedRelation: "review_links"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       review_links: {
         Row: {
@@ -328,15 +298,7 @@ export type Database = {
           slug?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "review_links_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "businesses"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -372,14 +334,98 @@ export type Database = {
           rating?: number
           source?: string
         }
+        Relationships: []
+      }
+      verification_requests: {
+        Row: {
+          id: string
+          business_id: string
+          user_id: string
+          status: string
+          message: string | null
+          admin_response: string | null
+          created_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          user_id: string
+          status?: string
+          message?: string | null
+          admin_response?: string | null
+          created_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
+        Update: {
+          id?: string
+          business_id?: string
+          user_id?: string
+          status?: string
+          message?: string | null
+          admin_response?: string | null
+          created_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "reviews_business_id_fkey"
+            foreignKeyName: "verification_requests_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "verification_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          message: string
+          type: string
+          is_read: boolean
+          action_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          message: string
+          type?: string
+          is_read?: boolean
+          action_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          message?: string
+          type?: string
+          is_read?: boolean
+          action_url?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
         ]
       }
     }
@@ -497,30 +543,3 @@ export type Enums<
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
-  public: {
-    Enums: {},
-  },
-} as const
-

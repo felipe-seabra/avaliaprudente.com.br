@@ -19,9 +19,6 @@ import {
 import { cn } from '@/lib/utils'
 
 interface BusinessWithProfile extends Business {
-  verification_status?: 'pending' | 'verified' | 'rejected'
-  verified_at?: string | null
-  verified_by?: string | null
   profiles?: {
     full_name: string | null
     email: string | null

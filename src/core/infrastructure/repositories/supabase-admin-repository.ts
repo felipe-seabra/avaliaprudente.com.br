@@ -64,16 +64,16 @@ export class AdminRepository {
   }
 
   async getAllBusinesses() {
-    // With the new foreign key, this join should work perfectly
+    // Using column names as hints is more reliable than FK names in PostgREST
     const { data, error } = await this.supabase
       .from('businesses')
       .select(`
         *,
-        profiles!businesses_owner_id_fkey (
+        profiles!owner_id (
           full_name,
           email
         ),
-        verifier:profiles!businesses_verified_by_fkey (
+        verifier:profiles!verified_by (
           full_name
         )
       `)
