@@ -28,7 +28,7 @@ interface BusinessWithProfile extends Business {
   } | null
 }
 
-type FilterStatus = 'all' | 'pending' | 'verified' | 'rejected'
+type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected'
 
 export default function AdminBusinessesPage() {
   const [businesses, setBusinesses] = useState<BusinessWithProfile[]>([])
@@ -57,22 +57,26 @@ export default function AdminBusinessesPage() {
     const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.slug.toLowerCase().includes(searchTerm.toLowerCase())
     
-    const matchesStatus = statusFilter === 'all' || b.verification_status === statusFilter
+    // Support both old 'verified' and new 'approved' statuses for filtering
+    const status = b.verification_status as string
+    const normalizedStatus = status === 'verified' ? 'approved' : status
+    
+    const matchesStatus = statusFilter === 'all' || normalizedStatus === statusFilter
     
     return matchesSearch && matchesStatus
   })
 
-  const handleVerificationAction = async (id: string, action: 'verify' | 'reject' | 'remove') => {
+  const handleVerificationAction = async (id: string, action: 'approve' | 'reject' | 'remove') => {
     try {
-      if (action === 'verify') {
+      if (action === 'approve') {
         await repo.verifyBusiness(id)
         toast.success('Empresa verificada com sucesso.')
       } else if (action === 'reject') {
         await repo.rejectBusiness(id)
-        toast.success('Empresa rejeitada.')
+        toast.success('Solicitação de verificação rejeitada.')
       } else {
         await repo.removeBusinessVerification(id)
-        toast.success('Status de verificação removido.')
+        toast.success('Status resetado para Pendente.')
       }
       loadBusinesses()
     } catch (error) {
@@ -95,7 +99,7 @@ export default function AdminBusinessesPage() {
   }
 
   const renderStatusBadge = (status: string | undefined) => {
-    if (status === 'verified') {
+    if (status === 'verified' || status === 'approved') {
       return (
         <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-blue-600 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20 w-fit">
           <ShieldCheck className="h-3 w-3" /> Verificado
@@ -148,8 +152,8 @@ export default function AdminBusinessesPage() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className={cn("text-xs h-8 px-3", statusFilter === 'verified' && "bg-background shadow-sm text-blue-600")}
-              onClick={() => setStatusFilter('verified')}
+              className={cn("text-xs h-8 px-3", statusFilter === 'approved' && "bg-background shadow-sm text-blue-600")}
+              onClick={() => setStatusFilter('approved')}
             >
               Verificadas
             </Button>
@@ -225,7 +229,7 @@ export default function AdminBusinessesPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {business.verification_status === 'verified' ? (
+                        {(business.verification_status === 'verified' || business.verification_status === 'approved') ? (
                           <div className="flex flex-col">
                             <span className="text-xs font-medium text-blue-600">{formatDate(business.verified_at)}</span>
                             <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">por {business.verifier?.full_name || 'Sistema'}</span>
@@ -256,25 +260,25 @@ export default function AdminBusinessesPage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuLabel className="text-xs font-bold uppercase text-muted-foreground">Verificação</DropdownMenuLabel>
                             
-                            {business.verification_status !== 'verified' && (
-                              <DropdownMenuItem className="cursor-pointer text-blue-600 font-medium" onClick={() => handleVerificationAction(business.id, 'verify')}>
+                            {business.verification_status !== 'approved' && business.verification_status !== 'verified' && (
+                              <DropdownMenuItem className="cursor-pointer text-blue-600 font-medium" onClick={() => handleVerificationAction(business.id, 'approve')}>
                                 <ShieldCheck className="mr-2 h-4 w-4" /> Aprovar Verificação
-                              </DropdownMenuItem>
-                            )}
-                            
-                            {business.verification_status === 'verified' && (
-                              <DropdownMenuItem className="cursor-pointer text-destructive font-medium" onClick={() => handleVerificationAction(business.id, 'remove')}>
-                                <XCircle className="mr-2 h-4 w-4" /> Remover Verificação
                               </DropdownMenuItem>
                             )}
 
                             {business.verification_status === 'pending' && (
                               <DropdownMenuItem className="cursor-pointer text-destructive font-medium" onClick={() => handleVerificationAction(business.id, 'reject')}>
-                                <XCircle className="mr-2 h-4 w-4" /> Rejeitar Empresa
+                                <XCircle className="mr-2 h-4 w-4" /> Rejeitar Verificação
+                              </DropdownMenuItem>
+                            )}
+                            
+                            {(business.is_verified || business.verification_status === 'approved' || business.verification_status === 'verified') && (
+                              <DropdownMenuItem className="cursor-pointer text-destructive font-medium" onClick={() => handleVerificationAction(business.id, 'remove')}>
+                                <XCircle className="mr-2 h-4 w-4" /> Remover Verificação
                               </DropdownMenuItem>
                             )}
 
-                            {business.verification_status !== 'pending' && (
+                            {business.verification_status === 'rejected' && (
                               <DropdownMenuItem className="cursor-pointer text-muted-foreground" onClick={() => handleVerificationAction(business.id, 'remove')}>
                                 <Clock className="mr-2 h-4 w-4" /> Mover para Pendente
                               </DropdownMenuItem>

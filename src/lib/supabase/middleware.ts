@@ -39,15 +39,21 @@ export async function updateSession(request: NextRequest) {
   let isBlocked = false
 
   if (user) {
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role, is_blocked')
       .eq('id', user.id)
       .single()
     
+    if (profileError) {
+      console.error('Middleware: Error fetching profile for user', user.id, profileError)
+    }
+
     if (profile) {
       role = profile.role
       isBlocked = profile.is_blocked
+    } else {
+      console.warn('Middleware: No profile found for user', user.id)
     }
   }
 

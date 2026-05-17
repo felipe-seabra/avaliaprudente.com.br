@@ -44,6 +44,11 @@ const data = {
       icon: Building2,
     },
     {
+      title: 'Verificações',
+      url: '/admin/verifications',
+      icon: ShieldAlert,
+    },
+    {
       title: 'Estatísticas',
       url: '/admin/stats',
       icon: BarChart3,

@@ -89,3 +89,33 @@ All notable changes to this project will be documented in this file.
 - RLS Permissions Update: Added public read access to `businesses` to allow anonymous slug resolution. Fixed `page_links` insert/update policies.
 - Missing Routes: Implemented the `/dashboard/settings` page for basic business management (name and slug updates).
 - Dashboard UX Enhancement: Added a highly visible "Public Link" card to the dashboard with one-click copy, QR shortcut, and new-tab preview.
+
+## [0.2.0] - 2026-05-17
+
+### Added
+
+- **Full Verification System:** Dedicated workflow for businesses to request the "Official Seal" of trust.
+- **Verification Requests Table:** New database table to track request history, admin messages, and timestamps.
+- **Admin Verification Dashboard:** Centralized panel for administrators to approve or reject verification requests.
+- **Unified Verification UI:** "Blue Badge" (ShieldCheck) consistently displayed across Rankings, Public Pages, and Dashboard.
+- **Verification Request Modal:** Reusable component for business owners to submit requests with optional justification.
+- **Smart Ranking Algorithm:** Bayesian Average implementation for "Elite da Cidade" ranking, prioritizing verified and high-volume businesses.
+- **Trending Score:** Logic to rank "Em Alta Agora" based on recent NFC scans and page visits (last 30 days).
+- **Admin Sidebar:** Added direct access to the Verifications panel.
+
+### Changed
+
+- **Business Page Editor:** Integrated the new verification flow, replacing manual status updates with a formal request system.
+- **Business Directory (Admin):** Enhanced with status-based filtering (Pending, Approved, Rejected) and verifier tracking.
+- **Public Page Trust Indicators:** Added verified badge and total review count to the header for social proof.
+
+### Fixed
+
+- **Stabilization:** Removed temporary test files causing lint errors.
+- **Build Integrity:** Resolved type mismatches in Admin and Dashboard repositories.
+- **RLS Hardening:** Updated `profiles` policies to allow admins to view all profiles (necessary for verifier attribution).
+
+### Security
+
+- **Verification Logic:** Restricted the ability to self-verify; verification status changes now require admin privileges or specific database triggers.
+- **RBAC Enforcement:** Hardened Middleware and RLS to ensure only admins can access moderation tools.

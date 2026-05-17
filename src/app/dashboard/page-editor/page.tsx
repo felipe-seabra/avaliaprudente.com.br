@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { useBusiness } from '@/providers/business-provider'
 import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
-import { BusinessPage, PageLink } from '@/core/domain/entities'
+import { BusinessPage, PageLink, Business } from '@/core/domain/entities'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -17,7 +17,9 @@ import {
   Globe,
   Briefcase,
   Link as LinkIcon,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck,
+  Clock
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -45,8 +47,10 @@ import {
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { SortableLinkItem } from '@/components/dashboard/sortable-link-item'
 import { ImageUpload } from '@/components/shared/image-upload'
+import { VerificationRequestModal } from '@/components/dashboard/verification-request-modal'
 import { parseError, logError } from '@/lib/error-handler'
 import { BrandIcons } from '@/components/shared/brand-icons'
+import { cn } from '@/lib/utils'
 
 export default function PageEditor() {
   const { currentBusiness, refreshBusinesses } = useBusiness()
@@ -54,6 +58,7 @@ export default function PageEditor() {
   const [links, setLinks] = useState<PageLink[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false)
   const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null)
 
   const pageRepo = useMemo(() => new BusinessPageRepository(), [])
@@ -239,6 +244,10 @@ export default function PageEditor() {
     return <div className="p-12 text-center">Selecione uma empresa para começar.</div>
   }
 
+  const biz = currentBusiness as Business
+  const isVerified = biz.is_verified
+  const verificationStatus = biz.verification_status
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-20">
       <div className="flex items-center justify-between">
@@ -265,6 +274,72 @@ export default function PageEditor() {
       <div className="grid gap-8 md:grid-cols-3">
         {/* Settings Column */}
         <div className="md:col-span-2 space-y-6">
+          <Card className={cn(isVerified ? "border-blue-500/20 bg-blue-500/5" : "border-primary/10 bg-primary/5")}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className={cn("h-5 w-5", isVerified ? "text-blue-500" : "text-primary")} />
+                  <CardTitle className="text-lg">Status de Verificação</CardTitle>
+                </div>
+                {isVerified ? (
+                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">
+                      <ShieldCheck className="h-3 w-3" /> Verificado
+                   </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted text-muted-foreground text-[10px] font-black uppercase tracking-widest border">
+                      {verificationStatus === 'rejected' ? 'Não Aprovado' : 'Não Verificado'}
+                  </div>
+                )}
+              </div>
+              <CardDescription>
+                {isVerified 
+                  ? "Sua empresa possui o selo oficial de confiança da Avalia Prudente."
+                  : "Aumente a confiança dos seus clientes solicitando o selo oficial de verificação."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!isVerified ? (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-xs text-muted-foreground max-w-sm">
+                    {verificationStatus === 'rejected' 
+                      ? "Sua última solicitação não foi aprovada. Certifique-se de que seu perfil está completo e tente novamente."
+                      : "Para ser verificado, sua empresa deve ter nome, logo e pelo menos 3 links ativos."}
+                  </div>
+                  <Button 
+                    onClick={() => setIsVerificationModalOpen(true)}
+                    disabled={verificationStatus === 'pending'}
+                    className="font-bold gap-2 cursor-pointer w-full sm:w-auto"
+                    variant={verificationStatus === 'rejected' ? "outline" : "default"}
+                  >
+                    {verificationStatus === 'pending' ? (
+                      <>
+                        <Clock className="h-4 w-4 animate-spin" />
+                        Aguardando Análise...
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="h-4 w-4" />
+                        Solicitar Selo
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-xs text-blue-700/70 font-medium">
+                  Seu selo está ativo e visível para todos os clientes em sua página pública e nos rankings.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <VerificationRequestModal 
+            businessId={currentBusiness.id}
+            businessName={currentBusiness.name}
+            isVerified={isVerified}
+            open={isVerificationModalOpen}
+            onOpenChange={setIsVerificationModalOpen}
+          />
+
           <Card>
             <CardHeader>
               <CardTitle>Identidade Visual</CardTitle>

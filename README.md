@@ -11,8 +11,10 @@ O Avalia Prudente é uma solução baseada em NFC (Near Field Communication) que
 - **Páginas de Negócio Personalizáveis:** Crie uma vitrine digital com sua marca, logo e descrição.
 - **Sistema de CTAs Modular:** Adicione botões para WhatsApp, Instagram, Website, Portfólio e mais.
 - **Filtro Inteligente de Avaliações Google:** Capture feedbacks internos para notas baixas e direcione notas altas direto para o Google.
+- **Sistema de Verificação Oficial (Selo Azul):** Workflow completo de solicitação e aprovação de selos de confiança para empresas.
+- **Rankings Inteligentes:** Algoritmos Bayesianos para listar os melhores estabelecimentos da cidade ("Elite") e os mais acessados ("Em Alta").
 - **Gestão Multi-empresa:** Gerencie múltiplos locais em um único painel.
-- **Painel Administrativo (RBAC):** Estrutura preparada para gestão global da plataforma.
+- **Painel Administrativo (RBAC):** Interface completa para moderação de empresas, usuários e solicitações de verificação.
 
 ## Tech Stack
 

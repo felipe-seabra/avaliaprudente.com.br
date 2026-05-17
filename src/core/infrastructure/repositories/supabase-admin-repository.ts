@@ -27,7 +27,6 @@ export class AdminRepository {
       const customersRes = await this.supabase.from('profiles').select('*', { count: 'exact', head: true })
       const businessesRes = await this.supabase.from('businesses').select('*', { count: 'exact', head: true })
       
-      // Safe check for verified businesses (won't crash if column is missing)
       let verifiedCount = 0
       const verifiedRes = await this.supabase.from('businesses').select('id', { count: 'exact', head: true }).eq('is_verified', true)
       if (!verifiedRes.error) {
@@ -45,7 +44,7 @@ export class AdminRepository {
 
       const reviewList = (reviewsRes.data || []) as { rating: number }[]
       const averageRating = reviewList.length > 0 
-        ? reviewList.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) / reviewList.length 
+        ? reviewList.reduce((acc, r) => acc + r.rating, 0) / reviewList.length 
         : 0
 
       return {
@@ -180,7 +179,7 @@ export class AdminRepository {
     const { error } = await this.supabase
       .from('businesses')
       .update({
-        verification_status: 'verified',
+        verification_status: 'approved',
         verified_by: user?.id,
         verified_at: new Date().toISOString(),
         is_verified: true
@@ -211,7 +210,8 @@ export class AdminRepository {
         verification_status: 'pending',
         verified_by: null,
         verified_at: null,
-        is_verified: false
+        is_verified: false,
+        verification_requested_at: null
       })
       .eq('id', businessId)
 

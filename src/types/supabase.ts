@@ -109,6 +109,7 @@ export type Database = {
           verified_at: string | null
           verified_by: string | null
           verification_status: string
+          verification_requested_at: string | null
         }
         Insert: {
           address?: string | null
@@ -127,6 +128,7 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           verification_status?: string
+          verification_requested_at?: string | null
         }
         Update: {
           address?: string | null
@@ -145,6 +147,7 @@ export type Database = {
           verified_at?: string | null
           verified_by?: string | null
           verification_status?: string
+          verification_requested_at?: string | null
         }
         Relationships: []
       }
