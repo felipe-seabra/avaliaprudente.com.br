@@ -1,29 +1,21 @@
 # Project Memory: Avalia Prudente
 
-## Visão Geral
-**Avalia Prudente** é uma plataforma SaaS voltada para a aquisição de avaliações no Google através de QR Codes inteligentes e redirecionamento estratégico. O projeto foca em estabelecimentos locais, oferecendo uma ponte entre o mundo físico (Tags NFC/QR Codes) e o digital (Páginas de Avaliação).
+## Context
+SaaS platform for Google review acquisition via NFC/QR Codes. Multi-tenant (RLS-based). Clean Architecture.
 
-## Stack Tecnológica
-- **Framework:** Next.js 15 (App Router)
-- **Linguagem:** TypeScript
-- **Estilização:** Tailwind CSS 4, shadcn/ui
-- **Backend:** Supabase (PostgreSQL, Auth, Storage)
-- **Gerenciamento de Estado:** React Context (BusinessProvider), Hooks customizados.
-- **Validação:** Zod + React Hook Form.
+## Architecture
+- **Framework:** Next.js 15 (App Router).
+- **Persistence:** Supabase (Auth, RLS, Storage).
+- **Core:** `Domain` (entities), `Infrastructure` (repos), `UI` (components/hooks).
+- **Isolation:** Strict RLS via `owner_id`. Admin roles for moderation.
 
-## Arquitetura
-O projeto segue uma estrutura inspirada em **Clean Architecture**, embora a camada de Application (Use Cases) ainda esteja em fase de adoção.
-- **Domain (`src/core/domain`):** Entidades puras e regras de negócio.
-- **Infrastructure (`src/core/infrastructure`):** Repositórios Supabase e integrações externas.
-- **UI Layer (`src/app`, `src/components`):** Componentes React e páginas Next.js.
+## Critical Business Rules
+- **Intelligent Redirect:** Rating >= 4 -> Google; < 4 -> Internal Feedback.
+- **Bayesian Ranking:** Weighted score based on volume, average rating, and verification status.
+- **Verification:** Formal request-approve-verify flow. Admins can force status.
+- **Page Editor:** Drag-and-drop link ordering (dnd-kit).
 
-## Regras de Negócio Críticas
-1. **Isolamento Multi-tenant:** Garantido via Row Level Security (RLS) no Supabase, baseado no `owner_id`.
-2. **Sistema de Verificação:** Fluxo formal de solicitação de selo de confiança, moderado por admins.
-3. **Ranking (Média Bayesiana):** Algoritmo que pondera volume de avaliações e nota média para evitar rankings injustos.
-4. **Redirecionamento Inteligente:** Avaliações >= 4 são direcionadas ao Google; < 4 abrem formulário de feedback interno.
-
-## Áreas Sensíveis
-- **Middleware:** Gerencia proteção de rotas (Admin/Dashboard) e controle de usuários bloqueados.
-- **RLS Policies:** Crucial para manter a privacidade dos dados entre diferentes empresas.
-- **Processamento de Ranking:** Depende da integridade dos dados de `reviews` e `analytics_events`.
+## Sensitive Modules
+- `src/middleware.ts`: RBAC & Session hardening.
+- `src/providers/business-provider.tsx`: Multi-tenant context management.
+- `supabase/migrations/`: RLS & Schema source of truth.

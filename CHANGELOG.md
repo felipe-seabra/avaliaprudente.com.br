@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.3] - 2026-05-17
+
+### Added
+
+- **AI Governance Structure:** Established a dedicated framework for AI-assisted development, including specific rules for Architecture, Backend, Frontend, Database, and Security.
+- **Architectural Decision Records (ADRs):** Documented core project decisions (Multi-tenant RLS, Auth SSR, Verification Flow, Clean Architecture).
+- **Development Workflows:** Standardized workflows for Features, Debugging, Code Review, and Releases.
+- **Security & Safety Hardening:** Created a "Protected Areas" guide and a specialized "Review Checklist" to prevent regressions in critical modules.
+- **Improved Project Memory:** Refined documentation for AI agents, making it more concise and technical.
+
 ## [0.2.2] - 2026-05-17
 
 ### Added
