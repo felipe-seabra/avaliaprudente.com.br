@@ -43,7 +43,6 @@ export class VerificationRepository {
     const { data: { user } } = await this.supabase.auth.getUser()
     if (!user) throw new Error('User not authenticated')
 
-    // Check for pending requests
     const { data: existing, error: fetchError } = await this.supabase
       .from('verification_requests')
       .select('id')
@@ -74,8 +73,8 @@ export class VerificationRepository {
       .from('verification_requests')
       .select(`
         *,
-        businesses!business_id (name, slug),
-        profiles!user_id (full_name, email)
+        businesses!verification_requests_business_id_fkey (name, slug),
+        profiles!verification_requests_user_id_fkey (full_name, email)
       `)
       .order('created_at', { ascending: false })
 
@@ -90,7 +89,6 @@ export class VerificationRepository {
     const { data: { user } } = await this.supabase.auth.getUser()
     if (!user) throw new Error('User not authenticated')
 
-    // 1. Get business_id from request
     const { data: request, error: fetchError } = await this.supabase
       .from('verification_requests')
       .select('business_id')
@@ -99,7 +97,6 @@ export class VerificationRepository {
 
     if (fetchError) throw fetchError
 
-    // 2. Update request status
     const { error: updateRequestError } = await this.supabase
       .from('verification_requests')
       .update({
@@ -112,7 +109,6 @@ export class VerificationRepository {
 
     if (updateRequestError) throw updateRequestError
 
-    // 3. Update business status
     const { error: updateBusinessError } = await this.supabase
       .from('businesses')
       .update({
@@ -130,7 +126,6 @@ export class VerificationRepository {
     const { data: { user } } = await this.supabase.auth.getUser()
     if (!user) throw new Error('User not authenticated')
 
-    // 1. Get business_id from request
     const { data: request, error: fetchError } = await this.supabase
       .from('verification_requests')
       .select('business_id')
@@ -139,7 +134,6 @@ export class VerificationRepository {
 
     if (fetchError) throw fetchError
 
-    // 2. Update request status
     const { error: updateRequestError } = await this.supabase
       .from('verification_requests')
       .update({
@@ -152,7 +146,6 @@ export class VerificationRepository {
 
     if (updateRequestError) throw updateRequestError
 
-    // 3. Update business verification_status to rejected (optional, but consistent)
     await this.supabase
       .from('businesses')
       .update({ 

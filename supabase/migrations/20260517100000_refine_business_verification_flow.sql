@@ -2,7 +2,7 @@
 
 -- Update the sync_business_verification trigger function to handle initial state based on creator role
 create or replace function public.handle_business_verification_initial_state()
-returns trigger as 20622
+returns trigger as $$
 declare
   is_admin boolean;
 begin
@@ -29,7 +29,7 @@ begin
 
   return new;
 end;
-20622 language plpgsql security definer;
+$$ language plpgsql security definer;
 
 -- Create the trigger for INSERT only to handle initial state
 drop trigger if exists handle_verification_initial_state on public.businesses;
@@ -39,7 +39,7 @@ create trigger handle_verification_initial_state
 
 -- Update sync_business_verification to be more robust
 create or replace function public.sync_business_verification()
-returns trigger as 20622
+returns trigger as $$
 begin
   -- If status changed to verified
   if new.verification_status = 'verified' and (old.verification_status is null or old.verification_status != 'verified') then
@@ -61,4 +61,4 @@ begin
 
   return new;
 end;
-20622 language plpgsql security definer;
+$$ language plpgsql security definer;

@@ -24,8 +24,6 @@ export class AdminRepository {
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-      // Fetch metrics individually to avoid Promise.all failure on single query error
-      // Also allows better debugging
       const customersRes = await this.supabase.from('profiles').select('*', { count: 'exact', head: true })
       const businessesRes = await this.supabase.from('businesses').select('*', { count: 'exact', head: true })
       const verifiedRes = await this.supabase.from('businesses').select('*', { count: 'exact', head: true }).eq('is_verified', true)
@@ -34,14 +32,13 @@ export class AdminRepository {
       const scansRes = await this.supabase.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'nfc_scan')
       const newBusinessesRes = await this.supabase.from('businesses').select('*', { count: 'exact', head: true }).gte('created_at', thirtyDaysAgo.toISOString())
 
-      // Log errors if any but don't crash
       if (customersRes.error) console.error('AdminRepo: Error fetching customers count', customersRes.error)
       if (businessesRes.error) console.error('AdminRepo: Error fetching businesses count', businessesRes.error)
       if (reviewsRes.error) console.error('AdminRepo: Error fetching reviews', reviewsRes.error)
 
-      const reviewList = reviewsRes.data || []
+      const reviewList = (reviewsRes.data || []) as { rating: number }[]
       const averageRating = reviewList.length > 0 
-        ? reviewList.reduce((acc, r) => acc + r.rating, 0) / reviewList.length 
+        ? reviewList.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) / reviewList.length 
         : 0
 
       return {
@@ -64,16 +61,15 @@ export class AdminRepository {
   }
 
   async getAllBusinesses() {
-    // Using column names as hints is more reliable than FK names in PostgREST
     const { data, error } = await this.supabase
       .from('businesses')
       .select(`
         *,
-        profiles!owner_id (
+        profiles!businesses_owner_id_fkey (
           full_name,
           email
         ),
-        verifier:profiles!verified_by (
+        verifier:profiles!businesses_verified_by_fkey (
           full_name
         )
       `)
@@ -81,7 +77,6 @@ export class AdminRepository {
 
     if (error) {
       console.error('AdminRepo: getAllBusinesses error', error)
-      // Fallback without profiles join if it still fails
       const { data: fallbackData, error: fallbackError } = await this.supabase
         .from('businesses')
         .select('*')
@@ -102,7 +97,6 @@ export class AdminRepository {
 
       if (error) {
         console.error('AdminRepo: getAllCustomers error', error)
-        // Fallback to updated_at if created_at doesn't exist yet
         const { data: fallbackData, error: fallbackError } = await this.supabase
           .from('profiles')
           .select('*')
@@ -136,8 +130,6 @@ export class AdminRepository {
       return []
     }
   }
-
-  // --- Moderation Methods ---
 
   async blockUser(userId: string, reason: string = 'Violou os termos de uso') {
     const { error } = await this.supabase
@@ -175,8 +167,6 @@ export class AdminRepository {
 
     if (error) throw error
   }
-
-  // --- Verification Methods ---
 
   async verifyBusiness(businessId: string) {
     const { data: { user } } = await this.supabase.auth.getUser()

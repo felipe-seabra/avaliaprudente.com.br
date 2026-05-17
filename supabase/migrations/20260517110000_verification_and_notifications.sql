@@ -51,7 +51,7 @@ create policy "Admins can create notifications for anyone"
 
 -- 3. Trigger to notify admins on new verification request
 create or replace function public.notify_admin_on_verification_request()
-returns trigger as 21356
+returns trigger as $$
 declare
   admin_id uuid;
   biz_name text;
@@ -66,7 +66,7 @@ begin
   
   return new;
 end;
-21356 language plpgsql security definer;
+$$ language plpgsql security definer;
 
 create trigger on_verification_request_created
   after insert on public.verification_requests
@@ -74,7 +74,7 @@ create trigger on_verification_request_created
 
 -- 4. Trigger to notify user on verification status change
 create or replace function public.notify_user_on_verification_status_change()
-returns trigger as 21356
+returns trigger as $$
 begin
   if (new.status = 'approved') then
     insert into public.notifications (user_id, title, message, type)
@@ -86,7 +86,7 @@ begin
   
   return new;
 end;
-21356 language plpgsql security definer;
+$$ language plpgsql security definer;
 
 create trigger on_verification_request_updated
   after update on public.verification_requests
