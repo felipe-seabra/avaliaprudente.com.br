@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2026-05-17
+
+### Added
+
+- **Project Memory System:** Initialized a comprehensive documentation system to preserve architectural context and business rules.
+- **Generated Documentation:** Added `docs/generated/project-memory.md`, `system-map.md`, and `git-summary.md` for high-level overview.
+- **State Documentation:** Created `docs/current-state/implemented-features.md`, `known-bugs.md`, and `technical-debt.md` to track technical health.
+
 ## [0.2.1] - 2026-05-17
 
 ### Added
