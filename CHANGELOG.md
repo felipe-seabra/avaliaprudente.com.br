@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 2026-05-17
+
+### Added
+
+- **Core Verification Schema:** Stabilized the database layer by adding missing fields (`is_verified`, `verification_status`, `verified_at`, `verified_by`) to the `businesses` table.
+- **Verification Requests Table:** Implemented the `verification_requests` table to track formal trust seal applications.
+- **Admin Auto-Verification:** New database trigger that automatically verifies businesses created by administrators.
+- **Direct Admin Controls:** Added instant "Verify Now" and "Remove Verification" buttons in the Dashboard Page Editor for admin users.
+
+### Fixed
+
+- **Schema Stabilization:** Resolved issues where frontend components were attempting to access non-existent database fields.
+- **Status Consistency:** Standardized `verification_status` across the entire application, using `'approved'` instead of the invalid `'verified'` value to comply with database constraints.
+
+### Security
+
+- **Database Hardening:** Implemented strict RLS policies for the new `verification_requests` table, ensuring users can only see their own requests while admins maintain full control.
+
 ## [Unreleased]
 
 ### Added

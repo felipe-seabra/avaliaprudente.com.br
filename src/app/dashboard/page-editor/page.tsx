@@ -82,7 +82,7 @@ export default function PageEditor() {
           .select('role')
           .eq('id', user.id)
           .single()
-        if (profile) setUserRole(profile.role)
+        if (profile) setUserRole(profile.role as 'admin' | 'customer')
       }
     }
     getRole()
