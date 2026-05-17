@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.5] - 2026-05-17
+
+### Added
+- **Portable Intelligence Layer (`GPT.md`):** Created a centralized, LLM-optimized context document for fast onboarding in new AI sessions, summarizing architecture, governance, debt, and critical business rules in a single file.
+
 ## [0.2.4] - 2026-05-17
 
 ### Changed
