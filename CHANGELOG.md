@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.6] - 2026-05-17
+
+### Changed
+- **Unified Multi-AI Governance:** Consolidated the entire AI operational architecture into the `docs/ai/` directory.
+- **Centralized Documentation:** Created `docs/ai/shared-context.md` as the universal rulebook for all AI agents. Optimized and relocated `GEMINI.md`, `GPT.md`, and added a new `CODEX.md` specifically for IDE execution.
+- **AI Workflows:** Moved scattered rules and workflows (`rules/`, `workflows/`, `review/`) into `docs/ai/` to prevent fragmentation.
+- **AI Tooling:** Added `docs/ai/onboarding/flows.md` and `docs/ai/prompts/library.md` for consistent and safe session startups across different models.
+
 ## [0.2.5] - 2026-05-17
 
 ### Added
