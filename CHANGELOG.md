@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 ## [0.2.7] - 2026-05-18
 
 ### Added
+- **Moderation System (Phase 2):** Implemented account suspensions and business freezing.
+  - **Account Suspension:** Admins can now suspend users for specific periods (3 to 90 days), blocking dashboard and admin access.
+  - **Business Freezing:** Introduced the ability to freeze businesses, preventing all management and new reviews while maintaining public visibility.
+  - **Automated Escalation:** System now suggests escalation to suspension for users with 2+ active warnings.
+  - **Real-time Notifications:** Automated alerts for account suspension and reactivation.
+  - **Middleware Protection:** Hardened application boundaries to redirect suspended users to a dedicated informational page.
+  - **RLS Hardening:** Updated database policies to strictly prevent data mutations from suspended accounts or within frozen businesses.
 - **Moderation System (Phase 1):** Implemented the foundation for progressive moderation.
   - **Audit Log:** Created `moderation_actions` table to track all administrative actions.
   - **Warning Infrastructure:** Admins can now send formal warnings to users with mandatory justifications.
@@ -158,7 +165,7 @@ All notable changes to this project will be documented in this file.
 - Image Optimization: Configured remote patterns and optimized loading for production assets.
 - Deployment Documentation: Created `docs/DEPLOYMENT.md` with checklists, backup, and rollback strategies.
 - Supabase Cloud Migration: Transitioned database, authentication, and storage from local Docker to Supabase Cloud infrastructure.
-- Migrations Validation: Ensured all local migrations are compatible with production schema via `npx supabase db push`.
+- Migrations Validation: Ensure all local migrations are compatible with production schema via `npx supabase db push`.
 - Environment Hardening: Validated environment variable separation and publishable key support.
 - Legal & Compliance: Added LGPD-compliant Privacy Policy (`/privacy`) and Terms of Use (`/terms`).
 - Business Branding: Implemented logo uploads via Supabase Storage with secure RLS policies and `ImageUpload` UI.

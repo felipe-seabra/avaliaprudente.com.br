@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck } from 'lucide-react'
+import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck, RotateCcw, Clock } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -16,13 +16,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ModerationWarningDialog } from '@/components/admin/moderation-warning-dialog'
+import { ModerationSuspensionDialog } from '@/components/admin/moderation-suspension-dialog'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 
-// Extend Profile entity with moderation fields for Phase 1
+// Extend Profile entity with moderation fields
 interface ModeratedProfile extends Profile {
   warning_count: number
-  account_status: 'active' | 'warned'
+  account_status: 'active' | 'warned' | 'suspended'
+  suspended_until: string | null
 }
 
 export default function AdminCustomersPage() {
@@ -31,8 +33,9 @@ export default function AdminCustomersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [currentAdminId, setCurrentAdminId] = useState<string | null>(null)
   
-  // Warning Dialog State
+  // Dialogs State
   const [isWarningDialogOpen, setIsWarningDialogOpen] = useState(false)
+  const [isSuspensionDialogOpen, setIsSuspensionDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<{ id: string, name: string } | null>(null)
   
   const [repo] = useState(() => new AdminRepository())
@@ -81,6 +84,18 @@ export default function AdminCustomersPage() {
     }
   }
 
+  const handleReactivateAccount = async (id: string) => {
+    if (!confirm('Deseja reativar esta conta agora?')) return
+    try {
+      await repo.reactivateUser(id)
+      toast.success('Conta reativada com sucesso.')
+      loadCustomers()
+    } catch (error) {
+      console.error('Error reactivating user', error)
+      toast.error('Erro ao reativar conta.')
+    }
+  }
+
   const handleSetRole = async (id: string, role: 'admin' | 'customer') => {
     if (!confirm(`Deseja alterar a função deste usuário para ${role}?`)) return
     try {
@@ -96,6 +111,11 @@ export default function AdminCustomersPage() {
   const handleOpenWarningDialog = (id: string, name: string) => {
     setSelectedUser({ id, name })
     setIsWarningDialogOpen(true)
+  }
+
+  const handleOpenSuspensionDialog = (id: string, name: string) => {
+    setSelectedUser({ id, name })
+    setIsSuspensionDialogOpen(true)
   }
 
   const formatDate = (dateStr: string | null | undefined) => {
@@ -159,7 +179,7 @@ export default function AdminCustomersPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredCustomers.map((customer) => (
-                    <TableRow key={customer.id} className={customer.is_blocked ? 'bg-destructive/5' : ''}>
+                    <TableRow key={customer.id} className={customer.is_blocked || customer.account_status === 'suspended' ? 'bg-destructive/5' : ''}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
@@ -175,6 +195,11 @@ export default function AdminCustomersPage() {
                              {customer.is_blocked && (
                                <span className="text-[10px] text-destructive font-bold uppercase flex items-center gap-1">
                                  <Ban className="h-3 w-3" /> Bloqueado
+                               </span>
+                             )}
+                             {customer.account_status === 'suspended' && (
+                               <span className="text-[10px] text-destructive font-bold uppercase flex items-center gap-1">
+                                 <Clock className="h-3 w-3" /> Suspenso até {formatDate(customer.suspended_until)}
                                </span>
                              )}
                            </div>
@@ -203,8 +228,12 @@ export default function AdminCustomersPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1 items-start">
-                          {customer.account_status === 'warned' ? (
-                            <Badge variant="warning" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 text-[10px] uppercase font-bold gap-1">
+                          {customer.account_status === 'suspended' ? (
+                            <Badge variant="destructive" className="text-[10px] uppercase font-bold gap-1">
+                               <ShieldAlert className="h-2.5 w-2.5" /> Suspenso
+                            </Badge>
+                          ) : customer.account_status === 'warned' ? (
+                            <Badge variant="warning" className="text-[10px] uppercase font-bold gap-1">
                                <AlertTriangle className="h-2.5 w-2.5" /> Avisado
                             </Badge>
                           ) : (
@@ -213,9 +242,14 @@ export default function AdminCustomersPage() {
                             </Badge>
                           )}
                           {customer.warning_count > 0 && (
-                            <span className="text-[10px] font-bold text-muted-foreground px-1">
-                               {customer.warning_count} {customer.warning_count === 1 ? 'aviso' : 'avisos'}
-                            </span>
+                            <div className="flex items-center gap-1">
+                               <span className="text-[10px] font-bold text-muted-foreground px-1">
+                                  {customer.warning_count} {customer.warning_count === 1 ? 'aviso' : 'avisos'}
+                               </span>
+                               {customer.warning_count >= 2 && customer.account_status !== 'suspended' && (
+                                 <span className="text-[8px] bg-red-500 text-white px-1 rounded font-black animate-pulse">ESCALAR</span>
+                               )}
+                            </div>
                           )}
                         </div>
                       </TableCell>
@@ -233,27 +267,43 @@ export default function AdminCustomersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Moderação</DropdownMenuLabel>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => navigator.clipboard.writeText(customer.id)}>
-                              Copiar ID
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
                             
-                            {/* Send Warning Action - Phase 1 */}
+                            {/* Send Warning Action */}
                             <DropdownMenuItem 
                               className="cursor-pointer text-yellow-600 font-medium" 
                               onClick={() => handleOpenWarningDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
-                              disabled={customer.id === currentAdminId}
+                              disabled={customer.id === currentAdminId || customer.account_status === 'suspended'}
                             >
                               <AlertTriangle className="h-4 w-4 mr-2" />
                               Enviar Aviso
                             </DropdownMenuItem>
+
+                            {/* Suspend Action - Phase 2 */}
+                            {customer.account_status !== 'suspended' ? (
+                               <DropdownMenuItem 
+                                  className="cursor-pointer text-destructive font-bold" 
+                                  onClick={() => handleOpenSuspensionDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
+                                  disabled={customer.id === currentAdminId}
+                               >
+                                  <ShieldAlert className="h-4 w-4 mr-2" />
+                                  Suspender Conta
+                               </DropdownMenuItem>
+                            ) : (
+                               <DropdownMenuItem 
+                                  className="cursor-pointer text-green-600 font-bold" 
+                                  onClick={() => handleReactivateAccount(customer.id)}
+                               >
+                                  <RotateCcw className="h-4 w-4 mr-2" />
+                                  Reativar Conta
+                               </DropdownMenuItem>
+                            )}
 
                             <DropdownMenuSeparator />
                             
                             {customer.is_blocked ? (
                               <DropdownMenuItem className="cursor-pointer text-green-600" onClick={() => handleBlockUser(customer.id, false)}>
                                 <BadgeCheck className="h-4 w-4 mr-2" />
-                                Desbloquear Usuário
+                                Desbloquear (Permanente)
                               </DropdownMenuItem>
                             ) : (
                               <DropdownMenuItem 
@@ -262,7 +312,7 @@ export default function AdminCustomersPage() {
                                 disabled={customer.id === currentAdminId}
                               >
                                 <Ban className="h-4 w-4 mr-2" />
-                                Bloquear Usuário
+                                Bloquear permanentemente
                               </DropdownMenuItem>
                             )}
 
@@ -295,15 +345,24 @@ export default function AdminCustomersPage() {
         </CardContent>
       </Card>
 
-      {/* Warning Dialog */}
+      {/* Dialogs */}
       {selectedUser && (
-        <ModerationWarningDialog
-          open={isWarningDialogOpen}
-          onOpenChange={setIsWarningDialogOpen}
-          userId={selectedUser.id}
-          userName={selectedUser.name}
-          onSuccess={loadCustomers}
-        />
+        <>
+          <ModerationWarningDialog
+            open={isWarningDialogOpen}
+            onOpenChange={setIsWarningDialogOpen}
+            userId={selectedUser.id}
+            userName={selectedUser.name}
+            onSuccess={loadCustomers}
+          />
+          <ModerationSuspensionDialog
+            open={isSuspensionDialogOpen}
+            onOpenChange={setIsSuspensionDialogOpen}
+            userId={selectedUser.id}
+            userName={selectedUser.name}
+            onSuccess={loadCustomers}
+          />
+        </>
       )}
     </div>
   )

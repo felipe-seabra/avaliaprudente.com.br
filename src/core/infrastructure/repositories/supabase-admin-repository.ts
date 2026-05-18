@@ -98,14 +98,14 @@ export class AdminRepository {
     try {
       const { data, error } = await this.supabase
         .from('profiles')
-        .select('*, warning_count, account_status')
+        .select('*, warning_count, account_status, suspended_until')
         .order('created_at', { ascending: false })
 
       if (error) {
         console.error('AdminRepo: getAllCustomers error', error)
         const { data: fallbackData, error: fallbackError } = await this.supabase
           .from('profiles')
-          .select('*, warning_count, account_status')
+          .select('*, warning_count, account_status, suspended_until')
           .order('updated_at', { ascending: false })
 
         if (fallbackError) throw fallbackError
@@ -147,6 +147,76 @@ export class AdminRepository {
         admin_user_id: user?.id,
         action_type: 'warning',
         reason: reason
+      })
+
+    if (error) throw error
+  }
+
+  async suspendUser(userId: string, reason: string, days: number = 15) {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    const suspendedUntil = new Date()
+    suspendedUntil.setDate(suspendedUntil.getDate() + days)
+
+    const { error } = await this.supabase
+      .from('moderation_actions')
+      .insert({
+        target_user_id: userId,
+        admin_user_id: user?.id,
+        action_type: 'suspension',
+        reason: reason,
+        metadata: { suspended_until: suspendedUntil.toISOString() }
+      })
+
+    if (error) throw error
+  }
+
+  async reactivateUser(userId: string, reason: string = 'Conta reativada pelo administrador') {
+    const { data: { user } } = await this.supabase.auth.getUser()
+
+    const { error } = await this.supabase
+      .from('moderation_actions')
+      .insert({
+        target_user_id: userId,
+        admin_user_id: user?.id,
+        action_type: 'reactivation',
+        reason: reason
+      })
+
+    if (error) throw error
+  }
+
+  async freezeBusiness(businessId: string, reason: string) {
+    const { data: { user } } = await this.supabase.auth.getUser()
+
+    // We first need the business owner_id to log it correctly in moderation_actions if we want audit per-user
+    // But since moderation_actions targets profiles, we'll log it for the owner
+    const { data: business } = await this.supabase.from('businesses').select('owner_id').eq('id', businessId).single()
+
+    const { error } = await this.supabase
+      .from('moderation_actions')
+      .insert({
+        target_user_id: business?.owner_id,
+        admin_user_id: user?.id,
+        action_type: 'freeze',
+        reason: reason,
+        metadata: { business_id: businessId }
+      })
+
+    if (error) throw error
+  }
+
+  async unfreezeBusiness(businessId: string) {
+    const { data: { user } } = await this.supabase.auth.getUser()
+    const { data: business } = await this.supabase.from('businesses').select('owner_id').eq('id', businessId).single()
+
+    const { error } = await this.supabase
+      .from('moderation_actions')
+      .insert({
+        target_user_id: business?.owner_id,
+        admin_user_id: user?.id,
+        action_type: 'unfreeze',
+        reason: 'Empresa liberada pelo administrador',
+        metadata: { business_id: businessId }
       })
 
     if (error) throw error

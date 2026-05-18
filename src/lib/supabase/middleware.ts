@@ -37,11 +37,13 @@ export async function updateSession(request: NextRequest) {
 
   let role = 'customer'
   let isBlocked = false
+  let accountStatus = 'active'
+  let suspendedUntil: string | null = null
 
   if (user) {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role, is_blocked')
+      .select('role, is_blocked, account_status, suspended_until')
       .eq('id', user.id)
       .single()
     
@@ -52,10 +54,12 @@ export async function updateSession(request: NextRequest) {
     if (profile) {
       role = profile.role
       isBlocked = profile.is_blocked
+      accountStatus = profile.account_status || 'active'
+      suspendedUntil = profile.suspended_until
     } else {
       console.warn('Middleware: No profile found for user', user.id)
     }
   }
 
-  return { supabaseResponse, user, role, isBlocked }
+  return { supabaseResponse, user, role, isBlocked, accountStatus, suspendedUntil }
 }

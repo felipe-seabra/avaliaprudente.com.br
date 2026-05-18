@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 })
   }
 
-  const { supabaseResponse, user, role, isBlocked } = await updateSession(request)
+  const { supabaseResponse, user, role, isBlocked, accountStatus, suspendedUntil } = await updateSession(request)
 
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||
@@ -43,13 +43,20 @@ export async function middleware(request: NextRequest) {
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin')
   const isBlockedPage = request.nextUrl.pathname.startsWith('/blocked')
 
+  // 1. Permanent Block check
   if (user && isBlocked && !isBlockedPage) {
-    // If blocked user tries to access anything other than /blocked, sign them out / redirect
-    // Redirect to blocked page
     return NextResponse.redirect(new URL('/blocked', request.url))
   }
 
-  if (user && !isBlocked && isBlockedPage) {
+  // 2. Temporary Suspension check
+  const isSuspended = accountStatus === 'suspended' && (!suspendedUntil || new Date(suspendedUntil) > new Date())
+  
+  if (user && isSuspended && (isDashboardPage || isAdminPage)) {
+    // Suspended users can only see their landing page or rankings, not the dashboard
+    return NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
+  }
+
+  if (user && !isBlocked && !isSuspended && isBlockedPage) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

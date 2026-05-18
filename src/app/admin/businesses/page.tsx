@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Building2, Search, Loader2, ExternalLink, Calendar, MoreHorizontal, ShieldCheck, Clock, XCircle } from 'lucide-react'
+import { Building2, Search, Loader2, ExternalLink, Calendar, MoreHorizontal, ShieldCheck, Clock, XCircle, Snowflake, Lock, RotateCcw } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -17,6 +17,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { ModerationFreezeDialog } from '@/components/admin/moderation-freeze-dialog'
+import { Badge } from '@/components/ui/badge'
 
 interface BusinessWithProfile extends Business {
   profiles?: {
@@ -26,15 +28,22 @@ interface BusinessWithProfile extends Business {
   verifier?: {
     full_name: string | null
   } | null
+  is_frozen: boolean
+  frozen_reason: string | null
 }
 
-type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected'
+type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected' | 'frozen'
 
 export default function AdminBusinessesPage() {
   const [businesses, setBusinesses] = useState<BusinessWithProfile[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
+  
+  // Freeze Dialog State
+  const [isFreezeDialogOpen, setIsFreezeDialogOpen] = useState(false)
+  const [selectedBusiness, setSelectedBusiness] = useState<{ id: string, name: string } | null>(null)
+  
   const [repo] = useState(() => new AdminRepository())
 
   const loadBusinesses = useCallback(async () => {
@@ -57,6 +66,8 @@ export default function AdminBusinessesPage() {
     const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.slug.toLowerCase().includes(searchTerm.toLowerCase())
     
+    if (statusFilter === 'frozen') return matchesSearch && b.is_frozen
+
     // Support both old 'verified' and new 'approved' statuses for filtering
     const status = b.verification_status as string
     const normalizedStatus = status === 'verified' ? 'approved' : status
@@ -85,6 +96,23 @@ export default function AdminBusinessesPage() {
     }
   }
 
+  const handleUnfreezeBusiness = async (id: string) => {
+    if (!confirm('Deseja descongelar esta empresa?')) return
+    try {
+      await repo.unfreezeBusiness(id)
+      toast.success('Empresa descongelada com sucesso.')
+      loadBusinesses()
+    } catch (error) {
+      console.error('Error unfreezing business', error)
+      toast.error('Erro ao descongelar empresa.')
+    }
+  }
+
+  const handleOpenFreezeDialog = (id: string, name: string) => {
+    setSelectedBusiness({ id, name })
+    setIsFreezeDialogOpen(true)
+  }
+
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-'
     try {
@@ -98,7 +126,15 @@ export default function AdminBusinessesPage() {
     }
   }
 
-  const renderStatusBadge = (status: string | undefined) => {
+  const renderStatusBadge = (status: string | undefined, isFrozen: boolean) => {
+    if (isFrozen) {
+      return (
+        <Badge variant="warning" className="bg-blue-500/10 text-blue-600 border-blue-500/20 text-[10px] uppercase font-bold gap-1">
+          <Snowflake className="h-3 w-3" /> Congelada
+        </Badge>
+      )
+    }
+
     if (status === 'verified' || status === 'approved') {
       return (
         <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-blue-600 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20 w-fit">
@@ -160,18 +196,18 @@ export default function AdminBusinessesPage() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className={cn("text-xs h-8 px-3", statusFilter === 'pending' && "bg-background shadow-sm")}
-              onClick={() => setStatusFilter('pending')}
+              className={cn("text-xs h-8 px-3", statusFilter === 'frozen' && "bg-background shadow-sm text-blue-400")}
+              onClick={() => setStatusFilter('frozen')}
             >
-              Pendentes
+              Congeladas
             </Button>
             <Button 
               variant="ghost" 
               size="sm" 
-              className={cn("text-xs h-8 px-3", statusFilter === 'rejected' && "bg-background shadow-sm text-destructive")}
-              onClick={() => setStatusFilter('rejected')}
+              className={cn("text-xs h-8 px-3", statusFilter === 'pending' && "bg-background shadow-sm")}
+              onClick={() => setStatusFilter('pending')}
             >
-              Rejeitadas
+              Pendentes
             </Button>
           </div>
         </div>
@@ -210,17 +246,20 @@ export default function AdminBusinessesPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredBusinesses.map((business) => (
-                    <TableRow key={business.id} className={business.verification_status === 'rejected' ? 'bg-destructive/5' : ''}>
+                    <TableRow key={business.id} className={business.is_frozen ? 'bg-blue-500/5' : business.verification_status === 'rejected' ? 'bg-destructive/5' : ''}>
                       <TableCell className="font-bold">
                         <div className="flex flex-col gap-1">
-                          {business.name}
+                          <div className="flex items-center gap-2">
+                             {business.name}
+                             {business.is_frozen && <Lock className="h-3 w-3 text-blue-400" />}
+                          </div>
                           <code className="text-[10px] bg-muted px-1 py-0.5 rounded text-muted-foreground w-fit">
                             /r/{business.slug}
                           </code>
                         </div>
                       </TableCell>
                       <TableCell>
-                        {renderStatusBadge(business.verification_status)}
+                        {renderStatusBadge(business.verification_status, business.is_frozen)}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
@@ -256,6 +295,19 @@ export default function AdminBusinessesPage() {
                             <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => window.open(`/r/${business.slug}`, '_blank')}>
                               <ExternalLink className="h-4 w-4" /> Ver Página Pública
                             </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel className="text-xs font-bold uppercase text-muted-foreground">Moderação</DropdownMenuLabel>
+
+                            {!business.is_frozen ? (
+                              <DropdownMenuItem className="cursor-pointer text-blue-600 font-medium" onClick={() => handleOpenFreezeDialog(business.id, business.name)}>
+                                <Snowflake className="mr-2 h-4 w-4" /> Congelar Empresa
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem className="cursor-pointer text-green-600 font-medium" onClick={() => handleUnfreezeBusiness(business.id)}>
+                                <RotateCcw className="mr-2 h-4 w-4" /> Descongelar Empresa
+                              </DropdownMenuItem>
+                            )}
 
                             <DropdownMenuSeparator />
                             <DropdownMenuLabel className="text-xs font-bold uppercase text-muted-foreground">Verificação</DropdownMenuLabel>
@@ -295,6 +347,17 @@ export default function AdminBusinessesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Freeze Dialog */}
+      {selectedBusiness && (
+        <ModerationFreezeDialog
+          open={isFreezeDialogOpen}
+          onOpenChange={setIsFreezeDialogOpen}
+          businessId={selectedBusiness.id}
+          businessName={selectedBusiness.name}
+          onSuccess={loadBusinesses}
+        />
+      )}
     </div>
   )
 }
