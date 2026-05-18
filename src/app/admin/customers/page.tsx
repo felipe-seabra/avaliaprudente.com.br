@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert } from 'lucide-react'
+import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -15,17 +15,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ModerationWarningDialog } from '@/components/admin/moderation-warning-dialog'
+import { Badge } from '@/components/ui/badge'
+import { createClient } from '@/lib/supabase/client'
+
+// Extend Profile entity with moderation fields for Phase 1
+interface ModeratedProfile extends Profile {
+  warning_count: number
+  account_status: 'active' | 'warned'
+}
 
 export default function AdminCustomersPage() {
-  const [customers, setCustomers] = useState<Profile[]>([])
+  const [customers, setCustomers] = useState<ModeratedProfile[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [currentAdminId, setCurrentAdminId] = useState<string | null>(null)
+  
+  // Warning Dialog State
+  const [isWarningDialogOpen, setIsWarningDialogOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<{ id: string, name: string } | null>(null)
+  
   const [repo] = useState(() => new AdminRepository())
 
   const loadCustomers = useCallback(async () => {
     try {
-      const data = await repo.getAllCustomers()
-      setCustomers(data as Profile[] || [])
+      const [data, { data: authData }] = await Promise.all([
+        repo.getAllCustomers(),
+        createClient().auth.getUser()
+      ])
+      
+      setCustomers(data as ModeratedProfile[] || [])
+      setCurrentAdminId(authData.user?.id || null)
     } catch (err) {
       console.error('Admin Customers: Failed to load', err)
       toast.error('Erro ao carregar clientes')
@@ -71,6 +91,11 @@ export default function AdminCustomersPage() {
       console.error('Error updating role', error)
       toast.error('Erro ao alterar a função.')
     }
+  }
+
+  const handleOpenWarningDialog = (id: string, name: string) => {
+    setSelectedUser({ id, name })
+    setIsWarningDialogOpen(true)
   }
 
   const formatDate = (dateStr: string | null | undefined) => {
@@ -127,6 +152,7 @@ export default function AdminCustomersPage() {
                     <TableHead>Usuário</TableHead>
                     <TableHead>Contato</TableHead>
                     <TableHead>Status / Função</TableHead>
+                    <TableHead>Moderação</TableHead>
                     <TableHead>Registrado em</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
@@ -140,7 +166,12 @@ export default function AdminCustomersPage() {
                              {(customer.full_name || customer.email || 'U').substring(0, 1).toUpperCase()}
                            </div>
                            <div className="flex flex-col">
-                             <span className="truncate max-w-[150px]">{customer.full_name || 'Usuário sem nome'}</span>
+                             <div className="flex items-center gap-1">
+                               <span className="truncate max-w-[150px]">{customer.full_name || 'Usuário sem nome'}</span>
+                               {customer.id === currentAdminId && (
+                                 <Badge variant="outline" className="text-[9px] h-4 px-1 text-primary border-primary/20">Você</Badge>
+                               )}
+                             </div>
                              {customer.is_blocked && (
                                <span className="text-[10px] text-destructive font-bold uppercase flex items-center gap-1">
                                  <Ban className="h-3 w-3" /> Bloqueado
@@ -170,6 +201,24 @@ export default function AdminCustomersPage() {
                           )}
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1 items-start">
+                          {customer.account_status === 'warned' ? (
+                            <Badge variant="warning" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20 text-[10px] uppercase font-bold gap-1">
+                               <AlertTriangle className="h-2.5 w-2.5" /> Avisado
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-green-500/5 text-green-600 border-green-500/10 text-[10px] uppercase font-bold gap-1">
+                               <BadgeCheck className="h-2.5 w-2.5" /> Ativo
+                            </Badge>
+                          )}
+                          {customer.warning_count > 0 && (
+                            <span className="text-[10px] font-bold text-muted-foreground px-1">
+                               {customer.warning_count} {customer.warning_count === 1 ? 'aviso' : 'avisos'}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3 w-3" />
@@ -189,12 +238,30 @@ export default function AdminCustomersPage() {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             
+                            {/* Send Warning Action - Phase 1 */}
+                            <DropdownMenuItem 
+                              className="cursor-pointer text-yellow-600 font-medium" 
+                              onClick={() => handleOpenWarningDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
+                              disabled={customer.id === currentAdminId}
+                            >
+                              <AlertTriangle className="h-4 w-4 mr-2" />
+                              Enviar Aviso
+                            </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
+                            
                             {customer.is_blocked ? (
                               <DropdownMenuItem className="cursor-pointer text-green-600" onClick={() => handleBlockUser(customer.id, false)}>
+                                <BadgeCheck className="h-4 w-4 mr-2" />
                                 Desbloquear Usuário
                               </DropdownMenuItem>
                             ) : (
-                              <DropdownMenuItem className="cursor-pointer text-destructive" onClick={() => handleBlockUser(customer.id, true)}>
+                              <DropdownMenuItem 
+                                className="cursor-pointer text-destructive" 
+                                onClick={() => handleBlockUser(customer.id, true)}
+                                disabled={customer.id === currentAdminId}
+                              >
+                                <Ban className="h-4 w-4 mr-2" />
                                 Bloquear Usuário
                               </DropdownMenuItem>
                             )}
@@ -202,11 +269,17 @@ export default function AdminCustomersPage() {
                             <DropdownMenuSeparator />
                             
                             {customer.role === 'admin' ? (
-                              <DropdownMenuItem className="cursor-pointer text-orange-600" onClick={() => handleSetRole(customer.id, 'customer')}>
+                              <DropdownMenuItem 
+                                className="cursor-pointer text-orange-600" 
+                                onClick={() => handleSetRole(customer.id, 'customer')}
+                                disabled={customer.id === currentAdminId}
+                              >
+                                <User className="h-4 w-4 mr-2" />
                                 Remover Admin
                               </DropdownMenuItem>
                             ) : (
                               <DropdownMenuItem className="cursor-pointer text-blue-600" onClick={() => handleSetRole(customer.id, 'admin')}>
+                                <ShieldAlert className="h-4 w-4 mr-2" />
                                 Promover a Admin
                               </DropdownMenuItem>
                             )}
@@ -221,6 +294,17 @@ export default function AdminCustomersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Warning Dialog */}
+      {selectedUser && (
+        <ModerationWarningDialog
+          open={isWarningDialogOpen}
+          onOpenChange={setIsWarningDialogOpen}
+          userId={selectedUser.id}
+          userName={selectedUser.name}
+          onSuccess={loadCustomers}
+        />
+      )}
     </div>
   )
 }

@@ -98,16 +98,16 @@ export class AdminRepository {
     try {
       const { data, error } = await this.supabase
         .from('profiles')
-        .select('*')
+        .select('*, warning_count, account_status')
         .order('created_at', { ascending: false })
 
       if (error) {
         console.error('AdminRepo: getAllCustomers error', error)
         const { data: fallbackData, error: fallbackError } = await this.supabase
           .from('profiles')
-          .select('*')
+          .select('*, warning_count, account_status')
           .order('updated_at', { ascending: false })
-          
+
         if (fallbackError) throw fallbackError
         return fallbackData
       }
@@ -135,6 +135,21 @@ export class AdminRepository {
       console.error('AdminRepo: getRecentActivity unexpected error', err)
       return []
     }
+  }
+
+  async warnUser(userId: string, reason: string) {
+    const { data: { user } } = await this.supabase.auth.getUser()
+
+    const { error } = await this.supabase
+      .from('moderation_actions')
+      .insert({
+        target_user_id: userId,
+        admin_user_id: user?.id,
+        action_type: 'warning',
+        reason: reason
+      })
+
+    if (error) throw error
   }
 
   async blockUser(userId: string, reason: string = 'Violou os termos de uso') {

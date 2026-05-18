@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.7] - 2026-05-18
 
+### Added
+- **Moderation System (Phase 1):** Implemented the foundation for progressive moderation.
+  - **Audit Log:** Created `moderation_actions` table to track all administrative actions.
+  - **Warning Infrastructure:** Admins can now send formal warnings to users with mandatory justifications.
+  - **Automated Workflows:** Integrated database triggers to automatically increment warning counts, update account status to `'warned'`, and dispatch real-time notifications to target users.
+  - **Admin UI:** Added "Send Warning" action to the Customers directory and integrated moderation badges (warning count, status) into the management table.
+- **Component System:** Added `warning` variants to `Badge` and `Button` components for consistent moderation UI.
+
 ### Fixed
 - **Database Stability (RLS Recursion):** Eliminated 500 Internal Server Errors in production caused by infinite recursion in RLS policies. Standardized all admin checks to use a robust `SECURITY DEFINER` function (`is_admin`).
 - **Migration Chain Stability:** Resolved a critical failure in `npx supabase db reset` by fixing a column name mismatch in the `20260517150000_core_verification_schema.sql` migration (changed `requested_by` to the standardized `user_id`).
