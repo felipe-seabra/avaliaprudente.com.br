@@ -48,19 +48,14 @@ export async function middleware(request: NextRequest) {
   const isUserBlocked = !isAdmin && isBlocked
 
   // DEBUG LOGS
-  if (isAdminPage || isDashboardPage || isBlockedPage) {
-    console.log(`Middleware [${request.nextUrl.pathname}]:`, {
-      userId: user?.id,
-      role,
-      isAdmin,
-      isUserBlocked,
-      isSuspended
-    })
+  if (isAdminPage || isDashboardPage || isBlockedPage || isAuthPage) {
+    console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}`)
   }
 
   // 1. Admin Master Bypass: If admin is logged in, they bypass all moderation blocks
   if (user && isAdmin) {
     if (isAuthPage) {
+      console.log('Middleware: Admin at Auth Page -> Redirecting to /admin/dashboard')
       return NextResponse.redirect(new URL('/admin/dashboard', request.url))
     }
     // Allow admin to access anything (dashboard or admin panel)
@@ -69,37 +64,43 @@ export async function middleware(request: NextRequest) {
 
   // 2. Permanent Block check (Regular users only)
   if (user && isUserBlocked && !isBlockedPage) {
+    console.log('Middleware: Blocked User -> Redirecting to /blocked')
     return NextResponse.redirect(new URL('/blocked', request.url))
   }
 
   // 3. Temporary Suspension check (Regular users only)
   if (user && isSuspended && (isDashboardPage || isAdminPage)) {
+    console.log('Middleware: Suspended User -> Redirecting to /blocked?type=suspended')
     return NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
   }
 
   // 4. Redirect away from /blocked if not actually blocked
   if (user && !isUserBlocked && !isSuspended && isBlockedPage) {
+    console.log('Middleware: Not Blocked User at /blocked -> Redirecting to /dashboard')
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   // 5. Redirect logged in users away from auth pages
   if (user && isAuthPage) {
+    console.log('Middleware: Logged in User at Auth Page -> Redirecting to /dashboard')
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   // 6. Protect dashboard
   if (!user && isDashboardPage) {
+    console.log('Middleware: Anonymous User at Dashboard -> Redirecting to /login')
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // 7. Protect admin routes (Double check for security)
   if (isAdminPage) {
     if (!user) {
+      console.log('Middleware: Anonymous User at Admin Page -> Redirecting to /login')
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
     if (!isAdmin) {
-      console.warn(`Middleware: Non-admin user ${user.id} attempted to access ${request.nextUrl.pathname}`)
+      console.warn(`Middleware: Non-admin user ${user.id} attempted to access ${request.nextUrl.pathname} -> Redirecting to /dashboard`)
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }

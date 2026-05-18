@@ -41,14 +41,14 @@ export async function updateSession(request: NextRequest) {
   let suspendedUntil: string | null = null
 
   if (user) {
-    // 1. Fallback: Trust JWT metadata if present (fast path)
-    if (user.app_metadata?.role) {
-       role = user.app_metadata.role
-    } else if (user.user_metadata?.role) {
-       role = user.user_metadata.role
+    console.log(`Middleware [Session]: User ${user.id} found. Metadata role: ${user.app_metadata?.role || 'none'}`)
+    
+    // 1. Initial assignment from JWT (fast path)
+    if (user.app_metadata?.role === 'admin' || user.user_metadata?.role === 'admin') {
+       role = 'admin'
     }
 
-    // 2. Authoritative: Fetch from database
+    // 2. Authoritative check from DB (always try to refresh)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role, is_blocked, account_status, suspended_until')
@@ -56,27 +56,16 @@ export async function updateSession(request: NextRequest) {
       .single()
     
     if (profileError) {
-      console.error('Middleware Error: Failed to fetch profile', {
-        userId: user.id,
-        error: profileError,
-        code: profileError.code,
-        message: profileError.message
-      })
-      // If we couldn't fetch profile but JWT says admin, we'll keep the JWT role for bypass
-    }
-
-    if (profile) {
-      console.log('Middleware Success: Profile loaded', {
-        userId: user.id,
-        role: profile.role,
-        accountStatus: profile.account_status
-      })
+      console.error(`Middleware [DB Error]: Profile fetch failed for ${user.id}`, profileError.message)
+      // We don't overwrite 'role' here to preserve JWT fallback if DB fails
+    } else if (profile) {
+      console.log(`Middleware [DB Success]: Profile loaded for ${user.id}. Role: ${profile.role}`)
       role = profile.role
       isBlocked = profile.is_blocked
       accountStatus = profile.account_status || 'active'
       suspendedUntil = profile.suspended_until
     } else {
-      console.warn('Middleware Warning: No profile found for user', user.id)
+      console.warn(`Middleware [DB Warning]: No profile row for ${user.id}`)
     }
   }
 
