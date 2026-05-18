@@ -51,7 +51,7 @@ export async function middleware(request: NextRequest) {
   // 2. Temporary Suspension check
   const isSuspended = accountStatus === 'suspended' && (!suspendedUntil || new Date(suspendedUntil) > new Date())
   
-  if (user && isSuspended && (isDashboardPage || isAdminPage)) {
+  if (user && isSuspended && role !== 'admin' && (isDashboardPage || isAdminPage)) {
     // Suspended users can only see their landing page or rankings, not the dashboard
     return NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
   }

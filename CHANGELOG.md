@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.8] - 2026-05-18
+
+### Fixed
+- **Admin Panel Regression:** Restored full admin panel functionality after Phase 2 moderation changes.
+  - **Bypass Protections:** Admins now bypass suspension and frozen business restrictions across the entire platform.
+  - **RLS Stability:** Added missing administrative management policies for business pages, links, and QR codes.
+  - **Security Hardening:** Implemented database-level and UI-level prevents to ensure admins cannot accidentally suspend or warn their own accounts.
+  - **Middleware Logic:** Corrected route protection to ensure administrators maintain uninterrupted access to the dashboard and admin panel regardless of account status.
+
 ## [0.2.7] - 2026-05-18
 
 ### Added

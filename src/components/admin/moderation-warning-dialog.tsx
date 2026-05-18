@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { AlertTriangle, Loader2, Send } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 interface ModerationWarningDialogProps {
   open: boolean
@@ -38,6 +39,13 @@ export function ModerationWarningDialog({
   const handleSubmit = async () => {
     if (!reason.trim()) {
       toast.error('Por favor, informe o motivo do aviso.')
+      return
+    }
+
+    // Double check to prevent self-warning
+    const { data: { user } } = await createClient().auth.getUser()
+    if (user?.id === userId) {
+      toast.error('Você não pode enviar um aviso para a sua própria conta.')
       return
     }
 

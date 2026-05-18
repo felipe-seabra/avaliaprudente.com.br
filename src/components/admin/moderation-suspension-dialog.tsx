@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Ban, ShieldAlert } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 interface ModerationSuspensionDialogProps {
   open: boolean
@@ -39,6 +40,13 @@ export function ModerationSuspensionDialog({
   const handleSubmit = async () => {
     if (!reason.trim()) {
       toast.error('Por favor, informe o motivo da suspensão.')
+      return
+    }
+
+    // Double check to prevent self-suspension
+    const { data: { user } } = await createClient().auth.getUser()
+    if (user?.id === userId) {
+      toast.error('Você não pode suspender a sua própria conta.')
       return
     }
 
