@@ -40,3 +40,35 @@ Todas as alterações no esquema do banco de dados devem ser feitas via migraç�
 - **Docker não está rodando:** Certifique-se de que o Docker Desktop está ativo antes de rodar `npm run supabase:start`.
 - **Portas ocupadas:** O Supabase utiliza várias portas (54321-54330). Se houver conflito, verifique processos rodando nessas portas.
 - **Containers não iniciam:** Tente rodar `npm run supabase:stop` seguido de `npm run supabase:start`.
+
+## Manutenção e Limpeza (Docker)
+
+O ambiente local do Supabase pode consumir uma quantidade significativa de espaço em disco ao longo do tempo. Se você estiver enfrentando falta de espaço ou quiser estabilizar o ambiente Docker, siga estas recomendações:
+
+### Limpeza Preventiva
+
+Para remover recursos não utilizados do Docker sem afetar os dados importantes:
+
+```bash
+# Remove containers parados e imagens pendentes (dangling)
+docker system prune
+```
+
+### Limpeza Profunda (Deep Clean)
+
+Se você não planeja usar o ambiente local por um tempo e quer recuperar o máximo de espaço:
+
+1. Pare o Supabase: `npm run supabase:stop`
+2. Remova todos os recursos não utilizados (incluindo imagens):
+   ```bash
+   docker system prune -a --volumes
+   ```
+
+**Aviso:** O comando acima removerá imagens e volumes. Os volumes do Supabase contêm os dados do seu banco de dados local. Use com cautela se tiver dados de teste importantes que não foram salvos via `seed.sql`.
+
+### Quando usar o ambiente local?
+
+Atualmente, o projeto está configurado para usar o **Supabase remoto** por padrão no arquivo `.env.local`. O ambiente Docker local é opcional e recomendado apenas para:
+- Desenvolvimento offline.
+- Testes de migrações complexas antes de aplicar no Cloud.
+- Testes de fluxos de email via Mailpit.
