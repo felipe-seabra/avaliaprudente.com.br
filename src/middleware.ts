@@ -43,40 +43,63 @@ export async function middleware(request: NextRequest) {
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin')
   const isBlockedPage = request.nextUrl.pathname.startsWith('/blocked')
 
-  // 1. Permanent Block check
-  if (user && isBlocked && !isBlockedPage) {
+  const isAdmin = role === 'admin'
+  const isSuspended = !isAdmin && accountStatus === 'suspended' && (!suspendedUntil || new Date(suspendedUntil) > new Date())
+  const isUserBlocked = !isAdmin && isBlocked
+
+  // DEBUG LOGS
+  if (isAdminPage || isDashboardPage || isBlockedPage) {
+    console.log(`Middleware [${request.nextUrl.pathname}]:`, {
+      userId: user?.id,
+      role,
+      isAdmin,
+      isUserBlocked,
+      isSuspended
+    })
+  }
+
+  // 1. Admin Master Bypass: If admin is logged in, they bypass all moderation blocks
+  if (user && isAdmin) {
+    if (isAuthPage) {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+    }
+    // Allow admin to access anything (dashboard or admin panel)
+    return supabaseResponse
+  }
+
+  // 2. Permanent Block check (Regular users only)
+  if (user && isUserBlocked && !isBlockedPage) {
     return NextResponse.redirect(new URL('/blocked', request.url))
   }
 
-  // 2. Temporary Suspension check
-  const isSuspended = accountStatus === 'suspended' && (!suspendedUntil || new Date(suspendedUntil) > new Date())
-  
-  if (user && isSuspended && role !== 'admin' && (isDashboardPage || isAdminPage)) {
-    // Suspended users can only see their landing page or rankings, not the dashboard
+  // 3. Temporary Suspension check (Regular users only)
+  if (user && isSuspended && (isDashboardPage || isAdminPage)) {
     return NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
   }
 
-  if (user && !isBlocked && !isSuspended && isBlockedPage) {
+  // 4. Redirect away from /blocked if not actually blocked
+  if (user && !isUserBlocked && !isSuspended && isBlockedPage) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Redirect logged in users away from auth pages
+  // 5. Redirect logged in users away from auth pages
   if (user && isAuthPage) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Protect dashboard
+  // 6. Protect dashboard
   if (!user && isDashboardPage) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Protect admin routes
+  // 7. Protect admin routes (Double check for security)
   if (isAdminPage) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    if (role !== 'admin') {
+    if (!isAdmin) {
+      console.warn(`Middleware: Non-admin user ${user.id} attempted to access ${request.nextUrl.pathname}`)
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }

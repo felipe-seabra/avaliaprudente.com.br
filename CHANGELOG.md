@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.9] - 2026-05-18
+
+### Fixed
+- **Admin Routing Stability:** Resolved a critical issue where administrators were being incorrectly redirected from `/admin` to `/dashboard`.
+  - **Prioritized Bypass:** Refactored middleware to implement a "Master Bypass" for admins, ensuring they are never subjected to regular user account restrictions.
+  - **Auth Resilience:** Added JWT metadata fallback for role identification in the middleware to prevent access loss if database profile queries fail or latency occurs.
+  - **Audit Logging:** Added granular debug logging to track middleware decision-making and auth state during redirections.
+
 ## [0.2.8] - 2026-05-18
 
 ### Fixed
