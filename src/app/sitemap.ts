@@ -1,17 +1,20 @@
 import { MetadataRoute } from 'next'
 import { APP_CONFIG } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/server'
-import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
-  const businessRepo = new BusinessRepository(supabase)
   
   // Fetch all businesses to include in sitemap
   let businesses: { slug: string, updated_at: string }[] = []
   try {
-    const data = await businessRepo.getAll()
-    businesses = data.map(b => ({ slug: b.slug, updated_at: b.updated_at }))
+    const { data, error } = await supabase
+      .from('businesses')
+      .select('slug, updated_at')
+      .eq('is_frozen', false)
+    
+    if (error) throw error
+    businesses = data || []
   } catch (err) {
     console.error('Failed to fetch businesses for sitemap:', err)
   }

@@ -56,9 +56,11 @@ export function BusinessRanking() {
             logo_url,
             is_verified,
             is_featured,
+            is_frozen,
             reviews (rating, created_at),
             analytics_events (event_type, created_at)
           `)
+          .eq('is_frozen', false)
           .limit(100)
 
         if (error) throw error

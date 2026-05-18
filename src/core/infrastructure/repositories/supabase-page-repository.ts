@@ -20,7 +20,7 @@ export class BusinessPageRepository {
     return data
   }
 
-  async getBySlug(slug: string): Promise<(BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean } }) | null> {
+  async getBySlug(slug: string): Promise<(BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean, is_frozen?: boolean } }) | null> {
     // 1. Check for Virtual Demo Profile
     if (slug === 'demo' || slug === 'demonstracao') {
       const demoBusiness = {
@@ -28,7 +28,8 @@ export class BusinessPageRepository {
         name: 'Avalia Prudente Demo',
         logo_url: '/branding/logo-vertical.webp',
         slug: 'demo',
-        is_verified: true
+        is_verified: true,
+        is_frozen: false
       }
       
       return {
@@ -40,7 +41,7 @@ export class BusinessPageRepository {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         businesses: demoBusiness
-      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean } })
+      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean, is_frozen?: boolean } })
     }
 
     // 2. Resolve business by slug first (Publicly accessible)

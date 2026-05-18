@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.4] - 2026-05-18
+
+### Fixed
+- **Public Visibility Restrictions:** Resolved security issue where frozen/banned businesses were still publicly visible.
+  - **RLS Hardening:** Updated SELECT policies for `business_pages`, `reviews`, and `page_links` to filter by `is_frozen = false` for anonymous users.
+  - **Public UX:** Implemented a "Business temporarily unavailable" state for direct links to frozen businesses instead of a generic 404.
+  - **Listing Filtering:** Explicitly filtered frozen businesses from public rankings (`Elite da Cidade`, `Em Alta Now`) and the sitemap.
+  - **Admin Integrity:** Ensured administrators can still audit and manage frozen businesses via public links and the dashboard.
+
 ## [0.3.3] - 2026-05-18
 
 ### Added
