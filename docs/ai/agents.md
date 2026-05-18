@@ -4,27 +4,28 @@ This repository utilizes specialized AI modes to ensure code quality, security, 
 
 ## 1. Architect
 - **Responsibilities:** System design, structural planning, and defining abstractions.
-- **Allowed Actions:** Creating ADRs, defining domain entities, defining repository interfaces, structuring database schemas.
+- **Allowed Actions:** Creating ADRs, defining domain entities, defining repository interfaces, structuring database schemas, **designing RLS security definers**.
 - **Forbidden Actions:** Writing UI components, deep-diving into CSS, or managing local React state.
 - **Workflow:** Analyze requirements -> Read current memory -> Draft ADR -> Define Interfaces -> Update `system-map.md`.
-- **Validation Requirements:** Must comply with `docs/ai/rules/architecture-rules.md`. Ensure high scalability and low coupling.
-- **Risk Focus:** Multi-tenant data leakage, circular dependencies.
+- **Validation Requirements:** Must comply with `docs/ai/rules/architecture-rules.md`. Ensure high scalability and low coupling. **Strict check for RLS recursion.**
+- **Risk Focus:** Multi-tenant data leakage, circular dependencies, **infinite RLS loops**.
 
 ## 2. Implementer
 - **Responsibilities:** Executing feature logic and building UI based on the Architect's guidelines.
 - **Allowed Actions:** Writing application code, creating React components, building API routes, consuming hooks.
 - **Forbidden Actions:** Modifying RLS policies, rewriting core middleware, altering database schemas without an approved ADR.
 - **Workflow:** Read architecture -> Build minimal feature -> Run lint/build -> Update features list.
-- **Validation Requirements:** Must pass `npm run build` and `npm run lint`. Code must be idiomatic.
+- **Validation Requirements:** Must pass `npm run build` and `npm run lint`. Code must be idiomatic. **Verify public visibility restrictions (frozen businesses).**
 - **Risk Focus:** Code duplication, poor accessibility, performance degradation.
 
 ## 3. Debugger
 - **Responsibilities:** Investigating failures, performance bottlenecks, and regressions.
 - **Allowed Actions:** Reading logs, inspecting error traces, modifying buggy implementations.
 - **Forbidden Actions:** Refactoring unrelated code, adding new features, changing architectural patterns.
-- **Workflow:** Reproduce issue -> Identify Root Cause -> Explain Root Cause -> Implement minimal fix -> Run validation.
-- **Validation Requirements:** Verify the exact bug is fixed without breaking dependent flows. Add tests if applicable.
+- **Workflow:** Reproduce issue -> Identify Root Cause -> Explain Root Cause -> Implement minimal fix -> Run validation. **Check middleware logs for auth/moderation issues.**
+- **Validation Requirements:** Verify the exact bug is fixed without breaking dependent flows. Add tests if applicable. **Ensure Admin bypass is not broken.**
 - **Risk Focus:** Unintended regressions, masking root causes with temporary hacks.
+
 
 ## 4. Reviewer
 - **Responsibilities:** Ensuring all code meets quality, security, and architectural standards.

@@ -14,12 +14,17 @@ This document is optimized for GitHub Copilot / Codex sessions, focusing on impl
 ## 3. Refactor Safety Rules
 - **No Unrelated Changes:** Codex should NOT suggest formatting or structural changes outside the immediate lines being edited.
 - **Preserve RLS & Tenant Context:** When refactoring database queries, ensure `owner_id` filters and RLS compatibility remain intact.
+- **RLS Recursion Alert:** Avoid queries to `profiles` within RLS. Use `is_admin()`.
+- **Public Filtering:** Ensure public queries explicitly check for `is_frozen = false` where applicable.
 
 ## 4. Validation Workflow
 - Ensure IDE linters are green before committing.
 - Run `npm run build` locally to detect TS/SSR issues caused by inline suggestions.
+- **Middleware Safety:** Do not remove or simplify moderation checks in `middleware.ts`.
 
 ## 5. Protected Area Warnings
 - If editing `middleware.ts` or `supabase/migrations/`, trigger a manual review. Do not trust auto-completions that simplify security checks or remove role guards (`admin` vs `customer`).
+- **Admin Bypass:** Verify that refactored logic preserves the Admin Master Bypass.
+
 
 > **Reference:** For universal governance rules, refer to `docs/ai/shared-context.md`.

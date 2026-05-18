@@ -21,6 +21,12 @@ This document is the official entrypoint for Gemini CLI execution workflows.
 
 ## 4. Protected Areas & Architectural Constraints
 - **Database Modifiers:** Do not run arbitrary bash scripts that modify database schemas without verifying against `docs/ai/rules/database-rules.md` and `docs/ai/rules/protected-areas.md`.
-- **RLS Recursion:** NEVER write RLS policies that query `profiles` directly. ALWAYS use the `is_admin()` security definer function.
-- **Moderation Bypass:** Do not alter the auth bypass logic in `src/middleware.ts` without explicitly testing that admins can still log in and suspended users are redirected.
-- **Public Visibility:** ALWAYS filter out `is_frozen = true` items in public repository lookups and public RLS policies.
+- **RLS Recursion:** NEVER write RLS policies that query `profiles` directly. ALWAYS use the `is_admin()` security definer function to avoid infinite loops (Error 500).
+- **Moderation Bypass:** Admins (`role = 'admin'`) MUST bypass all moderation blocks. This logic is centralized in `src/middleware.ts` and the database layer.
+- **Public Visibility:** ALWAYS filter out `is_frozen = true` items in public repository lookups and public RLS policies. Custom slugs for frozen businesses must return 404 or a "Business Unavailable" state.
+- **Soft Delete Pattern:** Use `is_deleted = true` for profile deactivation. Do not delete profile rows.
+
+## 5. Essential Verification
+- After any auth/middleware change, verify that an Admin can still access `/admin/dashboard`.
+- Always run `npm run lint` and `npm run build` before finalizing a task.
+
