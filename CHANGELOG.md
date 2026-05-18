@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2026-05-19
+
+### Added
+- **Appeals & Resolution Center (Phase 3):** Empowerment and formal recourse for moderated users.
+  - **Appeals Infrastructure:** New `moderation_appeals` system allowing users to formally contest warnings, suspensions, and bans.
+  - **Automated Resolution Flow:** Implemented database triggers that automatically reverse moderation actions (reactivate accounts, unfreeze businesses) upon appeal approval.
+  - **User Recourse Flow:** Integrated appeal submission directly into the Moderation Transparency Center, with real-time status tracking and admin feedback.
+  - **Admin Management Panel:** New `/admin/appeals` dashboard for administrators to review, respond to, and resolve pending appeals with integrated resolution tools.
+  - **Unified Audit Log:** Appeals are now linked directly to their originating moderation actions for a complete transparency chain.
+
 ## [0.4.0] - 2026-05-19
 
 ### Added

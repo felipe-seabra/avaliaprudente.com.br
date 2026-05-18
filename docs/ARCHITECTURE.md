@@ -60,9 +60,10 @@ The platform uses a strict tenant isolation model based on `owner_id`.
 The platform implements a progressive moderation escalation system:
 1. **Terms of Use Acceptance:** Mandatory acceptance of platform rules during signup or upon major updates (v1.2+). Tracked via `terms_accepted_at` and `terms_version` in `profiles`. Middleware enforces re-acceptance by redirecting users with outdated versions to `/terms-reaccept`.
 2. **Transparency Center:** Users have access to `/dashboard/moderation`, a central hub showing their account status, warning count, and full audit history of moderation actions.
-3. **Moderation Visibility:** Users see their current status (warnings, suspension, ban) directly in the dashboard via a status badge that links to the Transparency Center.
-4. **Warnings:** Soft interventions tracked in `moderation_actions`. Two warnings automatically escalate to a suspension suggestion.
-5. **Suspensions (Temporary):** Blocks access to the dashboard for 3 to 90 days. Public business pages remain active. Handled by `suspended_until`. Users are redirected to `/blocked?type=suspended` with a link back to their transparency details.
+3. **Appeals System:** Moderated users can submit formal appeals via the Transparency Center. Appeals are tracked in `moderation_appeals` and can lead to automated reversal of sanctions if approved by an admin.
+4. **Moderation Visibility:** Users see their current status (warnings, suspension, ban) directly in the dashboard via a status badge that links to the Transparency Center.
+5. **Warnings:** Soft interventions tracked in `moderation_actions`. Two warnings automatically escalate to a suspension suggestion.
+6. **Suspensions (Temporary):** Blocks access to the dashboard for 3 to 90 days. Public business pages remain active. Handled by `suspended_until`. Users are redirected to `/blocked?type=suspended` with a link back to their transparency details.
 3. **Bans (Permanent):** Permanently blocks account access. Tracked via `account_status = 'banned'`. Users are redirected to `/blocked?type=banned`.
 4. **Soft Delete (Deactivation):** Marks an account as deleted (`is_deleted = true`) to disable login without destroying relational database integrity. Users are redirected to `/blocked?type=deleted`.
 5. **Business Freezing:** An isolated state where a business is removed from public visibility (`is_frozen = true`) and all custom domain slugs and review links are disabled, regardless of the owner's account status.

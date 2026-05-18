@@ -9,6 +9,7 @@ import {
   Users,
   ShieldAlert,
   ArrowLeft,
+  MessageSquare,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -47,6 +48,11 @@ const data = {
       title: 'Verificações',
       url: '/admin/verifications',
       icon: ShieldAlert,
+    },
+    {
+      title: 'Apelações',
+      url: '/admin/appeals',
+      icon: MessageSquare,
     },
     {
       title: 'Estatísticas',

@@ -7,7 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ShieldAlert, Info, AlertTriangle, CheckCircle, Ban, Clock } from 'lucide-react'
+import { ShieldAlert, Info, AlertTriangle, CheckCircle, Ban, Clock, MessageSquare, History } from 'lucide-react'
+import { AppealDialog } from '@/components/dashboard/moderation/appeal-dialog'
 
 // Helper to format dates natively
 const formatDate = (dateStr: string) => {
@@ -30,18 +31,20 @@ const formatLongDate = (dateStr: string) => {
   })
 }
 
-const formatShortDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit'
-  })
-}
-
 type ModerationMetadata = {
   suspended_until?: string
   business_id?: string
   [key: string]: unknown
+}
+
+type ModerationAppeal = {
+  id: string
+  moderation_action_id: string
+  status: 'pending' | 'under_review' | 'approved' | 'rejected'
+  message: string
+  admin_response: string | null
+  created_at: string
+  reviewed_at: string | null
 }
 
 type ModerationAction = {
@@ -50,6 +53,7 @@ type ModerationAction = {
   reason: string
   created_at: string
   metadata: ModerationMetadata | null
+  appeal?: ModerationAppeal | null
 }
 
 type AccountStatusData = {
@@ -66,43 +70,50 @@ export default function ModerationCenterPage() {
   const [isLoading, setIsLoading] = useState(true)
   const supabase = createClient()
 
-  useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true)
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
+  const fetchData = React.useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-        // Fetch account status
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('account_status, warning_count, suspended_until, banned_at, banned_reason')
-          .eq('id', user.id)
-          .single()
-        
-        if (profile) {
-          setStatus(profile as AccountStatusData)
-        }
-
-        // Fetch moderation actions
-        const { data: moderationActions } = await supabase
-          .from('moderation_actions')
-          .select('*')
-          .eq('target_user_id', user.id)
-          .order('created_at', { ascending: false })
-        
-        if (moderationActions) {
-          setActions(moderationActions as unknown as ModerationAction[])
-        }
-      } catch (error) {
-        console.error('Error fetching moderation data:', error)
-      } finally {
-        setIsLoading(false)
+      // Fetch account status
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('account_status, warning_count, suspended_until, banned_at, banned_reason')
+        .eq('id', user.id)
+        .single()
+      
+      if (profile) {
+        setStatus(profile as AccountStatusData)
       }
-    }
 
-    fetchData()
+      // Fetch moderation actions with their appeals
+      const { data: moderationActions } = await supabase
+        .from('moderation_actions')
+        .select(`
+          *,
+          appeal:moderation_appeals(*)
+        `)
+        .eq('target_user_id', user.id)
+        .order('created_at', { ascending: false })
+      
+      if (moderationActions) {
+        const normalized = (moderationActions as unknown as ModerationAction[]).map((action) => ({
+          ...action,
+          appeal: Array.isArray(action.appeal) ? (action.appeal[0] as unknown as ModerationAppeal) : (action.appeal as unknown as ModerationAppeal)
+        }))
+        setActions(normalized as ModerationAction[])
+      }
+    } catch (error) {
+      console.error('Error fetching moderation data:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }, [supabase])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -131,6 +142,21 @@ export default function ModerationCenterPage() {
         return <Badge variant="outline" className="text-emerald-500 border-emerald-500/50">Reativação</Badge>
       default:
         return <Badge variant="outline">{type}</Badge>
+    }
+  }
+
+  const getAppealStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="text-muted-foreground border-muted-foreground/50">Pendente</Badge>
+      case 'under_review':
+        return <Badge variant="outline" className="text-blue-500 border-blue-500/50">Em Revisão</Badge>
+      case 'approved':
+        return <Badge variant="outline" className="text-emerald-500 border-emerald-500/50">Aprovada</Badge>
+      case 'rejected':
+        return <Badge variant="outline" className="text-destructive border-destructive/50">Rejeitada</Badge>
+      default:
+        return <Badge variant="outline">{status}</Badge>
     }
   }
 
@@ -226,9 +252,12 @@ export default function ModerationCenterPage() {
       )}
 
       <Card>
-        <CardHeader>
-          <CardTitle>Histórico de Moderação</CardTitle>
-          <CardDescription>Todas as ações tomadas em relação à sua conta.</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>Histórico de Moderação</CardTitle>
+            <CardDescription>Todas as ações tomadas em relação à sua conta.</CardDescription>
+          </div>
+          <History className="h-5 w-5 text-muted-foreground opacity-50" />
         </CardHeader>
         <CardContent>
           {actions.length > 0 ? (
@@ -238,31 +267,64 @@ export default function ModerationCenterPage() {
                   <TableHead>Data</TableHead>
                   <TableHead>Ação</TableHead>
                   <TableHead>Motivo</TableHead>
-                  <TableHead>Detalhes</TableHead>
+                  <TableHead>Status/Apelação</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {actions.map((action) => (
-                  <TableRow key={action.id}>
-                    <TableCell className="text-xs">
-                      {formatDate(action.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      {getActionTypeBadge(action.action_type)}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {action.reason}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {action.action_type === 'suspension' && action.metadata?.suspended_until && (
-                        <span>Suspensão até {formatShortDate(action.metadata.suspended_until)}</span>
-                      )}
-                      {action.action_type === 'freeze' && action.metadata?.business_id && (
-                        <span>Empresa congelada</span>
-                      )}
-                      {!action.metadata && '-'}
-                    </TableCell>
-                  </TableRow>
+                  <React.Fragment key={action.id}>
+                    <TableRow className={action.appeal ? 'border-b-0 bg-muted/5' : ''}>
+                      <TableCell className="text-xs">
+                        {formatDate(action.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        {getActionTypeBadge(action.action_type)}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {action.reason}
+                      </TableCell>
+                      <TableCell>
+                        {action.appeal ? (
+                          <div className="flex flex-col gap-1">
+                            {getAppealStatusBadge(action.appeal.status)}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">Sem apelação</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {!action.appeal && ['warning', 'suspension', 'ban'].includes(action.action_type) && (
+                          <AppealDialog 
+                            actionId={action.id} 
+                            actionType={action.action_type} 
+                            reason={action.reason}
+                            onSuccess={fetchData}
+                          />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                    {action.appeal && (
+                      <TableRow className="bg-muted/5 border-t-0">
+                        <TableCell colSpan={5} className="pt-0 pb-4">
+                          <div className="ml-8 p-3 rounded-lg bg-background border border-muted-foreground/10 text-xs space-y-2">
+                            <div className="flex items-center gap-2 text-primary font-bold">
+                              <MessageSquare className="h-3 w-3" /> Sua justificativa:
+                            </div>
+                            <p className="text-muted-foreground italic">&quot;{action.appeal.message}&quot;</p>
+                            {action.appeal.admin_response && (
+                              <div className="pt-2 border-t border-muted-foreground/5">
+                                <p className="font-bold flex items-center gap-2 mb-1">
+                                  <ShieldAlert className="h-3 w-3 text-emerald-500" /> Resposta da Moderação:
+                                </p>
+                                <p className="text-foreground">{action.appeal.admin_response}</p>
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
                 ))}
               </TableBody>
             </Table>
