@@ -20,6 +20,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
+  const [hasError, setHasError] = useState(false)
   const [repo] = useState(() => new NotificationRepository())
   const router = useRouter()
 
@@ -31,30 +32,44 @@ export function NotificationBell() {
       ])
       setNotifications(all)
       setUnreadCount(unread)
-    } catch (err) {
+      setHasError(false)
+    } catch (err: unknown) {
       console.error('Failed to load notifications', err)
+      // If table is missing (404/PGRST205), we mark as error to hide the bell or show empty
+      const error = err as { code?: string; status?: number };
+      if (error?.code === 'PGRST205' || error?.status === 404) {
+        setHasError(true)
+      }
     }
   }, [repo])
 
   useEffect(() => {
     loadNotifications()
 
-    const channel = repo.subscribe((newNotif: Notification) => {
-      setNotifications(prev => [newNotif, ...prev])
-      setUnreadCount(prev => prev + 1)
-      toast.info(newNotif.title, {
-        description: newNotif.message,
-        action: newNotif.action_url ? {
-          label: 'Ver',
-          onClick: () => router.push(newNotif.action_url!)
-        } : undefined
+    let channel: { unsubscribe: () => void } | null = null;
+    
+    try {
+      channel = repo.subscribe((newNotif: Notification) => {
+        setNotifications(prev => [newNotif, ...prev])
+        setUnreadCount(prev => prev + 1)
+        toast.info(newNotif.title, {
+          description: newNotif.message,
+          action: newNotif.action_url ? {
+            label: 'Ver',
+            onClick: () => router.push(newNotif.action_url!)
+          } : undefined
+        })
       })
-    })
+    } catch (err) {
+      console.error('Failed to subscribe to notifications', err)
+    }
 
     return () => {
-      channel.unsubscribe()
+      if (channel) channel.unsubscribe()
     }
   }, [loadNotifications, router, repo])
+
+  if (hasError) return null
 
   const handleMarkAsRead = async (id: string) => {
     try {
