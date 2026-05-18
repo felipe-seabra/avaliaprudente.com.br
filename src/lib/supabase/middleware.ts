@@ -37,6 +37,7 @@ export async function updateSession(request: NextRequest) {
 
   let role = 'customer'
   let isBlocked = false
+  let isDeleted = false
   let accountStatus = 'active'
   let suspendedUntil: string | null = null
 
@@ -51,7 +52,7 @@ export async function updateSession(request: NextRequest) {
     // 2. Authoritative check from DB (always try to refresh)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role, is_blocked, account_status, suspended_until')
+      .select('role, is_blocked, is_deleted, account_status, suspended_until')
       .eq('id', user.id)
       .single()
     
@@ -62,6 +63,7 @@ export async function updateSession(request: NextRequest) {
       console.log(`Middleware [DB Success]: Profile loaded for ${user.id}. Role: ${profile.role}`)
       role = profile.role
       isBlocked = profile.is_blocked
+      isDeleted = profile.is_deleted
       accountStatus = profile.account_status || 'active'
       suspendedUntil = profile.suspended_until
     } else {
@@ -69,5 +71,5 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  return { supabaseResponse, user, role, isBlocked, accountStatus, suspendedUntil }
+  return { supabaseResponse, user, role, isBlocked, isDeleted, accountStatus, suspendedUntil }
 }

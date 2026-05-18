@@ -185,6 +185,21 @@ export class AdminRepository {
     if (error) throw error
   }
 
+  async deactivateUser(userId: string, reason: string) {
+    const { data: { user } } = await this.supabase.auth.getUser()
+
+    const { error } = await this.supabase
+      .from('moderation_actions')
+      .insert({
+        target_user_id: userId,
+        admin_user_id: user?.id,
+        action_type: 'deactivation',
+        reason: reason
+      })
+
+    if (error) throw error
+  }
+
   async reactivateUser(userId: string, reason: string = 'Conta reativada pelo administrador') {
     const { data: { user } } = await this.supabase.auth.getUser()
 

@@ -218,6 +218,8 @@ export type Database = {
           warning_count: number
           banned_at: string | null
           banned_reason: string | null
+          is_deleted: boolean
+          deleted_at: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -238,6 +240,8 @@ export type Database = {
           warning_count?: number
           banned_at?: string | null
           banned_reason?: string | null
+          is_deleted?: boolean
+          deleted_at?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -258,6 +262,8 @@ export type Database = {
           warning_count?: number
           banned_at?: string | null
           banned_reason?: string | null
+          is_deleted?: boolean
+          deleted_at?: string | null
         }
         Relationships: []
       }

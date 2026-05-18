@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 })
   }
 
-  const { supabaseResponse, user, role, isBlocked, accountStatus, suspendedUntil } = await updateSession(request)
+  const { supabaseResponse, user, role, isBlocked, isDeleted, accountStatus, suspendedUntil } = await updateSession(request)
 
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||
@@ -46,11 +46,12 @@ export async function middleware(request: NextRequest) {
   const isAdmin = role === 'admin'
   const isSuspended = !isAdmin && accountStatus === 'suspended' && (!suspendedUntil || new Date(suspendedUntil) > new Date())
   const isBanned = !isAdmin && accountStatus === 'banned'
-  const isUserBlocked = !isAdmin && (isBlocked || isBanned)
+  const isUserDeleted = !isAdmin && isDeleted
+  const isUserBlocked = !isAdmin && (isBlocked || isBanned || isUserDeleted)
 
   // DEBUG LOGS
   if (isAdminPage || isDashboardPage || isBlockedPage || isAuthPage) {
-    console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}, Status: ${accountStatus}`)
+    console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}, Status: ${accountStatus}, Deleted: ${isDeleted}`)
   }
 
   // 1. Admin Master Bypass: If admin is logged in, they bypass all moderation blocks
@@ -63,11 +64,11 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // 2. Permanent Block / Ban check (Regular users only)
+  // 2. Permanent Block / Ban / Deactivation check (Regular users only)
   if (user && isUserBlocked && !isBlockedPage) {
-    const type = isBanned ? 'banned' : 'blocked'
-    console.log(`Middleware: Blocked/Banned User (${type}) -> Redirecting to /blocked`)
-    return NextResponse.redirect(new URL(`/blocked${isBanned ? '?type=banned' : ''}`, request.url))
+    const type = isUserDeleted ? 'deleted' : (isBanned ? 'banned' : 'blocked')
+    console.log(`Middleware: Blocked/Banned/Deleted User (${type}) -> Redirecting to /blocked`)
+    return NextResponse.redirect(new URL(`/blocked${type !== 'blocked' ? `?type=${type}` : ''}`, request.url))
   }
 
   // 3. Temporary Suspension check (Regular users only)

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.3] - 2026-05-18
+
+### Added
+- **Moderation System Phase 4 (Safe Deactivation & Soft Delete):** Introduced support for safe account deactivation without data loss.
+  - **Soft Delete Implementation:** Added `is_deleted` and `deleted_at` fields to profiles to allow account closure while preserving referential integrity and audit trails.
+  - **Safe Escalation:** Updated moderation triggers to automatically freeze businesses when an account is deactivated.
+  - **Middleware Protection:** Enhanced auth middleware to block access for deactivated accounts with specific redirection to `/blocked?type=deleted`.
+  - **Admin UX:** New `ModerationDeactivationDialog` and integrated "Deactivate Account" action in the customer directory.
+  - **Anonymization Ready:** Architecture now supports future anonymization of public data for deactivated users.
+
 ## [0.3.2] - 2026-05-18
 
 ### Added

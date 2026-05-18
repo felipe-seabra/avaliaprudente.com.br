@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck, RotateCcw, Clock } from 'lucide-react'
+import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck, RotateCcw, Clock, UserX } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -18,6 +18,7 @@ import {
 import { ModerationWarningDialog } from '@/components/admin/moderation-warning-dialog'
 import { ModerationSuspensionDialog } from '@/components/admin/moderation-suspension-dialog'
 import { ModerationBanDialog } from '@/components/admin/moderation-ban-dialog'
+import { ModerationDeactivationDialog } from '@/components/admin/moderation-deactivation-dialog'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 
@@ -27,6 +28,7 @@ interface ModeratedProfile extends Profile {
   account_status: 'active' | 'warned' | 'suspended' | 'banned'
   suspended_until: string | null
   banned_at: string | null
+  is_deleted: boolean
 }
 
 export default function AdminCustomersPage() {
@@ -39,6 +41,7 @@ export default function AdminCustomersPage() {
   const [isWarningDialogOpen, setIsWarningDialogOpen] = useState(false)
   const [isSuspensionDialogOpen, setIsSuspensionDialogOpen] = useState(false)
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false)
+  const [isDeactivationDialogOpen, setIsDeactivationDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<{ id: string, name: string } | null>(null)
   
   const [repo] = useState(() => new AdminRepository())
@@ -109,6 +112,11 @@ export default function AdminCustomersPage() {
     setIsBanDialogOpen(true)
   }
 
+  const handleOpenDeactivationDialog = (id: string, name: string) => {
+    setSelectedUser({ id, name })
+    setIsDeactivationDialogOpen(true)
+  }
+
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-'
     try {
@@ -170,7 +178,7 @@ export default function AdminCustomersPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredCustomers.map((customer) => (
-                    <TableRow key={customer.id} className={customer.is_blocked || customer.account_status === 'suspended' || customer.account_status === 'banned' ? 'bg-destructive/5' : ''}>
+                    <TableRow key={customer.id} className={customer.is_deleted || customer.account_status === 'suspended' || customer.account_status === 'banned' ? 'bg-destructive/5' : ''}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
@@ -183,6 +191,11 @@ export default function AdminCustomersPage() {
                                  <Badge variant="outline" className="text-[9px] h-4 px-1 text-primary border-primary/20">Você</Badge>
                                )}
                              </div>
+                             {customer.is_deleted && (
+                               <span className="text-[10px] text-destructive font-bold uppercase flex items-center gap-1">
+                                 <UserX className="h-3 w-3" /> Desativado
+                               </span>
+                             )}
                              {customer.account_status === 'banned' && (
                                <span className="text-[10px] text-destructive font-bold uppercase flex items-center gap-1">
                                  <Ban className="h-3 w-3" /> Banimento Permanente
@@ -219,7 +232,11 @@ export default function AdminCustomersPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1 items-start">
-                          {customer.account_status === 'banned' ? (
+                          {customer.is_deleted ? (
+                            <Badge variant="destructive" className="text-[10px] uppercase font-bold gap-1 bg-gray-900 hover:bg-gray-800">
+                               <UserX className="h-2.5 w-2.5" /> Desativado
+                            </Badge>
+                          ) : customer.account_status === 'banned' ? (
                             <Badge variant="destructive" className="text-[10px] uppercase font-bold gap-1 bg-red-600 hover:bg-red-700">
                                <Ban className="h-2.5 w-2.5" /> Banido
                             </Badge>
@@ -274,7 +291,7 @@ export default function AdminCustomersPage() {
                             </DropdownMenuItem>
 
                             {/* Suspend Action - Phase 2 */}
-                            {customer.account_status !== 'suspended' && customer.account_status !== 'banned' ? (
+                            {customer.account_status !== 'suspended' && customer.account_status !== 'banned' && !customer.is_deleted ? (
                                <DropdownMenuItem 
                                   className="cursor-pointer text-destructive font-bold" 
                                   onClick={() => handleOpenSuspensionDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
@@ -283,7 +300,7 @@ export default function AdminCustomersPage() {
                                   <ShieldAlert className="h-4 w-4 mr-2" />
                                   Suspender Conta
                                </DropdownMenuItem>
-                            ) : customer.account_status === 'suspended' || customer.account_status === 'banned' ? (
+                            ) : customer.account_status === 'suspended' || customer.account_status === 'banned' || customer.is_deleted ? (
                                <DropdownMenuItem 
                                   className="cursor-pointer text-green-600 font-bold" 
                                   onClick={() => handleReactivateAccount(customer.id)}
@@ -304,10 +321,21 @@ export default function AdminCustomersPage() {
                               <DropdownMenuItem 
                                 className="cursor-pointer text-destructive font-bold" 
                                 onClick={() => handleOpenBanDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
-                                disabled={customer.id === currentAdminId}
+                                disabled={customer.id === currentAdminId || customer.is_deleted}
                               >
                                 <Ban className="h-4 w-4 mr-2" />
                                 Banir permanentemente
+                              </DropdownMenuItem>
+                            )}
+
+                            {!customer.is_deleted && (
+                              <DropdownMenuItem 
+                                className="cursor-pointer text-destructive" 
+                                onClick={() => handleOpenDeactivationDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
+                                disabled={customer.id === currentAdminId}
+                              >
+                                <UserX className="h-4 w-4 mr-2" />
+                                Desativar Conta
                               </DropdownMenuItem>
                             )}
 
@@ -360,6 +388,13 @@ export default function AdminCustomersPage() {
           <ModerationBanDialog
             open={isBanDialogOpen}
             onOpenChange={setIsBanDialogOpen}
+            userId={selectedUser.id}
+            userName={selectedUser.name}
+            onSuccess={loadCustomers}
+          />
+          <ModerationDeactivationDialog
+            open={isDeactivationDialogOpen}
+            onOpenChange={setIsDeactivationDialogOpen}
             userId={selectedUser.id}
             userName={selectedUser.name}
             onSuccess={loadCustomers}
