@@ -1,6 +1,23 @@
-# Database Migrations
+## Database Migrations
 
 This document tracks and explains all database schema changes.
+
+## [20260518100000 - 20260518200000] Moderation Foundation, Public Restrictions & RLS Stabilization
+
+### Purpose
+Introduced a comprehensive Moderation System (warnings, suspensions, bans, soft deletes, and business freezing) and resolved critical infinite recursion errors in PostgreSQL Row Level Security (RLS).
+
+### Affected Tables
+- `public.profiles`: Added `account_status`, `suspended_until`, `warning_count`, `banned_at`, `banned_reason`, `is_deleted`, and `deleted_at`.
+- `public.businesses`: Added `is_frozen` to isolate and hide businesses from the public without deleting data.
+- `public.moderation_actions`: Created a new table for auditing all administrative actions.
+
+### Key Stabilization Techniques
+- **RLS Recursion Fix:** Replaced naive cross-table references in RLS policies with a `SECURITY DEFINER` function (`is_admin()`). This strictly prevents `500 Internal Server Errors` caused by deep policy evaluation loops.
+- **Public Visibility Restrictions:** Updated all public `SELECT` policies for `businesses`, `business_pages`, and `page_links` to enforce `is_frozen = false`, securing the public frontend.
+- **Admin Bypass:** Ensured the `is_admin()` function grants unrestricted read/write access to the database, independent of the admin's own `account_status`.
+
+---
 
 ## [20260517130000] Full Verification System
 

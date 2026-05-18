@@ -1,8 +1,11 @@
 # Security Rules
 
-## 1. Autenticação e Autorização
-- Valide sessões no Middleware e em Server Components.
+## 1. Autenticação, Autorização e Moderação
+- Valide sessões no `src/middleware.ts` e em Server Components.
 - Verifique roles (`admin`, `customer`) antes de permitir acesso a rotas sensíveis.
+- **Moderação Obrigatória:** O `middleware.ts` deve SEMPRE verificar e redirecionar usuários bloqueados (`is_deleted`, `account_status = 'banned'`, `suspended_until`).
+- **Admin Bypass:** Usuários com a role `admin` devem contornar restrições de moderação para garantir que nunca percam acesso à plataforma.
+- **Soft Delete:** Nunca delete registros da tabela `profiles`. Use `is_deleted = true` e mantenha a integridade referencial.
 
 ## 2. Proteção de Dados (LGPD)
 - Respeite as preferências de cookies.

@@ -9,6 +9,8 @@
 - **MANDATÓRIO:** Toda nova tabela deve ter RLS habilitado.
 - Defina políticas claras para `SELECT`, `INSERT`, `UPDATE` e `DELETE`.
 - Teste políticas com usuários autenticados e anônimos.
+- **CRÍTICO - RLS Recursion Avoidance:** NUNCA faça consultas diretas à tabela `profiles` de dentro das políticas RLS para verificar roles de admin. Isso causa loops infinitos (Erro 500). Use SEMPRE a função `SECURITY DEFINER` `is_admin()`.
+- **CRÍTICO - Moderation Visibility:** Toda política de `SELECT` para tabelas acessíveis ao público (ex: `businesses`, `business_pages`, `reviews`) DEVE incluir a restrição `is_frozen = false` para esconder conteúdo moderado do público.
 
 ## 3. Naming Conventions
 - Tabelas e colunas em `snake_case`.

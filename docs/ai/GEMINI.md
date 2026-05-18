@@ -19,5 +19,8 @@ This document is the official entrypoint for Gemini CLI execution workflows.
 - **Read Efficiency:** Avoid reading entire files if only a specific section is needed (use `start_line` and `end_line`).
 - **Parallelism:** Execute independent read/search tools concurrently to save turns.
 
-## 4. Protected Areas
-- Do not run arbitrary bash scripts that modify database schemas without verifying against `docs/ai/rules/database-rules.md` and `docs/ai/rules/protected-areas.md`.
+## 4. Protected Areas & Architectural Constraints
+- **Database Modifiers:** Do not run arbitrary bash scripts that modify database schemas without verifying against `docs/ai/rules/database-rules.md` and `docs/ai/rules/protected-areas.md`.
+- **RLS Recursion:** NEVER write RLS policies that query `profiles` directly. ALWAYS use the `is_admin()` security definer function.
+- **Moderation Bypass:** Do not alter the auth bypass logic in `src/middleware.ts` without explicitly testing that admins can still log in and suspended users are redirected.
+- **Public Visibility:** ALWAYS filter out `is_frozen = true` items in public repository lookups and public RLS policies.

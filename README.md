@@ -13,6 +13,7 @@ O Avalia Prudente é uma solução baseada em NFC (Near Field Communication) que
 - **Filtro Inteligente de Avaliações Google:** Capture feedbacks internos para notas baixas e direcione notas altas direto para o Google.
 - **Sistema de Verificação Oficial (Selo Azul):** Workflow completo de solicitação e aprovação de selos de confiança para empresas.
 - **Rankings Inteligentes:** Algoritmos Bayesianos para listar os melhores estabelecimentos da cidade ("Elite") e os mais acessados ("Em Alta").
+- **Sistema de Moderação e Auditoria:** Motor completo para Advertências, Suspensões, Banimentos e Congelamento de Empresas.
 - **Gestão Multi-empresa:** Gerencie múltiplos locais em um único painel.
 - **Painel Administrativo (RBAC):** Interface completa para moderação de empresas, usuários e solicitações de verificação.
 
@@ -30,6 +31,7 @@ O Avalia Prudente é uma solução baseada em NFC (Near Field Communication) que
 - `src/core/application`: Casos de uso.
 - `src/core/infrastructure`: Repositórios Supabase e implementações técnicas.
 - `src/components`: UI (shadcn), Shared, Marketing, Dashboard e Admin.
+- `src/middleware.ts`: Roteamento e orquestração centralizada de autenticação, proteção contra acesso não autorizado (banned/suspended/deleted), e bypass seguro para administradores.
 
 ## Desenvolvimento Local
 

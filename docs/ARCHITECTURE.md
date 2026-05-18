@@ -33,11 +33,13 @@
 - **Client State:** Handled by React `useState`, `useContext`, or specialized hooks.
 - **Persistence:** Supabase (PostgreSQL + Auth).
 
-## Authentication Flow
+## Authentication Flow & Middleware Routing
 
 1. User logs in via Supabase Auth.
-2. Middleware refreshes the session on each request.
-3. Server Components access the user session via `createClient` from `@/lib/supabase/server`.
+2. The `src/middleware.ts` intercepts every request to refresh the session and perform centralized state validation.
+3. Middleware enforces Moderation Constraints (redirects to `/blocked` if the user is suspended, banned, or deleted).
+4. Middleware implements Admin Master Bypass: Users with `role = 'admin'` bypass all moderation blocks and have guaranteed access to both the dashboard and the admin panel.
+5. Server Components access the user session via `createClient` from `@/lib/supabase/server` for rendering data safely.
 
 ## Data Isolation & Security
 
@@ -48,11 +50,19 @@ The platform uses a strict tenant isolation model based on `owner_id`.
 - **Analytics:** Data is strictly isolated; owners only see events related to their own businesses.
 
 ### Row Level Security (RLS) Logic
-- **Public Access:** Anonymous users can read `businesses`, `business_pages`, and `page_links` to view public profiles, but cannot modify anything.
-- **Admin Access:** Users with the `admin` role (in `profiles`) have broad read/write access to moderate the platform.
-- **Customer Access:** Restricted to their own created entities.
+- **Admin Access:** Enforced via a `SECURITY DEFINER` function `is_admin()`. This architectural pattern is mandatory; doing direct `profiles` lookups inside RLS policies causes infinite recursion failures.
+- **Public Access:** Anonymous users can read `businesses`, `business_pages`, and `page_links` to view public profiles, but **only if** the business is not frozen (`is_frozen = false`).
+- **Customer Access:** Restricted to their own created entities, but only if their account is not suspended/banned (`is_suspended() = false`).
 
 ## Core Workflows
+
+### Moderation System & Admin Infrastructure
+The platform implements a progressive moderation escalation system:
+1. **Warnings:** Soft interventions tracked in `moderation_actions`. Two warnings automatically escalate to a suspension suggestion.
+2. **Suspensions (Temporary):** Blocks access to the dashboard for 3 to 90 days. Public business pages remain active. Handled by `suspended_until`.
+3. **Bans (Permanent):** Permanently blocks account access. Tracked via `account_status = 'banned'`.
+4. **Soft Delete (Deactivation):** Marks an account as deleted (`is_deleted = true`) to disable login without destroying relational database integrity.
+5. **Business Freezing:** An isolated state where a business is removed from public visibility (`is_frozen = true`) and all custom domain slugs and review links are disabled, regardless of the owner's account status.
 
 ### Verification System
 1. **Request:** A business owner submits a request via `VerificationRequestModal`. A record is created in `verification_requests` with status `pending`.
