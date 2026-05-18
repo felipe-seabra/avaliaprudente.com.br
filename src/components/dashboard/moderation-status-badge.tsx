@@ -10,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-
+import Link from 'next/link'
 import { AccountStatus, UserRole } from '@/core/domain/entities'
 
 export function ModerationStatusBadge() {
@@ -56,10 +56,12 @@ export function ModerationStatusBadge() {
 
   if (isBanned) {
     return (
-      <Badge variant="destructive" className="gap-1 px-2 py-1 h-7">
-        <Ban className="h-3 w-3" />
-        Conta Banida
-      </Badge>
+      <Link href="/dashboard/moderation">
+        <Badge variant="destructive" className="gap-1 px-2 py-1 h-7 cursor-pointer">
+          <Ban className="h-3 w-3" />
+          Conta Banida
+        </Badge>
+      </Link>
     )
   }
 
@@ -67,14 +69,16 @@ export function ModerationStatusBadge() {
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger>
-            <Badge variant="destructive" className="gap-1 px-2 py-1 h-7 bg-orange-600 hover:bg-orange-700">
-              <Clock className="h-3 w-3" />
-              Conta Suspensa
-            </Badge>
-          </TooltipTrigger>
+          <TooltipTrigger render={
+            <Link href="/dashboard/moderation">
+              <Badge variant="destructive" className="gap-1 px-2 py-1 h-7 bg-orange-600 hover:bg-orange-700 cursor-pointer">
+                <Clock className="h-3 w-3" />
+                Conta Suspensa
+              </Badge>
+            </Link>
+          } />
           <TooltipContent>
-            <p>Sua conta está suspensa temporariamente por violação dos termos.</p>
+            <p>Sua conta está suspensa temporariamente. Clique para detalhes.</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -85,14 +89,16 @@ export function ModerationStatusBadge() {
     return (
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger>
-            <Badge variant="outline" className="gap-1 px-2 py-1 h-7 border-orange-500 text-orange-500 bg-orange-500/10">
-              <AlertTriangle className="h-3 w-3" />
-              {status.warningCount} {status.warningCount === 1 ? 'Aviso' : 'Avisos'}
-            </Badge>
-          </TooltipTrigger>
+          <TooltipTrigger render={
+            <Link href="/dashboard/moderation">
+              <Badge variant="outline" className="gap-1 px-2 py-1 h-7 border-orange-500 text-orange-500 bg-orange-500/10 cursor-pointer">
+                <AlertTriangle className="h-3 w-3" />
+                {status.warningCount} {status.warningCount === 1 ? 'Aviso' : 'Avisos'}
+              </Badge>
+            </Link>
+          } />
           <TooltipContent>
-            <p>Você possui avisos de moderação. Revise as regras da plataforma.</p>
+            <p>Você possui avisos de moderação. Clique para ver detalhes.</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -101,10 +107,12 @@ export function ModerationStatusBadge() {
 
   if (status.accountStatus === 'warned') {
     return (
-      <Badge variant="secondary" className="gap-1 px-2 py-1 h-7 border-yellow-500 text-yellow-500 bg-yellow-500/10">
-        <ShieldAlert className="h-3 w-3" />
-        Sob Revisão
-      </Badge>
+      <Link href="/dashboard/moderation">
+        <Badge variant="secondary" className="gap-1 px-2 py-1 h-7 border-yellow-500 text-yellow-500 bg-yellow-500/10 cursor-pointer">
+          <ShieldAlert className="h-3 w-3" />
+          Sob Revisão
+        </Badge>
+      </Link>
     )
   }
 

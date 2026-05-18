@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { APP_CONFIG } from '@/lib/constants'
 
 // Basic rate limiting configuration
 const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
@@ -31,7 +32,7 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 })
   }
 
-  const { supabaseResponse, user, role, isBlocked, isDeleted, accountStatus, suspendedUntil } = await updateSession(request)
+  const { supabaseResponse, user, role, isBlocked, isDeleted, accountStatus, suspendedUntil, termsVersion } = await updateSession(request)
 
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||
@@ -42,16 +43,19 @@ export async function middleware(request: NextRequest) {
   const isDashboardPage = request.nextUrl.pathname.startsWith('/dashboard')
   const isAdminPage = request.nextUrl.pathname.startsWith('/admin')
   const isBlockedPage = request.nextUrl.pathname.startsWith('/blocked')
+  const isTermsPage = request.nextUrl.pathname.startsWith('/terms-reaccept')
 
   const isAdmin = role === 'admin'
   const isSuspended = !isAdmin && accountStatus === 'suspended' && (!suspendedUntil || new Date(suspendedUntil) > new Date())
   const isBanned = !isAdmin && accountStatus === 'banned'
   const isUserDeleted = !isAdmin && isDeleted
   const isUserBlocked = !isAdmin && (isBlocked || isBanned || isUserDeleted)
+  
+  const needsTermsReacceptance = user && !isAdmin && termsVersion !== APP_CONFIG.currentTermsVersion
 
   // DEBUG LOGS
-  if (isAdminPage || isDashboardPage || isBlockedPage || isAuthPage) {
-    console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}, Status: ${accountStatus}, Deleted: ${isDeleted}`)
+  if (isAdminPage || isDashboardPage || isBlockedPage || isAuthPage || isTermsPage) {
+    console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}, Status: ${accountStatus}, Deleted: ${isDeleted}, NeedsTerms: ${needsTermsReacceptance}`)
   }
 
   // 1. Admin Master Bypass: If admin is logged in, they bypass all moderation blocks
@@ -64,38 +68,44 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // 2. Permanent Block / Ban / Deactivation check (Regular users only)
+  // 2. Terms Re-acceptance (Regular users only)
+  if (needsTermsReacceptance && !isTermsPage && (isDashboardPage || isAdminPage)) {
+    console.log('Middleware: User needs terms re-acceptance -> Redirecting to /terms-reaccept')
+    return NextResponse.redirect(new URL('/terms-reaccept', request.url))
+  }
+
+  // 3. Permanent Block / Ban / Deactivation check (Regular users only)
   if (user && isUserBlocked && !isBlockedPage) {
     const type = isUserDeleted ? 'deleted' : (isBanned ? 'banned' : 'blocked')
     console.log(`Middleware: Blocked/Banned/Deleted User (${type}) -> Redirecting to /blocked`)
     return NextResponse.redirect(new URL(`/blocked${type !== 'blocked' ? `?type=${type}` : ''}`, request.url))
   }
 
-  // 3. Temporary Suspension check (Regular users only)
+  // 4. Temporary Suspension check (Regular users only)
   if (user && isSuspended && (isDashboardPage || isAdminPage) && !isBlockedPage) {
     console.log('Middleware: Suspended User -> Redirecting to /blocked?type=suspended')
     return NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
   }
 
-  // 4. Redirect away from /blocked if not actually blocked
+  // 5. Redirect away from /blocked if not actually blocked
   if (user && !isUserBlocked && !isSuspended && isBlockedPage) {
     console.log('Middleware: Not Blocked User at /blocked -> Redirecting to /dashboard')
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // 5. Redirect logged in users away from auth pages
+  // 6. Redirect logged in users away from auth pages
   if (user && isAuthPage) {
     console.log('Middleware: Logged in User at Auth Page -> Redirecting to /dashboard')
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // 6. Protect dashboard
+  // 7. Protect dashboard
   if (!user && isDashboardPage) {
     console.log('Middleware: Anonymous User at Dashboard -> Redirecting to /login')
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // 7. Protect admin routes (Double check for security)
+  // 8. Protect admin routes (Double check for security)
   if (isAdminPage) {
     if (!user) {
       console.log('Middleware: Anonymous User at Admin Page -> Redirecting to /login')

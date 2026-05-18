@@ -15,12 +15,28 @@ function BlockedContent() {
   const router = useRouter()
   
   const isSuspended = type === 'suspended'
+  const isBanned = type === 'banned'
+  const isDeleted = type === 'deleted'
 
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
+  }
+
+  const getTitle = () => {
+    if (isSuspended) return 'Conta Suspensa'
+    if (isBanned) return 'Conta Banida'
+    if (isDeleted) return 'Conta Desativada'
+    return 'Acesso Bloqueado'
+  }
+
+  const getDescription = () => {
+    if (isSuspended) return 'Sua conta foi temporariamente suspensa por um administrador.'
+    if (isBanned) return 'Sua conta foi permanentemente banida por violações graves dos Termos de Uso.'
+    if (isDeleted) return 'Esta conta foi desativada e não pode mais ser acessada.'
+    return 'Sua conta foi bloqueada por violação dos termos de uso.'
   }
 
   return (
@@ -35,20 +51,25 @@ function BlockedContent() {
             )}
           </div>
           <CardTitle className="text-2xl font-black text-destructive">
-            {isSuspended ? 'Conta Suspensa' : 'Acesso Bloqueado'}
+            {getTitle()}
           </CardTitle>
           <CardDescription className="text-base mt-2">
-            {isSuspended 
-              ? 'Sua conta foi temporariamente suspensa por um administrador.' 
-              : 'Sua conta foi permanentemente bloqueada por violação dos termos de uso.'}
+            {getDescription()}
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center pt-4 pb-6 text-sm text-muted-foreground space-y-4">
           <p>
             {isSuspended 
-              ? 'Durante este período, você não poderá gerenciar suas empresas ou realizar novas avaliações.'
+              ? 'Durante este período, você não poderá gerenciar suas empresas ou realizar novas avaliações. Consulte a Central de Transparência para mais detalhes.'
               : 'Você não tem mais permissão para acessar as áreas restritas da plataforma.'}
           </p>
+          
+          {isSuspended && (
+            <Link href="/dashboard/moderation" className="block p-3 bg-muted rounded-lg text-primary hover:bg-muted/80 transition-colors font-medium">
+              Ver detalhes na Central de Transparência
+            </Link>
+          )}
+
           <p className="italic">
             Se você acredita que isso é um erro, entre em contato com nosso suporte.
           </p>

@@ -64,6 +64,11 @@ const data = {
       url: '/dashboard/analytics',
       icon: BarChart3,
     },
+    {
+      title: 'Transparência',
+      url: '/dashboard/moderation',
+      icon: ShieldAlert,
+    },
   ],
 }
 

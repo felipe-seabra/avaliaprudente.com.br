@@ -40,6 +40,7 @@ export async function updateSession(request: NextRequest) {
   let isDeleted = false
   let accountStatus = 'active'
   let suspendedUntil: string | null = null
+  let termsVersion: string | null = null
 
   if (user) {
     console.log(`Middleware [Session]: User ${user.id} found. Metadata role: ${user.app_metadata?.role || 'none'}`)
@@ -52,7 +53,7 @@ export async function updateSession(request: NextRequest) {
     // 2. Authoritative check from DB (always try to refresh)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role, is_blocked, is_deleted, account_status, suspended_until, terms_accepted_at, terms_version, warning_count')
+      .select('role, is_blocked, is_deleted, account_status, suspended_until, terms_version')
       .eq('id', user.id)
       .single()
     
@@ -66,10 +67,11 @@ export async function updateSession(request: NextRequest) {
       isDeleted = profile.is_deleted
       accountStatus = profile.account_status || 'active'
       suspendedUntil = profile.suspended_until
+      termsVersion = profile.terms_version
     } else {
       console.warn(`Middleware [DB Warning]: No profile row for ${user.id}`)
     }
   }
 
-  return { supabaseResponse, user, role, isBlocked, isDeleted, accountStatus, suspendedUntil }
+  return { supabaseResponse, user, role, isBlocked, isDeleted, accountStatus, suspendedUntil, termsVersion }
 }

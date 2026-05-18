@@ -51,7 +51,7 @@ export function RegisterForm() {
           data: {
             full_name: data.fullName,
             terms_accepted_at: new Date().toISOString(),
-            terms_version: '1.1',
+            terms_version: APP_CONFIG.currentTermsVersion,
           },
         },
       })

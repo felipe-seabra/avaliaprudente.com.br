@@ -17,7 +17,7 @@ export default function TermsPage() {
           
           <div className="prose prose-slate dark:prose-invert max-w-none space-y-8 text-muted-foreground leading-relaxed">
             <section className="space-y-4">
-              <p>Última atualização: 18 de maio de 2026 (Versão 1.1)</p>
+              <p>Última atualização: 19 de maio de 2026 (Versão 1.2)</p>
               <p>
                 Bem-vindo ao <strong>Avalia Prudente</strong>. Ao acessar nossa plataforma ou adquirir nossos produtos físicos (Tags NFC), você concorda em cumprir e estar vinculado aos seguintes Termos de Uso.
               </p>
@@ -78,7 +78,7 @@ export default function TermsPage() {
             <section className="space-y-4 text-foreground border-t pt-8">
               <h2 className="text-2xl font-bold font-heading">6. Disposições Gerais</h2>
               <p className="text-muted-foreground">
-                Estes termos podem ser atualizados periodicamente. O uso continuado da plataforma após as alterações constitui aceitação dos novos termos. A versão atual (1.1) entra em vigor imediatamente para todos os usuários.
+                Estes termos podem ser atualizados periodicamente. O uso continuado da plataforma após as alterações constitui aceitação dos novos termos. A versão atual (1.2) entra em vigor imediatamente para todos os usuários.
               </p>
               <p className="font-medium underline decoration-primary">Dúvidas? Entre em contato: contato@avaliaprudente.com.br</p>
             </section>

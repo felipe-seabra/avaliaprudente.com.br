@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-05-19
+
+### Added
+- **Terms & Moderation Transparency (Phase 2):** Enhanced enforcement and user transparency.
+  - **Terms Version Enforcement:** Implemented a robust re-acceptance flow when platform terms are updated.
+  - **Moderation Transparency Center:** New `/dashboard/moderation` page where users can view their full moderation history, warning counts, and status details.
+  - **Improved Blocked UX:** Redesigned `/blocked` page with specific messaging for suspensions, permanent bans, and account deactivations.
+  - **Dashboard Integration:** Updated `ModerationStatusBadge` and sidebar to provide direct access to transparency details.
+  - **Surgical RLS Updates:** Added policies allowing users to read their own moderation audit logs while preserving admin-only write access.
+
 ## [0.3.7] - 2026-05-18
 
 ### Added
