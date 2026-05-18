@@ -40,3 +40,11 @@ npm install
 npm run supabase:start
 npm run dev
 ```
+
+### Manutenção do Docker
+Se o Docker estiver consumindo muito espaço em disco, utilize os comandos de manutenção:
+- `npm run docker:audit`: Analisa o uso de disco.
+- `npm run docker:clean`: Limpeza segura de recursos não utilizados.
+
+Para um guia completo, veja [docs/DOCKER_MAINTENANCE.md](docs/DOCKER_MAINTENANCE.md).
+

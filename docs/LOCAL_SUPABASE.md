@@ -43,32 +43,18 @@ Todas as alterações no esquema do banco de dados devem ser feitas via migraç�
 
 ## Manutenção e Limpeza (Docker)
 
-O ambiente local do Supabase pode consumir uma quantidade significativa de espaço em disco ao longo do tempo. Se você estiver enfrentando falta de espaço ou quiser estabilizar o ambiente Docker, siga estas recomendações:
+Implementamos ferramentas para automatizar a manutenção do ambiente Docker. Para mais detalhes, consulte [docs/DOCKER_MAINTENANCE.md](DOCKER_MAINTENANCE.md).
 
-### Limpeza Preventiva
+### Comandos de Manutenção
 
-Para remover recursos não utilizados do Docker sem afetar os dados importantes:
+- `npm run docker:audit`: Verifica o uso de disco atual.
+- `npm run docker:clean`: Limpeza segura (recomendado semanalmente).
+- `npm run docker:clean-all`: Limpeza profunda de imagens.
+- `npm run docker:reset-supa`: Para o Supabase e apaga volumes locais (Hard Reset).
 
-```bash
-# Remove containers parados e imagens pendentes (dangling)
-docker system prune
-```
+### Dicas de Estabilização
 
-### Limpeza Profunda (Deep Clean)
+1. **Build Cache:** Se você notar que o disco está cheio mesmo após limpar imagens, tente `docker builder prune`.
+2. **Volumes Órfãos:** Use `docker volume prune` para remover volumes que não estão vinculados a nenhum container.
+3. **Docker Desktop:** Lembre-se que no Mac/Windows, o Docker reserva um arquivo de tamanho fixo. Às vezes é necessário resetar o Docker Desktop para recuperar espaço real no sistema host.
 
-Se você não planeja usar o ambiente local por um tempo e quer recuperar o máximo de espaço:
-
-1. Pare o Supabase: `npm run supabase:stop`
-2. Remova todos os recursos não utilizados (incluindo imagens):
-   ```bash
-   docker system prune -a --volumes
-   ```
-
-**Aviso:** O comando acima removerá imagens e volumes. Os volumes do Supabase contêm os dados do seu banco de dados local. Use com cautela se tiver dados de teste importantes que não foram salvos via `seed.sql`.
-
-### Quando usar o ambiente local?
-
-Atualmente, o projeto está configurado para usar o **Supabase remoto** por padrão no arquivo `.env.local`. O ambiente Docker local é opcional e recomendado apenas para:
-- Desenvolvimento offline.
-- Testes de migrações complexas antes de aplicar no Cloud.
-- Testes de fluxos de email via Mailpit.

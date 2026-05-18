@@ -11,7 +11,11 @@
     "supabase:stop": "npx supabase stop",
     "supabase:status": "npx supabase status",
     "supabase:reset": "npx supabase db reset",
-    "supabase:migration": "npx supabase migration new"
+    "supabase:migration": "npx supabase migration new",
+    "docker:audit": "./scripts/docker-maintenance.sh audit",
+    "docker:clean": "./scripts/docker-maintenance.sh clean",
+    "docker:clean-all": "./scripts/docker-maintenance.sh clean-all",
+    "docker:reset-supa": "./scripts/docker-maintenance.sh reset-supa"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
