@@ -2,14 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.9] - 2026-05-18
+## [0.3.1] - 2026-05-18
 
 ### Fixed
-- **Admin Routing Stability:** Resolved a critical issue where administrators were being incorrectly redirected from `/admin` to `/dashboard`.
-  - **Prioritized Bypass:** Refactored middleware to implement a "Master Bypass" for admins, ensuring they are never subjected to regular user account restrictions.
-  - **Auth Resilience:** Added JWT metadata fallback for role identification in the middleware to prevent access loss if database profile queries fail or latency occurs.
-  - **Audit Logging:** Added granular debug logging to track middleware decision-making and auth state during redirections.
+- **Environment & Schema Synchronization:** Resolved a critical failure where the middleware was attempting to access non-existent database columns (`suspended_until`) on the remote Supabase instance.
+  - **Migration Deployment:** Successfully pushed the remaining Phase 2 Moderation migrations to the remote database, aligning the schema with the latest application code.
+  - **Database Integrity:** Verified that all moderation fields (`suspended_until`, `account_status`, `is_blocked`) are now properly synchronized and accessible.
 
+## [0.3.0] - 2026-05-18
+
+### Fixed
+- **Admin Access Root Cause Resolution:** Eliminated a hydration race condition that caused authenticated administrators to be redirected to the dashboard during page load.
+  - **Multi-Layered Auth Guards:** Implemented a dual-layered protection strategy with both Server-Side (RSC) and Client-Side (AdminGuard) validation.
+  - **Zero-Skeleton Unauthorized Access:** Created `AdminGuard` component to prevent rendering of administrative UI and skeletons until the user's role is definitively resolved as `admin`.
+  - **Auth Resilience:** Hardened `AdminLayout` with immediate server-side role verification, ensuring 403-like redirection happens before the browser even starts hydration.
+  - **Diagnostic Telemetries:** Added persistent debug logs to both server and client layers to trace authentication lifecycle and prevent future regressions.
+
+## [0.2.9] - 2026-05-18
+...
 ## [0.2.8] - 2026-05-18
 
 ### Fixed
