@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.2.7] - 2026-05-18
 
 ### Fixed
+- **Database Stability (RLS Recursion):** Eliminated 500 Internal Server Errors in production caused by infinite recursion in RLS policies. Standardized all admin checks to use a robust `SECURITY DEFINER` function (`is_admin`).
 - **Migration Chain Stability:** Resolved a critical failure in `npx supabase db reset` by fixing a column name mismatch in the `20260517150000_core_verification_schema.sql` migration (changed `requested_by` to the standardized `user_id`).
 - **Company Verification Flow:** Resolved a 400 Bad Request error by fixing conflicting database constraints on the `verification_status` column.
 - **Admin Permissions:** Added missing RLS `UPDATE` policies for the `businesses` and `profiles` tables, allowing administrators to verify companies and moderate users correctly.
