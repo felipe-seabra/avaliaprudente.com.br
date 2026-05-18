@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.7] - 2026-05-18
+
+### Added
+- **Terms of Use & Moderation Awareness (Phase 1):** Implemented mandatory terms acceptance and increased moderation visibility.
+  - **Terms Acceptance Flow:** New checkbox in registration and a mandatory `TermsAcceptanceDialog` in the dashboard for existing users or version updates.
+  - **Database Hardening:** Added `terms_accepted_at`, `terms_version`, and `last_warning_at` to profiles.
+  - **Trigger Optimization:** Updated `handle_new_user` trigger to automatically capture terms metadata from auth registration.
+  - **Moderation Visibility:** New `ModerationStatusBadge` in the dashboard header showing warning counts, suspension status, or ban status to the user.
+  - **Updated Content:** Fully revised `Terms of Use` page with clear sections on prohibited behavior, fake reviews, and moderation escalation.
+
 ## [0.3.6] - 2026-05-18
 
 ### Fixed

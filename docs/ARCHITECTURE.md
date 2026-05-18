@@ -58,8 +58,10 @@ The platform uses a strict tenant isolation model based on `owner_id`.
 
 ### Moderation System & Admin Infrastructure
 The platform implements a progressive moderation escalation system:
-1. **Warnings:** Soft interventions tracked in `moderation_actions`. Two warnings automatically escalate to a suspension suggestion.
-2. **Suspensions (Temporary):** Blocks access to the dashboard for 3 to 90 days. Public business pages remain active. Handled by `suspended_until`.
+1. **Terms of Use Acceptance:** Mandatory acceptance of platform rules during signup or upon major updates (v1.1+). Tracked via `terms_accepted_at` and `terms_version` in `profiles`.
+2. **Moderation Visibility:** Users see their current status (warnings, suspension, ban) directly in the dashboard via a status badge.
+3. **Warnings:** Soft interventions tracked in `moderation_actions`. Two warnings automatically escalate to a suspension suggestion.
+4. **Suspensions (Temporary):** Blocks access to the dashboard for 3 to 90 days. Public business pages remain active. Handled by `suspended_until`.
 3. **Bans (Permanent):** Permanently blocks account access. Tracked via `account_status = 'banned'`.
 4. **Soft Delete (Deactivation):** Marks an account as deleted (`is_deleted = true`) to disable login without destroying relational database integrity.
 5. **Business Freezing:** An isolated state where a business is removed from public visibility (`is_frozen = true`) and all custom domain slugs and review links are disabled, regardless of the owner's account status.

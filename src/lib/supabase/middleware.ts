@@ -52,7 +52,7 @@ export async function updateSession(request: NextRequest) {
     // 2. Authoritative check from DB (always try to refresh)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role, is_blocked, is_deleted, account_status, suspended_until')
+      .select('role, is_blocked, is_deleted, account_status, suspended_until, terms_accepted_at, terms_version, warning_count')
       .eq('id', user.id)
       .single()
     

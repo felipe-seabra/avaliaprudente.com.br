@@ -22,6 +22,8 @@ import { InputField } from '@/components/shared/input-field'
 import { parseError, logError } from '@/lib/error-handler'
 import { APP_CONFIG } from '@/lib/constants'
 
+import { Checkbox } from '@/components/ui/checkbox'
+
 export function RegisterForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = React.useState(false)
@@ -33,6 +35,7 @@ export function RegisterForm() {
       fullName: '',
       email: '',
       password: '',
+      acceptTerms: false,
     },
   })
 
@@ -47,6 +50,8 @@ export function RegisterForm() {
           emailRedirectTo: `${APP_CONFIG.url}/auth/callback`,
           data: {
             full_name: data.fullName,
+            terms_accepted_at: new Date().toISOString(),
+            terms_version: '1.1',
           },
         },
       })
@@ -104,6 +109,35 @@ export function RegisterForm() {
               disabled={isLoading}
               autoComplete="new-password"
             />
+            
+            <div className="flex items-start space-x-2 pt-2">
+              <Checkbox
+                id="acceptTerms"
+                checked={form.watch('acceptTerms')}
+                onCheckedChange={(checked) => 
+                  form.setValue('acceptTerms', checked === true, { shouldValidate: true })
+                }
+                disabled={isLoading}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <label
+                  htmlFor="acceptTerms"
+                  className="text-xs text-muted-foreground leading-normal"
+                >
+                  Eu li e aceito os{' '}
+                  <Link href="/terms" target="_blank" className="text-primary hover:underline font-medium">
+                    Termos de Uso
+                  </Link>
+                  {' '}da plataforma.
+                </label>
+                {form.formState.errors.acceptTerms && (
+                  <p className="text-[0.8rem] font-medium text-destructive">
+                    {form.formState.errors.acceptTerms.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <Button type="submit" className="w-full font-bold cursor-pointer" disabled={isLoading}>
               {isLoading ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
