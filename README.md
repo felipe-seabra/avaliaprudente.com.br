@@ -37,16 +37,19 @@ O Avalia Prudente é uma solução baseada em NFC (Near Field Communication) que
 
 Consulte [docs/LOCAL_SUPABASE.md](docs/LOCAL_SUPABASE.md) para configurar o ambiente Docker.
 
-```bash
-npm install
-npm run supabase:start
-npm run dev
-```
+### Comandos de Banco de Dados (Seguros)
+
+Implementamos um **Safety Guard** (`scripts/db-safety.sh`) que protege contra resets acidentais em ambientes remotos. Utilize sempre os comandos via `npm run`:
+
+- `npm run supabase:start`: Inicia o ambiente local.
+- `npm run supabase:reset`: Reseta o banco local (Seguro, valida ambiente).
+- `npm run db:push`: Envia migrações para o banco vinculado (Solicita confirmação).
 
 ### Manutenção do Docker
 Se o Docker estiver consumindo muito espaço em disco, utilize os comandos de manutenção:
 - `npm run docker:audit`: Analisa o uso de disco.
 - `npm run docker:clean`: Limpeza segura de recursos não utilizados.
+- `npm run docker:reset-supa`: Hard Reset do ambiente Supabase local.
 
 Para um guia completo, veja [docs/DOCKER_MAINTENANCE.md](docs/DOCKER_MAINTENANCE.md).
 

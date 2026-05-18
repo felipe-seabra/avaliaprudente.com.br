@@ -10,6 +10,12 @@ Este documento é a camada de inteligência primária e memória de longo prazo 
 - **Estilização:** Tailwind CSS 4 + shadcn/ui (OKLCH Colors).
 - **Clean Architecture:** Camadas estritas: `Domain` (Entidades/Interfaces) -> `Application` (Use Cases) -> `Infrastructure` (Repositórios/Supabase) -> `UI` (Components/Hooks).
 - **Workflow Docker:** `npm run supabase:start` para ambiente local. Use `scripts/docker-maintenance.sh` para auditoria e limpeza de disco.
+- **Segurança de DB:** Todos os comandos destrutivos são protegidos por `scripts/db-safety.sh`. Nunca ignore os avisos de "REMOTE" em logs.
+
+## 2. Separação de Ambientes
+- **Local:** Docker Supabase (Porta 54321). Reset seguro via `npm run supabase:reset`.
+- **Remote Development/Staging:** Projeto vinculado via `supabase link`. Alterações via `npm run db:push`.
+- **Production:** Banco de dados final. Acesso restrito e migrações controladas.
 
 ## 2. Sistema de Moderação (Moderation Lifecycle)
 O motor de moderação é centralizado e progressivo:

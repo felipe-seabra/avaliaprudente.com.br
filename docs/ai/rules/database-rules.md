@@ -1,9 +1,12 @@
 # Database Rules
 
-## 1. Migrations
+## 1. Migrations & Infrastructure Safety
 - Todas as alterações no esquema devem ser feitas via migrações do Supabase em `supabase/migrations`.
 - Nomeie migrações com timestamp e descrição clara.
 - Nunca altere migrações já aplicadas em produção.
+- **SEGURANÇA CRÍTICA:** Nunca execute `supabase db reset` ou comandos destrutivos contra projetos remotos (`--linked`) sem confirmação explícita do ambiente.
+- **WORKFLOW LOCAL:** Use sempre o ambiente Docker local para desenvolvimento e testes de migração.
+- **VALIDAÇÃO:** Antes de subir uma migração, teste localmente com `npm run supabase:reset`.
 
 ## 2. Row Level Security (RLS)
 - **MANDATÓRIO:** Toda nova tabela deve ter RLS habilitado.

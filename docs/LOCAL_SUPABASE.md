@@ -9,12 +9,13 @@ Esta documentação descreve o processo de configuração e uso do Supabase loca
 
 ## Comandos Úteis
 
-Os seguintes comandos estão disponíveis via `npm run`:
+Os seguintes comandos estão disponíveis via `npm run` e são protegidos pelo **Database Safety Guard** (`scripts/db-safety.sh`), que impede a execução acidental em ambientes de produção:
 
 - `npm run supabase:start`: Inicia todos os serviços do Supabase via Docker.
 - `npm run supabase:stop`: Para todos os serviços e remove os containers.
 - `npm run supabase:status`: Verifica o status dos serviços e exibe as chaves/URLs.
-- `npm run supabase:reset`: Reseta o banco de dados para o estado inicial (executa migrações e seed).
+- `npm run supabase:reset`: Reseta o banco de dados local (executa migrações e seed). **Aviso:** Valida se o ambiente é local antes de prosseguir.
+- `npm run db:push`: Envia migrações para um projeto vinculado (Cloud). **Aviso:** Exige confirmação explícita escrevendo "remoto".
 - `npm run supabase:migration <nome>`: Cria um novo arquivo de migração em `supabase/migrations`.
 
 ## URLs Locais

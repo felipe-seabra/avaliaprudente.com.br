@@ -21,6 +21,7 @@ This document is the official entrypoint for Gemini CLI execution workflows.
 
 ## 4. Protected Areas & Architectural Constraints
 - **Database Modifiers:** Do not run arbitrary bash scripts that modify database schemas without verifying against `docs/ai/rules/database-rules.md` and `docs/ai/rules/protected-areas.md`.
+- **Database Safety Guard:** ALWAYS use the `npm run` prefixed commands for Supabase (e.g., `npm run supabase:reset`) to trigger the safety guard script. NEVER run `npx supabase db reset --linked` directly without confirming the target environment.
 - **RLS Recursion:** NEVER write RLS policies that query `profiles` directly. ALWAYS use the `is_admin()` security definer function to avoid infinite loops (Error 500).
 - **Moderation Bypass:** Admins (`role = 'admin'`) MUST bypass all moderation blocks. This logic is centralized in `src/middleware.ts` and the database layer.
 - **Public Visibility:** ALWAYS filter out `is_frozen = true` items in public repository lookups and public RLS policies. Custom slugs for frozen businesses must return 404 or a "Business Unavailable" state.

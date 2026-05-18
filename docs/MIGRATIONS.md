@@ -2,6 +2,36 @@
 
 This document tracks and explains all database schema changes.
 
+### Safe Migration Workflow (MANDATORY)
+
+To prevent accidental data loss in remote/production environments, follow this strictly:
+
+1. **Local Development:** Work exclusively in the local Docker environment.
+   ```bash
+   npm run supabase:migration your_feature_name
+   ```
+2. **Schema Validation:** Ensure the database can be rebuilt from scratch.
+   ```bash
+   npm run supabase:reset
+   ```
+3. **Deployment to Cloud:** Only push to the linked project AFTER local validation.
+   ```bash
+   npm run db:push
+   ```
+   *The **Safety Guard** will ask for confirmation if a remote project is detected.*
+
+---
+
+## [20260518210000 - 20260518211000] Terms of Use & Trigger Optimization
+
+### Purpose
+Implements Phase 1 of Terms of Use acceptance and updates the `handle_new_user` trigger to persist terms metadata from auth registration.
+
+### Affected Tables
+- `public.profiles`: Added `terms_accepted_at`, `terms_version`, and `last_warning_at`.
+
+---
+
 ## [20260518100000 - 20260518200000] Moderation Foundation, Public Restrictions & RLS Stabilization
 
 ### Purpose
