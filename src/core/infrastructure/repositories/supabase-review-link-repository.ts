@@ -27,6 +27,7 @@ export class ReviewLinkRepository {
       .eq('slug', slug)
       .eq('is_active', true)
       .single()
+      .returns<ReviewLink & { businesses: Business }>()
 
     if (error || !data) return null
     

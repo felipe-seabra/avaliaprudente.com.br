@@ -62,6 +62,7 @@ export function BusinessRanking() {
           `)
           .eq('is_frozen', false)
           .limit(100)
+          .returns<SupabaseBusinessResponse[]>()
 
         if (error) throw error
 

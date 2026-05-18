@@ -10,6 +10,8 @@ export type AnalyticsEvent = Tables<'analytics_events'>
 
 export type UserRole = 'admin' | 'customer'
 
+export type AccountStatus = 'active' | 'warned' | 'suspended' | 'banned'
+
 export interface CreateBusinessDTO {
   name: string
   slug: string

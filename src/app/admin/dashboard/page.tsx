@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
           repo.getRecentActivity()
         ])
         setStats(data)
-        setRecentActivity((activity as unknown as RecentActivityEvent[]) || [])
+        setRecentActivity(activity)
       } catch (err) {
         console.error('Admin Dashboard: Failed to load stats', err)
         toast.error('Erro ao carregar estatísticas')

@@ -122,7 +122,12 @@ export class AdminRepository {
     try {
       const { data, error } = await this.supabase
         .from('analytics_events')
-        .select('*, businesses(name, slug)')
+        .select('event_type, created_at, businesses(name, slug)')
+        .returns<{ 
+          event_type: string, 
+          created_at: string, 
+          businesses: { name: string, slug: string } | null 
+        }[]>()
         .order('created_at', { ascending: false })
         .limit(10)
 

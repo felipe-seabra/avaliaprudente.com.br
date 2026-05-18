@@ -16,12 +16,6 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import { ShieldCheck, AlertCircle } from 'lucide-react'
 
-interface Profile {
-  terms_accepted_at: string | null;
-  terms_version: string | null;
-  role: string;
-}
-
 export function TermsAcceptanceDialog() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -33,14 +27,12 @@ export function TermsAcceptanceDialog() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
         .select('terms_accepted_at, terms_version, role')
         .eq('id', user.id)
         .single()
       
-      const profile = data as unknown as Profile
-
       if (profile && profile.role !== 'admin') {
         const currentVersion = '1.1'
         if (!profile.terms_accepted_at || profile.terms_version !== currentVersion) {
@@ -68,7 +60,7 @@ export function TermsAcceptanceDialog() {
         .update({
           terms_accepted_at: new Date().toISOString(),
           terms_version: '1.1'
-        } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+        })
         .eq('id', user.id)
 
       if (error) throw error

@@ -299,7 +299,7 @@ export default function PageEditor() {
   }
 
   const biz = currentBusiness as Business
-  const isVerified = biz.is_verified
+  const isVerified = !!biz.is_verified
   const verificationStatus = biz.verification_status
   const isAdmin = userRole === 'admin'
 

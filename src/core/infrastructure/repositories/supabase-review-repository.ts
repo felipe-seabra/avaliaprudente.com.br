@@ -46,7 +46,7 @@ export class ReviewRepository {
           source: 'nfc',
           customer_email: null
         }
-      ] as unknown as Review[]
+      ] as Review[]
     }
 
     const { data, error } = await this.supabase

@@ -17,7 +17,7 @@ export function useReviewLink(slug: string) {
         if (!data) {
           setError('Link não encontrado ou inativo')
         } else {
-          setReviewLink(data as unknown as (ReviewLink & { businesses: Business }))
+          setReviewLink(data)
         }
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Erro desconhecido'

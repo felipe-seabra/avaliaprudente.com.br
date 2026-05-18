@@ -1,6 +1,21 @@
 import { createClient as createBrowserClient } from '@/lib/supabase/client'
 import { SupabaseClient } from '@supabase/supabase-js'
-import { BusinessPage, PageLink, CreatePageLinkDTO } from '@/core/domain/entities'
+import { BusinessPage, PageLink, CreatePageLinkDTO, Business } from '@/core/domain/entities'
+
+interface BusinessWithModeration extends Business {
+  is_frozen: boolean
+}
+
+interface PageWithBusiness extends BusinessPage {
+  businesses: { 
+    name: string, 
+    logo_url: string | null, 
+    slug: string, 
+    id: string, 
+    is_verified?: boolean | null, 
+    is_frozen?: boolean 
+  }
+}
 
 export class BusinessPageRepository {
   private supabase: SupabaseClient
@@ -20,7 +35,7 @@ export class BusinessPageRepository {
     return data
   }
 
-  async getBySlug(slug: string): Promise<(BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean, is_frozen?: boolean } }) | null> {
+  async getBySlug(slug: string): Promise<PageWithBusiness | null> {
     // 1. Check for Virtual Demo Profile
     if (slug === 'demo' || slug === 'demonstracao') {
       const demoBusiness = {
@@ -41,7 +56,7 @@ export class BusinessPageRepository {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         businesses: demoBusiness
-      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean, is_frozen?: boolean } })
+      } as PageWithBusiness
     }
 
     // 2. Resolve business by slug first (Publicly accessible)
@@ -58,28 +73,30 @@ export class BusinessPageRepository {
        return null
     }
 
+    const businessData = business as unknown as BusinessWithModeration
+
     // 3. Fetch the page for this business
     const { data: page } = await this.supabase
       .from('business_pages')
       .select('*')
-      .eq('business_id', business.id)
+      .eq('business_id', businessData.id)
       .maybeSingle()
 
     // 4. Handle newly created businesses without a page entry yet
     if (!page) {
       return {
         id: 'initial-page',
-        business_id: business.id,
-        description: `Bem-vindo à página oficial de ${business.name}. Em breve, mais informações e links úteis.`,
+        business_id: businessData.id,
+        description: `Bem-vindo à página oficial de ${businessData.name}. Em breve, mais informações e links úteis.`,
         theme_config: { primary_color: '#7c3aed', layout: 'standard' },
         is_published: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        businesses: business
-      } as unknown as (BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, id: string, is_verified?: boolean } })
+        businesses: businessData
+      } as PageWithBusiness
     }
 
-    return { ...page, businesses: business }
+    return { ...page, businesses: businessData } as PageWithBusiness
   }
 
   async create(businessId: string): Promise<BusinessPage> {

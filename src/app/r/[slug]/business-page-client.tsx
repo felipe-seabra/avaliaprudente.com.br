@@ -13,9 +13,19 @@ import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase
 
 interface BusinessPageClientProps {
   data: {
-    page: BusinessPage & { businesses: { name: string, logo_url: string | null, slug: string, is_verified?: boolean } }
+    page: BusinessPage & { 
+      businesses: { 
+        name: string, 
+        logo_url: string | null, 
+        slug: string, 
+        id?: string,
+        is_verified?: boolean | null,
+        is_frozen?: boolean 
+      } 
+    }
     links: PageLink[]
     reviews: Review[]
+    isAdmin?: boolean
   }
 }
 

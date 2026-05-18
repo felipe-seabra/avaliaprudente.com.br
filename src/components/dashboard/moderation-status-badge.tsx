@@ -11,19 +11,14 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-interface Profile {
-  account_status: string;
-  warning_count: number;
-  suspended_until: string | null;
-  role: string;
-}
+import { AccountStatus, UserRole } from '@/core/domain/entities'
 
 export function ModerationStatusBadge() {
   const [status, setStatus] = useState<{
-    accountStatus: string;
+    accountStatus: AccountStatus;
     warningCount: number;
     suspendedUntil: string | null;
-    role: string;
+    role: UserRole | string;
   } | null>(null)
   
   const supabase = createClient()
@@ -33,17 +28,15 @@ export function ModerationStatusBadge() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
         .select('account_status, warning_count, suspended_until, role')
         .eq('id', user.id)
         .single()
       
-      const profile = data as unknown as Profile
-
       if (profile) {
         setStatus({
-          accountStatus: profile.account_status || 'active',
+          accountStatus: (profile.account_status as AccountStatus) || 'active',
           warningCount: profile.warning_count || 0,
           suspendedUntil: profile.suspended_until,
           role: profile.role || 'customer'
