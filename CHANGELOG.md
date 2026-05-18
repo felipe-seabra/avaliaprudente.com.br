@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.2.7] - 2026-05-18
 
 ### Fixed
+- **Migration Chain Stability:** Resolved a critical failure in `npx supabase db reset` by fixing a column name mismatch in the `20260517150000_core_verification_schema.sql` migration (changed `requested_by` to the standardized `user_id`).
 - **Company Verification Flow:** Resolved a 400 Bad Request error by fixing conflicting database constraints on the `verification_status` column.
 - **Admin Permissions:** Added missing RLS `UPDATE` policies for the `businesses` and `profiles` tables, allowing administrators to verify companies and moderate users correctly.
 - **Trigger Consistency:** Synchronized database triggers (`sync_business_verification`, `handle_business_verification_initial_state`) to use the standardized `'approved'` status instead of the legacy `'verified'`.

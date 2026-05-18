@@ -26,12 +26,12 @@ END $$;
 CREATE TABLE IF NOT EXISTS public.verification_requests (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     business_id uuid REFERENCES public.businesses(id) ON DELETE CASCADE NOT NULL,
-    requested_by uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
     message text,
     status text DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
     created_at timestamptz DEFAULT now() NOT NULL,
     reviewed_at timestamptz NULL,
-    reviewed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL
+    reviewed_by uuid REFERENCES public.profiles(id) ON DELETE SET NULL
 );
 
 -- 3. Enable RLS
@@ -41,12 +41,12 @@ ALTER TABLE public.verification_requests ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view their own requests" ON public.verification_requests;
 CREATE POLICY "Users can view their own requests"
     ON public.verification_requests FOR SELECT
-    USING (auth.uid() = requested_by);
+    USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can create their own requests" ON public.verification_requests;
 CREATE POLICY "Users can create their own requests"
     ON public.verification_requests FOR INSERT
-    WITH CHECK (auth.uid() = requested_by);
+    WITH CHECK (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Admins can view all requests" ON public.verification_requests;
 CREATE POLICY "Admins can view all requests"
