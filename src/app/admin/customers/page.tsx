@@ -17,14 +17,16 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ModerationWarningDialog } from '@/components/admin/moderation-warning-dialog'
 import { ModerationSuspensionDialog } from '@/components/admin/moderation-suspension-dialog'
+import { ModerationBanDialog } from '@/components/admin/moderation-ban-dialog'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 
 // Extend Profile entity with moderation fields
 interface ModeratedProfile extends Profile {
   warning_count: number
-  account_status: 'active' | 'warned' | 'suspended'
+  account_status: 'active' | 'warned' | 'suspended' | 'banned'
   suspended_until: string | null
+  banned_at: string | null
 }
 
 export default function AdminCustomersPage() {
@@ -36,6 +38,7 @@ export default function AdminCustomersPage() {
   // Dialogs State
   const [isWarningDialogOpen, setIsWarningDialogOpen] = useState(false)
   const [isSuspensionDialogOpen, setIsSuspensionDialogOpen] = useState(false)
+  const [isBanDialogOpen, setIsBanDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<{ id: string, name: string } | null>(null)
   
   const [repo] = useState(() => new AdminRepository())
@@ -66,23 +69,6 @@ export default function AdminCustomersPage() {
     (c.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (c.username || '').toLowerCase().includes(searchTerm.toLowerCase())
   )
-
-  const handleBlockUser = async (id: string, isBlocked: boolean) => {
-    if (!confirm(isBlocked ? 'Tem certeza que deseja bloquear este usuário?' : 'Tem certeza que deseja desbloquear este usuário?')) return
-    try {
-      if (isBlocked) {
-        await repo.blockUser(id)
-        toast.success('Usuário bloqueado com sucesso.')
-      } else {
-        await repo.unblockUser(id)
-        toast.success('Usuário desbloqueado com sucesso.')
-      }
-      loadCustomers()
-    } catch (error) {
-      console.error('Error blocking/unblocking user', error)
-      toast.error('Erro ao processar a ação.')
-    }
-  }
 
   const handleReactivateAccount = async (id: string) => {
     if (!confirm('Deseja reativar esta conta agora?')) return
@@ -116,6 +102,11 @@ export default function AdminCustomersPage() {
   const handleOpenSuspensionDialog = (id: string, name: string) => {
     setSelectedUser({ id, name })
     setIsSuspensionDialogOpen(true)
+  }
+
+  const handleOpenBanDialog = (id: string, name: string) => {
+    setSelectedUser({ id, name })
+    setIsBanDialogOpen(true)
   }
 
   const formatDate = (dateStr: string | null | undefined) => {
@@ -179,7 +170,7 @@ export default function AdminCustomersPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredCustomers.map((customer) => (
-                    <TableRow key={customer.id} className={customer.is_blocked || customer.account_status === 'suspended' ? 'bg-destructive/5' : ''}>
+                    <TableRow key={customer.id} className={customer.is_blocked || customer.account_status === 'suspended' || customer.account_status === 'banned' ? 'bg-destructive/5' : ''}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
@@ -192,9 +183,9 @@ export default function AdminCustomersPage() {
                                  <Badge variant="outline" className="text-[9px] h-4 px-1 text-primary border-primary/20">Você</Badge>
                                )}
                              </div>
-                             {customer.is_blocked && (
+                             {customer.account_status === 'banned' && (
                                <span className="text-[10px] text-destructive font-bold uppercase flex items-center gap-1">
-                                 <Ban className="h-3 w-3" /> Bloqueado
+                                 <Ban className="h-3 w-3" /> Banimento Permanente
                                </span>
                              )}
                              {customer.account_status === 'suspended' && (
@@ -228,7 +219,11 @@ export default function AdminCustomersPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1 items-start">
-                          {customer.account_status === 'suspended' ? (
+                          {customer.account_status === 'banned' ? (
+                            <Badge variant="destructive" className="text-[10px] uppercase font-bold gap-1 bg-red-600 hover:bg-red-700">
+                               <Ban className="h-2.5 w-2.5" /> Banido
+                            </Badge>
+                          ) : customer.account_status === 'suspended' ? (
                             <Badge variant="destructive" className="text-[10px] uppercase font-bold gap-1">
                                <ShieldAlert className="h-2.5 w-2.5" /> Suspenso
                             </Badge>
@@ -279,7 +274,7 @@ export default function AdminCustomersPage() {
                             </DropdownMenuItem>
 
                             {/* Suspend Action - Phase 2 */}
-                            {customer.account_status !== 'suspended' ? (
+                            {customer.account_status !== 'suspended' && customer.account_status !== 'banned' ? (
                                <DropdownMenuItem 
                                   className="cursor-pointer text-destructive font-bold" 
                                   onClick={() => handleOpenSuspensionDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
@@ -288,7 +283,7 @@ export default function AdminCustomersPage() {
                                   <ShieldAlert className="h-4 w-4 mr-2" />
                                   Suspender Conta
                                </DropdownMenuItem>
-                            ) : (
+                            ) : customer.account_status === 'suspended' || customer.account_status === 'banned' ? (
                                <DropdownMenuItem 
                                   className="cursor-pointer text-green-600 font-bold" 
                                   onClick={() => handleReactivateAccount(customer.id)}
@@ -296,23 +291,23 @@ export default function AdminCustomersPage() {
                                   <RotateCcw className="h-4 w-4 mr-2" />
                                   Reativar Conta
                                </DropdownMenuItem>
-                            )}
+                            ) : null}
 
                             <DropdownMenuSeparator />
                             
-                            {customer.is_blocked ? (
-                              <DropdownMenuItem className="cursor-pointer text-green-600" onClick={() => handleBlockUser(customer.id, false)}>
+                            {customer.account_status === 'banned' ? (
+                              <DropdownMenuItem className="cursor-pointer text-green-600" onClick={() => handleReactivateAccount(customer.id)}>
                                 <BadgeCheck className="h-4 w-4 mr-2" />
-                                Desbloquear (Permanente)
+                                Remover Banimento
                               </DropdownMenuItem>
                             ) : (
                               <DropdownMenuItem 
-                                className="cursor-pointer text-destructive" 
-                                onClick={() => handleBlockUser(customer.id, true)}
+                                className="cursor-pointer text-destructive font-bold" 
+                                onClick={() => handleOpenBanDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
                                 disabled={customer.id === currentAdminId}
                               >
                                 <Ban className="h-4 w-4 mr-2" />
-                                Bloquear permanentemente
+                                Banir permanentemente
                               </DropdownMenuItem>
                             )}
 
@@ -358,6 +353,13 @@ export default function AdminCustomersPage() {
           <ModerationSuspensionDialog
             open={isSuspensionDialogOpen}
             onOpenChange={setIsSuspensionDialogOpen}
+            userId={selectedUser.id}
+            userName={selectedUser.name}
+            onSuccess={loadCustomers}
+          />
+          <ModerationBanDialog
+            open={isBanDialogOpen}
+            onOpenChange={setIsBanDialogOpen}
             userId={selectedUser.id}
             userName={selectedUser.name}
             onSuccess={loadCustomers}

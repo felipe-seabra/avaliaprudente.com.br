@@ -45,11 +45,12 @@ export async function middleware(request: NextRequest) {
 
   const isAdmin = role === 'admin'
   const isSuspended = !isAdmin && accountStatus === 'suspended' && (!suspendedUntil || new Date(suspendedUntil) > new Date())
-  const isUserBlocked = !isAdmin && isBlocked
+  const isBanned = !isAdmin && accountStatus === 'banned'
+  const isUserBlocked = !isAdmin && (isBlocked || isBanned)
 
   // DEBUG LOGS
   if (isAdminPage || isDashboardPage || isBlockedPage || isAuthPage) {
-    console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}`)
+    console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}, Status: ${accountStatus}`)
   }
 
   // 1. Admin Master Bypass: If admin is logged in, they bypass all moderation blocks
@@ -62,14 +63,15 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // 2. Permanent Block check (Regular users only)
+  // 2. Permanent Block / Ban check (Regular users only)
   if (user && isUserBlocked && !isBlockedPage) {
-    console.log('Middleware: Blocked User -> Redirecting to /blocked')
-    return NextResponse.redirect(new URL('/blocked', request.url))
+    const type = isBanned ? 'banned' : 'blocked'
+    console.log(`Middleware: Blocked/Banned User (${type}) -> Redirecting to /blocked`)
+    return NextResponse.redirect(new URL(`/blocked${isBanned ? '?type=banned' : ''}`, request.url))
   }
 
   // 3. Temporary Suspension check (Regular users only)
-  if (user && isSuspended && (isDashboardPage || isAdminPage)) {
+  if (user && isSuspended && (isDashboardPage || isAdminPage) && !isBlockedPage) {
     console.log('Middleware: Suspended User -> Redirecting to /blocked?type=suspended')
     return NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
   }

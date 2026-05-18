@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2026-05-18
+
+### Added
+- **Moderation System Phase 3 (Permanent Bans):** Implemented full support for permanent user bans in the admin dashboard and database.
+  - **Database Migration:** Added `banned_at` and `banned_reason` fields to profiles and updated moderation escalation triggers.
+  - **Minimalist RLS Integration:** Updated `is_suspended` helper to include banned users, automatically securing all related entities (businesses, reviews, pages).
+  - **Admin Actions:** New `ModerationBanDialog` requiring explicit reasons and confirmation for permanent bans.
+  - **Middleware Hardening:** Updated auth middleware to detect banned status and redirect users to `/blocked?type=banned` without breaking admin access.
+  - **Auditability:** All ban actions are now logged in the `moderation_actions` table for full administrative tracking.
+
 ## [0.3.1] - 2026-05-18
 
 ### Fixed

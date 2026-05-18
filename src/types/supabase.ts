@@ -213,6 +213,11 @@ export type Database = {
           blocked_reason: string | null
           last_login_at: string | null
           created_at: string
+          account_status: string | null
+          suspended_until: string | null
+          warning_count: number
+          banned_at: string | null
+          banned_reason: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -228,6 +233,11 @@ export type Database = {
           blocked_reason?: string | null
           last_login_at?: string | null
           created_at?: string
+          account_status?: string | null
+          suspended_until?: string | null
+          warning_count?: number
+          banned_at?: string | null
+          banned_reason?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -243,6 +253,11 @@ export type Database = {
           blocked_reason?: string | null
           last_login_at?: string | null
           created_at?: string
+          account_status?: string | null
+          suspended_until?: string | null
+          warning_count?: number
+          banned_at?: string | null
+          banned_reason?: string | null
         }
         Relationships: []
       }
