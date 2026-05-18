@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.6] - 2026-05-18
+
+### Fixed
+- **Total Public Isolation for Frozen Businesses:** Hardened public-facing repositories to prevent direct access to frozen content via slugs or review links.
+  - **Repository Hardening:** Updated `BusinessPageRepository` and `ReviewLinkRepository` to explicitly validate `is_frozen` status for all public-facing slug resolutions.
+  - **Redirect Protection:** Ensured custom review link slugs (e.g., `/r/custom-slug`) are immediately disabled when the associated business is frozen by moderation.
+  - **Type Safety:** Refined TypeScript interfaces in repositories to eliminate `any` usage and improve data integrity during moderation checks.
+
 ## [0.3.5] - 2026-05-18
 
 ### Fixed

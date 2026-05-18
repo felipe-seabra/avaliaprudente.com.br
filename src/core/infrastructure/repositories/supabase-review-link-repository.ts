@@ -28,8 +28,16 @@ export class ReviewLinkRepository {
       .eq('is_active', true)
       .single()
 
-    if (error) return null
-    return data as unknown as (ReviewLink & { businesses: Business })
+    if (error || !data) return null
+    
+    // Safety: If the associated business is frozen, the link should not work for public users.
+    // RLS might already handle this, but we reinforce it here.
+    const result = data as unknown as (ReviewLink & { businesses: Business })
+    if (result.businesses?.is_frozen) {
+       return null
+    }
+
+    return result
   }
 
   async create(link: CreateReviewLinkDTO): Promise<ReviewLink> {

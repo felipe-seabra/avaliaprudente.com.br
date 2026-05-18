@@ -45,9 +45,11 @@ export class BusinessPageRepository {
     }
 
     // 2. Resolve business by slug first (Publicly accessible)
+    // Note: RLS policies will automatically filter frozen businesses for anonymous users.
+    // We fetch everything here and let the Page Component decide based on auth status.
     const { data: business, error: bError } = await this.supabase
       .from('businesses')
-      .select('*')
+      .select('*, is_frozen')
       .eq('slug', slug)
       .maybeSingle()
 
