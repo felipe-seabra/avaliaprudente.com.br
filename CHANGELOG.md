@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.5] - 2026-05-18
+
+### Fixed
+- **Database & Middleware Synchronization (Phase 4):** Resolved a regression where the middleware failed to fetch profiles due to missing `is_deleted` column on the remote database.
+  - **Schema Alignment:** Applied missing Phase 3, 4, and 5 migrations to the remote Supabase instance.
+  - **Auth Stability:** Restored correct admin role resolution and dashboard access by ensuring all moderation-related fields are available for the middleware session check.
+  - **Build Integrity:** Verified full project stability with successful linting and production builds.
+
 ## [0.3.4] - 2026-05-18
 
 ### Fixed
