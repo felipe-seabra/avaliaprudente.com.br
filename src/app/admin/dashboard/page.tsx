@@ -7,6 +7,7 @@ import { AdminRepository, AdminStats } from '@/core/infrastructure/repositories/
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
 
 interface RecentActivityEvent {
   event_type: string
@@ -23,8 +24,14 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    console.log('AdminDashboardPage: Mounted')
+    
     async function loadStats() {
       try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        console.log(`AdminDashboardPage: Loading stats for user ${user?.id}`)
+
         const repo = new AdminRepository()
         const [data, activity] = await Promise.all([
           repo.getPlatformStats(),
