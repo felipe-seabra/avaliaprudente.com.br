@@ -1,6 +1,43 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+/**
+ * Generates a lightweight, privacy-aware browser fingerprint.
+ * Combines stable browser characteristics into a hash.
+ */
+export async function getBrowserFingerprint(): Promise<string> {
+  if (typeof window === 'undefined') return 'server-side'
+
+  const components = [
+    navigator.userAgent,
+    navigator.language,
+    new Date().getTimezoneOffset().toString(),
+    window.screen.width.toString(),
+    window.screen.height.toString(),
+    window.screen.colorDepth.toString(),
+    // Simple canvas fingerprinting (non-aggressive)
+    (() => {
+      try {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return ''
+        ctx.textBaseline = 'top'
+        ctx.font = '14px Arial'
+        ctx.fillText('AvaliaPrudente', 2, 2)
+        return canvas.toDataURL()
+      } catch {
+        return ''
+      }
+    })()
+  ]
+
+  const message = components.join('|')
+  const msgUint8 = new TextEncoder().encode(message)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }

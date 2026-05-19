@@ -34,6 +34,8 @@ export interface CreateReviewDTO {
   customer_email?: string
   source?: string
   is_internal: boolean
+  submission_fingerprint?: string
+  browser_fingerprint?: string
 }
 
 export interface CreatePageLinkDTO {

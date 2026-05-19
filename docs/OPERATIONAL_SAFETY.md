@@ -47,7 +47,15 @@ Before any change to RLS or Repositories:
 2. Verify that RLS policies for `UPDATE` and `DELETE` strictly check `auth.uid() = owner_id`.
 3. Ensure no infinite recursion is introduced by querying `profiles` inside RLS (use `is_admin()`).
 
-## 5. Moderation & Governance Safety
-1. **Admin Master Bypass:** Always ensure that `is_admin()` users can bypass blocks. Breaking this can lock out administrators.
-2. **Appeals Workflow:** When reviewing an appeal, verify that the reversing action (e.g., unfreezing a business) is atomic and audited in `moderation_actions`.
-3. **Onboarding Quality:** Any change to the business creation flow must respect the database-level quality constraints (slugs, required branding).
+## 6. Anti-Spam & Abuse Prevention
+
+The platform implements a hybrid protection system to prevent rating inflation and spam reviews.
+
+### Review Cooldown Rules
+- **Per-Business Throttling:** A single device/browser (identified by an anonymous fingerprint) can only review the same business once every **60 minutes**.
+- **Content Deduplication:** Identical review text from the same fingerprint is blocked across any business for **10 minutes**.
+
+### Implementation Details
+- **Anonymous Fingerprinting:** Uses a SHA-256 hash of stable browser characteristics (User Agent, timezone, screen resolution) combined with anonymized network signals. Raw IPs are NOT stored to preserve user privacy.
+- **Server-side Enforcement:** Protection is enforced via database triggers (`tr_enforce_review_abuse_protection`) on the `reviews` table. Frontend-only checks are never the sole protection.
+- **Shared Network Support:** The system is designed to avoid blocking legitimate users on shared Wi-Fi (offices, homes) by combining multiple heuristics instead of a simple IP lock.

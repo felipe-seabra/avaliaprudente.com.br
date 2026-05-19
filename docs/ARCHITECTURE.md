@@ -63,8 +63,14 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Branding:** Dynamically fetches business logo and primary colors to generate a personalized preview.
 - **Caching:** `Cache-Control: public, max-age=31536000, immutable`.
 - **Constraint:** Must not use Node.js-only libraries.
+### Review Abuse Prevention System
+- **Hybrid Strategy:** Combines anonymous fingerprinting with server-side cooldowns.
+- **Fingerprinting:** SHA-256 hash of stable client attributes (User Agent, timezone, resolution).
+- **Throttling:** Enforced via `tr_enforce_review_abuse_protection` trigger.
+- **Cooldowns:** 60-minute window per business; 10-minute window for identical content.
 
 ### Slug Validation & Protection
+...
 - **Uniqueness:** Guaranteed by `is_slug_available` database RPC.
 - **Normalization:** Forced lowercase and accent removal.
 - **Route Protection:** Prevents slugs from matching internal routes (`admin`, `dashboard`, `login`, `register`, etc.).

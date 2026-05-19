@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { toast } from 'sonner'
 import { CheckCircle2, ChevronLeft, Send, Sparkles } from 'lucide-react'
+import { getBrowserFingerprint } from '@/lib/utils'
 
 interface ReviewFlowProps {
   businessId: string
@@ -44,6 +45,7 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
     setIsLoading(true)
     try {
       const isInternal = rating < 4
+      const fingerprint = await getBrowserFingerprint()
 
       await repository.create({
         business_id: businessId,
@@ -53,6 +55,8 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
         customer_email: customerEmail.trim() || undefined,
         is_internal: isInternal,
         source: 'nfc-page',
+        submission_fingerprint: fingerprint,
+        browser_fingerprint: fingerprint,
       })
 
       setStep('success')
@@ -65,7 +69,14 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
       }
     } catch (err: unknown) {
       console.error('Review submission error:', err)
-      toast.error('Não foi possível enviar sua avaliação. Tente novamente.')
+      
+      // Check if it's a known database error message from our anti-spam trigger
+      const errorMessage = err instanceof Error ? err.message : ''
+      if (errorMessage.includes('recentemente') || errorMessage.includes('spam')) {
+        toast.error(errorMessage)
+      } else {
+        toast.error('Não foi possível enviar sua avaliação. Tente novamente.')
+      }
     } finally {
       setIsLoading(false)
     }

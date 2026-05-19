@@ -21,6 +21,7 @@ This file contains the universal governance rules, shared workflows, and operati
 - Ensure that updates to the UI do not break SSR/Server Component compatibility.
 - **RLS Safety:** Use `is_admin()` security definer to avoid infinite recursion.
 - **Public Visibility:** Filter out `is_frozen = true` items in public lookups.
+- **Review Anti-Spam:** Respect the per-business and per-content cooldowns implemented via database triggers. Ensure fingerprints are generated on the client-side for all new reviews.
 
 ## 4. Protected Areas
 Any modification to the following areas requires extreme caution and a mandatory security review:
