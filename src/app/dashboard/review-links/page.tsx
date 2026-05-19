@@ -61,9 +61,9 @@ export default function ReviewLinksPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Links de Avaliação</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Botões de Avaliação</h1>
           <p className="text-muted-foreground">
-            Gerencie os links de redirecionamento para <strong>{currentBusiness.name}</strong>.
+            Gerencie as chamadas para ação para <strong>{currentBusiness.name}</strong>.
           </p>
         </div>
         <CreateReviewLinkDialog onCreated={fetchLinks} />
@@ -82,9 +82,9 @@ export default function ReviewLinksPage() {
               <div className="max-w-md w-full space-y-6">
                 <div className="flex flex-col items-center">
                   <Link2 className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-                  <p className="text-muted-foreground">Você ainda não tem links de redirecionamento ativos.</p>
+                  <p className="text-muted-foreground">Você ainda não tem botões de avaliação configurados.</p>
                   <p className="text-sm text-muted-foreground mb-6">
-                    Configure seu link do Google para começar a coletar avaliações.
+                    Crie uma chamada para ação personalizada para começar a coletar avaliações.
                   </p>
                 </div>
 
@@ -92,7 +92,7 @@ export default function ReviewLinksPage() {
                   <AlertCircle className="h-4 w-4 text-primary" />
                   <AlertTitle className="text-sm font-bold">Por que configurar?</AlertTitle>
                   <AlertDescription className="text-xs">
-                    O link de avaliação é obrigatório para solicitar a verificação oficial e para que seus clientes possam te avaliar via NFC.
+                    Ter pelo menos um botão de avaliação configurado é necessário para que seus clientes possam te avaliar via NFC ou QR Code.
                   </AlertDescription>
                 </Alert>
 
@@ -105,8 +105,8 @@ export default function ReviewLinksPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Redireciona para</TableHead>
+                  <TableHead>Texto do Botão</TableHead>
+                  <TableHead>Link de Destino</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -114,7 +114,7 @@ export default function ReviewLinksPage() {
               <TableBody>
                 {links.map((link) => (
                   <TableRow key={link.id}>
-                    <TableCell className="font-medium">/r/{link.slug}</TableCell>
+                    <TableCell className="font-medium">{link.slug}</TableCell>
                     <TableCell className="max-w-[300px] truncate text-muted-foreground">
                       {link.redirect_url}
                     </TableCell>
@@ -138,7 +138,7 @@ export default function ReviewLinksPage() {
                             onClick={() => window.open(`/r/${link.slug}`, '_blank')}
                           >
                             <ExternalLink className="mr-2 h-4 w-4" />
-                            Testar Link
+                            Testar Botão
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             variant="destructive"

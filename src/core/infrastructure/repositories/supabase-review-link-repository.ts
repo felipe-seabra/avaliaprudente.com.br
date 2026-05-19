@@ -24,7 +24,7 @@ export class ReviewLinkRepository {
     const { data, error } = await this.supabase
       .from('review_links')
       .select('*, businesses(*)')
-      .eq('slug', slug.toLowerCase())
+      .ilike('slug', slug)
       .eq('is_active', true)
       .single()
       .returns<ReviewLink & { businesses: Business }>()
@@ -44,7 +44,7 @@ export class ReviewLinkRepository {
   async isSlugAvailable(slug: string): Promise<boolean> {
     const { data, error } = await this.supabase
       .rpc('is_slug_available', { 
-        slug_to_check: slug.toLowerCase()
+        slug_to_check: slug
       })
 
     if (error) {
@@ -52,7 +52,7 @@ export class ReviewLinkRepository {
       const { data: existing } = await this.supabase
         .from('review_links')
         .select('id')
-        .eq('slug', slug.toLowerCase())
+        .ilike('slug', slug)
         .maybeSingle()
       return !existing
     }

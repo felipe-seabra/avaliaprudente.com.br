@@ -22,11 +22,11 @@ import { InputField } from '@/components/shared/input-field'
 import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { useBusiness } from '@/providers/business-provider'
 import { parseError, logError } from '@/lib/error-handler'
-import { isValidSlug, isValidGoogleReviewUrl } from '@/lib/utils'
+import { isValidGoogleReviewUrl } from '@/lib/utils'
 import { GoogleReviewTutorial } from './google-review-tutorial'
 
 const createReviewLinkSchema = z.object({
-  slug: z.string().min(2, 'Slug deve ter pelo menos 2 caracteres').refine(isValidSlug, 'Slug inválido ou reservado'),
+  slug: z.string().min(2, 'O texto deve ter pelo menos 2 caracteres'),
   redirect_url: z.string().url('URL inválida. Comece com https://').refine(isValidGoogleReviewUrl, 'O link deve ser um link válido de avaliações do Google'),
 })
 
@@ -43,14 +43,14 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
   const form = useForm<CreateReviewLinkInput>({
     resolver: zodResolver(createReviewLinkSchema),
     defaultValues: {
-      slug: '',
+      slug: 'Nos Avalie no Google',
       redirect_url: '',
     },
   })
 
   const watchedSlug = form.watch('slug')
 
-  // Real-time slug validation
+  // Real-time label validation (checking for uniqueness)
   React.useEffect(() => {
     const checkSlug = async () => {
       if (!watchedSlug || watchedSlug.length < 2) {
@@ -63,7 +63,7 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
         const available = await repository.isSlugAvailable(watchedSlug)
         setSlugStatus(available ? 'available' : 'unavailable')
       } catch (error) {
-        console.error('Error checking slug:', error)
+        console.error('Error checking label availability:', error)
       } finally {
         setIsCheckingSlug(false)
       }
@@ -79,13 +79,12 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
     try {
       const available = await repository.isSlugAvailable(data.slug)
       if (!available) {
-        form.setError('slug', { message: 'Este slug já está em uso' })
+        form.setError('slug', { message: 'Este texto já está em uso para outro botão' })
         return
       }
 
       await repository.create({
         ...data,
-        slug: data.slug.toLowerCase(),
         business_id: currentBusiness.id,
       })
 
@@ -127,9 +126,9 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Novo Link de Redirecionamento</DialogTitle>
+          <DialogTitle>Novo Botão de Avaliação</DialogTitle>
           <DialogDescription>
-            Crie um link personalizado que redireciona seus clientes satisfeitos.
+            Crie uma chamada para ação que redireciona seus clientes para sua página no Google.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -137,10 +136,10 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
             <div className="relative">
               <InputField
                 name="slug"
-                label="Slug do Link"
-                placeholder="ex: restaurante-principal"
+                label="Chamada para ação (Texto do botão)"
+                placeholder="ex: Nos Avalie no Google"
                 disabled={isLoading}
-                description="O link será: avaliaprudente.com.br/r/seu-slug"
+                description="Este texto aparecerá no botão que seus clientes verão."
               />
               <div className="absolute top-9 right-3 flex items-center gap-2">
                 {isCheckingSlug && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
@@ -154,10 +153,10 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
             </div>
             <InputField
               name="redirect_url"
-              label="URL do Google Meu Negócio"
+              label="Link da sua Página de Avaliações"
               placeholder="https://g.page/r/..."
               disabled={isLoading}
-              description="Cole aqui o link direto da sua página de avaliações no Google."
+              description="Cole aqui o link direto onde o cliente deixa o comentário."
             />
 
             <GoogleReviewTutorial />
@@ -167,7 +166,7 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading || isCheckingSlug || slugStatus === 'unavailable'}>
-                {isLoading ? 'Criando...' : 'Criar Link'}
+                {isLoading ? 'Criando...' : 'Criar Botão'}
               </Button>
             </DialogFooter>
           </form>
