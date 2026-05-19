@@ -1,90 +1,50 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { Loader2, Upload, RefreshCw, Trash2 } from 'lucide-react'
+import { Loader2, Upload, RefreshCw, Trash2, Image as ImageIcon } from 'lucide-react'
+import { optimizeImage } from '@/lib/image-utils'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 interface ImageUploadProps {
   value?: string | null
-  onChange: (url: string) => void
+  onChange?: (url: string) => void
   onRemove: () => void
-  folder: string // e.g., 'logos'
+  onFileSelect?: (file: File | null) => void
+  folder?: string // e.g., 'logos'
   className?: string
   aspectRatio?: 'square' | 'video' | 'portrait'
+  disabled?: boolean
 }
 
 export function ImageUpload({
   value,
   onChange,
   onRemove,
-  folder,
+  onFileSelect,
+  folder = 'logos',
   className,
   aspectRatio = 'square',
+  disabled = false,
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
+  const [localPreview, setLocalPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
-  // Optimization: Resize and Compress image using Canvas
-  const optimizeImage = (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      if (file.type === 'image/svg+xml') {
-        resolve(file)
-        return
+  // Cleanup local preview URL on unmount or change
+  useEffect(() => {
+    return () => {
+      if (localPreview) {
+        URL.revokeObjectURL(localPreview)
       }
+    }
+  }, [localPreview])
 
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = (event) => {
-        const img = new window.Image()
-        img.src = event.target?.result as string
-        img.onload = () => {
-          const canvas = document.createElement('canvas')
-          let width = img.width
-          let height = img.height
-          const maxDimension = 512
-
-          if (width > height) {
-            if (width > maxDimension) {
-              height *= maxDimension / width
-              width = maxDimension
-            }
-          } else {
-            if (height > maxDimension) {
-              width *= maxDimension / height
-              height = maxDimension
-            }
-          }
-
-          canvas.width = width
-          canvas.height = height
-          const ctx = canvas.getContext('2d')
-          if (!ctx) {
-            reject(new Error('Canvas context not available'))
-            return
-          }
-
-          ctx.drawImage(img, 0, 0, width, height)
-          
-          canvas.toBlob(
-            (blob) => {
-              if (blob) resolve(blob)
-              else reject(new Error('Image optimization failed'))
-            },
-            'image/webp',
-            0.8
-          )
-        }
-      }
-      reader.onerror = reject
-    })
-  }
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -99,6 +59,18 @@ export function ImageUpload({
       toast.error('Formato não suportado. Use JPG, PNG, WebP ou SVG.')
       return
     }
+
+    // If onFileSelect is provided, we are in deferred mode
+    if (onFileSelect) {
+      const previewUrl = URL.createObjectURL(file)
+      if (localPreview) URL.revokeObjectURL(localPreview)
+      setLocalPreview(previewUrl)
+      onFileSelect(file)
+      return
+    }
+
+    // Immediate upload mode (Legacy support)
+    if (!onChange) return
 
     setIsUploading(true)
     try {
@@ -134,7 +106,7 @@ export function ImageUpload({
         .getPublicUrl(filePath)
 
       onChange(publicUrl)
-      toast.success('Logo atualizado com sucesso!')
+      toast.success('Imagem carregada com sucesso!')
     } catch (error: unknown) {
       console.error('Upload error:', error)
       const message = error instanceof Error ? error.message : 'Erro desconhecido'
@@ -145,38 +117,63 @@ export function ImageUpload({
     }
   }
 
+  const handleRemove = () => {
+    if (localPreview) {
+      URL.revokeObjectURL(localPreview)
+      setLocalPreview(null)
+    }
+    if (onFileSelect) {
+      onFileSelect(null)
+    }
+    onRemove()
+  }
+
   const triggerUpload = () => {
+    if (disabled || isUploading) return
     fileInputRef.current?.click()
   }
+
+  const displayImage = localPreview || (value && value !== 'pending' ? value : null)
 
   return (
     <div className={cn('space-y-4 w-full flex flex-col items-center', className)}>
       <input
         type="file"
         ref={fileInputRef}
-        onChange={handleUpload}
+        onChange={handleFileChange}
         accept="image/*"
         className="hidden"
+        disabled={disabled || isUploading}
       />
 
-      <div className={cn(
-        'relative group overflow-hidden rounded-2xl border-2 border-muted transition-all hover:border-primary/20 shadow-sm bg-background flex items-center justify-center',
-        aspectRatio === 'square' && 'h-32 w-32 md:h-40 md:w-40',
-        aspectRatio === 'video' && 'aspect-video w-full',
-        aspectRatio === 'portrait' && 'aspect-[3/4] w-full',
-        isUploading && 'opacity-50 grayscale'
-      )}>
-        {value ? (
+      <div 
+        onClick={triggerUpload}
+        className={cn(
+          'relative group overflow-hidden rounded-2xl border-2 border-dashed border-muted transition-all hover:border-primary/40 shadow-sm bg-muted/30 flex items-center justify-center cursor-pointer',
+          aspectRatio === 'square' && 'h-32 w-32 md:h-40 md:w-40',
+          aspectRatio === 'video' && 'aspect-video w-full',
+          aspectRatio === 'portrait' && 'aspect-[3/4] w-full',
+          (isUploading || disabled) && 'opacity-50 grayscale cursor-not-allowed',
+          displayImage && 'border-solid border-muted hover:border-primary/20 bg-background'
+        )}
+      >
+        {displayImage ? (
           <>
             <Image
-              src={value}
-              alt="Logo"
+              src={displayImage}
+              alt="Preview"
               fill
               className="object-contain p-3 transition-transform group-hover:scale-105"
             />
             {isUploading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            )}
+            {!isUploading && !disabled && (
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                <RefreshCw className="h-8 w-8 text-white animate-in zoom-in-50 duration-300" />
+                <span className="text-[10px] font-bold text-white uppercase tracking-wider">Trocar Imagem</span>
               </div>
             )}
           </>
@@ -186,37 +183,30 @@ export function ImageUpload({
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             ) : (
               <>
-                <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                <div className="p-3 rounded-full bg-primary/10 mb-2 group-hover:scale-110 transition-transform">
+                  <Upload className="h-6 w-6 text-primary" />
+                </div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider leading-tight">
-                  Clique para<br/>enviar logo
+                  Clique ou arraste<br/>para enviar
                 </p>
               </>
             )}
           </div>
         )}
-        
-        {/* Overlay trigger for upload when logo exists */}
-        {value && !isUploading && (
-          <button 
-            onClick={triggerUpload}
-            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-          >
-            <RefreshCw className="h-8 w-8 text-white animate-in zoom-in-50 duration-300" />
-          </button>
-        )}
       </div>
 
       {/* Explicit Actions */}
       <div className="flex flex-col w-full gap-2">
-        {!value ? (
+        {!displayImage ? (
           <Button 
             type="button" 
-            className="w-full font-bold gap-2 cursor-pointer" 
+            variant="outline"
+            className="w-full font-bold gap-2 cursor-pointer border-2 hover:bg-primary/5" 
             onClick={triggerUpload}
-            disabled={isUploading}
+            disabled={isUploading || disabled}
           >
-            <Upload className="h-4 w-4" />
-            Selecionar Logo
+            <ImageIcon className="h-4 w-4" />
+            Selecionar Imagem
           </Button>
         ) : (
           <div className="flex gap-2 w-full">
@@ -225,7 +215,7 @@ export function ImageUpload({
               variant="outline"
               className="flex-1 font-bold gap-2 cursor-pointer border-2" 
               onClick={triggerUpload}
-              disabled={isUploading}
+              disabled={isUploading || disabled}
             >
               <RefreshCw className={cn("h-4 w-4", isUploading && "animate-spin")} />
               Trocar
@@ -234,16 +224,16 @@ export function ImageUpload({
               type="button" 
               variant="destructive"
               size="icon"
-              className="w-10 h-10 rounded-xl cursor-pointer shadow-md" 
-              onClick={onRemove}
-              disabled={isUploading}
+              className="w-10 h-10 rounded-xl cursor-pointer shadow-sm hover:shadow-md transition-all" 
+              onClick={handleRemove}
+              disabled={isUploading || disabled}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         )}
         <p className="text-[9px] text-center text-muted-foreground font-medium uppercase tracking-tighter">
-          Máx 300KB • Recomendado 512x512px
+          JPG, PNG ou WebP • Máx 300KB
         </p>
       </div>
     </div>

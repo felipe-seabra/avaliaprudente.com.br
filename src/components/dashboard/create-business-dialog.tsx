@@ -26,6 +26,7 @@ import { parseError, logError } from '@/lib/error-handler'
 import { PRICING_PLANS, APP_CONFIG } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/client'
 import { slugify, isValidSlug } from '@/lib/utils'
+import { optimizeImage } from '@/lib/image-utils'
 
 const createBusinessSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -41,6 +42,7 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
   const [isCheckingSlug, setIsCheckingSlug] = useState(false)
   const [slugStatus, setSlugStatus] = useState<'available' | 'unavailable' | 'idle'>('idle')
   const [userRole, setUserRole] = useState('customer')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const { businesses, refreshBusinesses, setCurrentBusiness } = useBusiness()
   const repository = useMemo(() => new BusinessRepository(), [])
   const supabase = useMemo(() => createClient(), [])
@@ -64,6 +66,14 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
       logo_url: '',
     },
   })
+
+  // Reset local state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setSelectedFile(null)
+      form.reset()
+    }
+  }, [open, form])
 
   // Auto-generate slug from name
   const name = form.watch('name')
@@ -101,6 +111,37 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
 
   const canCreate = userRole === 'admin' || businesses.length < PRICING_PLANS.FREE.maxBusinesses
 
+  async function uploadLogo(businessId: string, file: File): Promise<string> {
+    const optimizedBlob = await optimizeImage(file)
+    
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) throw new Error('Usuário não autenticado')
+
+    const userId = userData.user.id
+    const fileExt = file.type === 'image/svg+xml' ? 'svg' : 'webp'
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
+    const filePath = `${userId}/logos/${fileName}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('business-assets')
+      .upload(filePath, optimizedBlob, {
+        contentType: file.type === 'image/svg+xml' ? 'image/svg+xml' : 'image/webp',
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (uploadError) throw uploadError
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('business-assets')
+      .getPublicUrl(filePath)
+
+    // Associate with business
+    await repository.update(businessId, { logo_url: publicUrl })
+    
+    return publicUrl
+  }
+
   async function onSubmit(data: CreateBusinessInput) {
     if (!canCreate) {
       toast.error('Limite de empresas atingido', {
@@ -122,13 +163,32 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
         return
       }
 
+      // Step 1: Create business record
       const newBusiness = await repository.create({
         ...data,
-        slug: data.slug.toLowerCase()
+        slug: data.slug.toLowerCase(),
+        logo_url: '' // Always start empty, upload later
       })
+
+      // Step 2: Upload logo if selected
+      if (selectedFile) {
+        try {
+          await uploadLogo(newBusiness.id, selectedFile)
+        } catch (uploadErr) {
+          console.error('Logo upload failed:', uploadErr)
+          toast.error('Empresa criada, mas erro ao enviar logo.', {
+            description: 'Você pode tentar enviar a logo depois nas configurações.'
+          })
+        }
+      }
+
       toast.success('Empresa criada com sucesso!')
       await refreshBusinesses()
-      setCurrentBusiness(newBusiness)
+      
+      // Get the latest business data (with logo if uploaded)
+      const finalBusiness = await repository.getById(newBusiness.id)
+      if (finalBusiness) setCurrentBusiness(finalBusiness)
+      
       setOpen(false)
       form.reset()
     } catch (error: unknown) {
@@ -206,9 +266,15 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
                         <FormControl>
                           <ImageUpload
                             value={field.value}
-                            onChange={field.onChange}
-                            onRemove={() => field.onChange('')}
-                            folder="logos"
+                            onFileSelect={(file) => {
+                              setSelectedFile(file)
+                              field.onChange(file ? 'pending' : '')
+                            }}
+                            onRemove={() => {
+                              setSelectedFile(null)
+                              field.onChange('')
+                            }}
+                            disabled={isLoading}
                           />
                         </FormControl>
                         <FormMessage />
