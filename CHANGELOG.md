@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.0] - 2026-05-19
+
+### Changed
+- **Project Structure Cleanup & Consolidation:**
+  - **Redundant Folder Removal:** Safely deleted empty directories: `src/components/layout`, `src/core/domain/repositories`, `src/hooks/use-business`, `src/providers/business-provider`, `src/styles`, and `supabase/snippets`.
+  - **Moderation Component Consolidation:** Reorganized `src/components/admin` by moving all moderation-related dialogs and appeal review components into a dedicated `src/components/admin/moderation/` subfolder.
+  - **Auth Feature Alignment:** Standardized the `(auth)` route group by moving `LoginForm` and `RegisterForm` (and their tests) into their respective feature folders (`/login` and `/register`), matching the pattern of other authentication features.
+  - **Refined Imports:** Updated all affected import paths across the admin and auth modules to ensure architectural integrity and build stability.
+
 ## [0.10.0] - 2026-05-19
 
 ### Changed

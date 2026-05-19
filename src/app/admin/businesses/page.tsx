@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import { ModerationFreezeDialog } from '@/components/admin/moderation-freeze-dialog'
+import { ModerationFreezeDialog } from '@/components/admin/moderation/moderation-freeze-dialog'
 import { Badge } from '@/components/ui/badge'
 
 interface BusinessWithProfile extends Business {

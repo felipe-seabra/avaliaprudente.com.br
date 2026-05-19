@@ -15,10 +15,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ModerationWarningDialog } from '@/components/admin/moderation-warning-dialog'
-import { ModerationSuspensionDialog } from '@/components/admin/moderation-suspension-dialog'
-import { ModerationBanDialog } from '@/components/admin/moderation-ban-dialog'
-import { ModerationDeactivationDialog } from '@/components/admin/moderation-deactivation-dialog'
+import { ModerationWarningDialog } from '@/components/admin/moderation/moderation-warning-dialog'
+import { ModerationSuspensionDialog } from '@/components/admin/moderation/moderation-suspension-dialog'
+import { ModerationBanDialog } from '@/components/admin/moderation/moderation-ban-dialog'
+import { ModerationDeactivationDialog } from '@/components/admin/moderation/moderation-deactivation-dialog'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 

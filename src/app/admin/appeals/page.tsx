@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MessageSquare, ShieldAlert, History, Filter } from 'lucide-react'
-import { ReviewAppealDialog } from '@/components/admin/appeals/review-appeal-dialog'
+import { ReviewAppealDialog } from '@/components/admin/moderation/review-appeal-dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
