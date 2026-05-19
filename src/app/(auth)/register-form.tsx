@@ -77,16 +77,16 @@ export function RegisterForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Criar conta</CardTitle>
+    <Card className="border-muted/50 shadow-xl rounded-3xl overflow-hidden">
+      <CardHeader className="space-y-1 pb-8 text-center">
+        <CardTitle className="text-2xl font-bold tracking-tight">Criar conta</CardTitle>
         <CardDescription>
-          Preencha os campos abaixo para começar.
+          Preencha os campos abaixo para começar sua jornada.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <InputField
               name="fullName"
               label="Nome Completo"
@@ -119,10 +119,10 @@ export function RegisterForm() {
               autoComplete="new-password"
             />
             
-            <div className="flex items-start space-x-3 pt-4">
+            <div className="flex items-start space-x-3 pt-2">
               <Checkbox
                 id="acceptTerms"
-                className="mt-0.5"
+                className="mt-1 transition-all data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 checked={form.watch('acceptTerms')}
                 onCheckedChange={(checked) => 
                   form.setValue('acceptTerms', checked === true, { shouldValidate: true })
@@ -132,34 +132,34 @@ export function RegisterForm() {
               <div className="grid gap-1.5 leading-none">
                 <label
                   htmlFor="acceptTerms"
-                  className="text-sm font-medium leading-normal cursor-pointer select-none text-foreground/90 dark:text-foreground/80"
+                  className="text-sm font-medium leading-normal cursor-pointer select-none text-foreground/90"
                 >
                   Eu li e aceito os{' '}
-                  <Link href="/terms" target="_blank" className="text-primary hover:underline font-bold">
+                  <Link href="/terms" target="_blank" className="text-primary hover:underline font-bold transition-colors">
                     Termos de Uso
                   </Link>
                   {' '}da plataforma.
                 </label>
                 {form.formState.errors.acceptTerms && (
-                  <p className="text-[0.8rem] font-medium text-destructive">
+                  <p className="text-[0.8rem] font-medium text-destructive animate-in fade-in slide-in-from-top-1">
                     {form.formState.errors.acceptTerms.message}
                   </p>
                 )}
               </div>
             </div>
 
-            <Button type="submit" className="w-full font-bold cursor-pointer" disabled={isLoading}>
+            <Button type="submit" className="w-full h-11 text-base font-bold transition-all hover:opacity-90 active:scale-[0.98]" disabled={isLoading}>
               {isLoading ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex justify-center">
+      <CardFooter className="flex justify-center pb-8 pt-2">
         <Link
           href="/login"
-          className="text-sm text-muted-foreground hover:underline"
+          className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
         >
-          Já tem uma conta? Entrar
+          Já tem uma conta? <span className="text-primary hover:underline">Entrar</span>
         </Link>
       </CardFooter>
     </Card>

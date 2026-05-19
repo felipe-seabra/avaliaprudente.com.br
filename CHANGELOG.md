@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.0] - 2026-05-19
+
+### Changed
+- **Premium Auth UI/UX Refactor:**
+  - **Redundant Container Removal:** Eliminated unnecessary nested card wrappers in `AuthLayout` and individual forms, reducing visual clutter and the "double-wrapped" appearance.
+  - **Spacious Layout:** Increased the maximum width of authentication containers from 400px to 440px to provide more "breathing room" for inputs and buttons.
+  - **Premium Card Styling:** Implemented `rounded-3xl`, `shadow-xl`, and `border-muted/50` across all authentication forms (Login, Register, Forgot Password, Reset Password, Terms Re-accept).
+  - **Consistent Hierarchy:** Standardized centered headers with improved typography and spacing for a more professional, SaaS-quality feel.
+  - **Improved Interactivity:** Refined hover states, active scaling, and transition animations for buttons and navigation links.
+  - **Responsive Optimization:** Ensured consistent padding and centering across mobile and desktop devices.
+
 ## [0.9.0] - 2026-05-19
 
 ### Added

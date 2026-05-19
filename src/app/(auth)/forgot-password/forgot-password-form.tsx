@@ -62,16 +62,16 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Esqueci minha senha</CardTitle>
+    <Card className="border-muted/50 shadow-xl rounded-3xl overflow-hidden">
+      <CardHeader className="space-y-1 pb-8 text-center">
+        <CardTitle className="text-2xl font-bold tracking-tight">Esqueci minha senha</CardTitle>
         <CardDescription>
           Digite seu e-mail para receber as instruções de recuperação.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <InputField
               name="email"
               label="E-mail"
@@ -80,16 +80,16 @@ export function ForgotPasswordForm() {
               disabled={isLoading}
               autoComplete="email"
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full h-11 text-base font-semibold transition-all hover:opacity-90 active:scale-[0.98]" disabled={isLoading}>
               {isLoading ? 'Enviando...' : 'Enviar e-mail'}
             </Button>
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex justify-center">
+      <CardFooter className="flex justify-center pb-8 pt-2">
         <Link
           href="/login"
-          className="text-sm text-muted-foreground hover:underline"
+          className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
         >
           Voltar para o login
         </Link>

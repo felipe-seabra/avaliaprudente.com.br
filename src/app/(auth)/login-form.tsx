@@ -62,16 +62,16 @@ export function LoginForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Entrar</CardTitle>
+    <Card className="border-muted/50 shadow-xl rounded-3xl overflow-hidden">
+      <CardHeader className="space-y-1 pb-8 text-center">
+        <CardTitle className="text-2xl font-bold tracking-tight">Entrar</CardTitle>
         <CardDescription>
           Digite seu e-mail e senha para acessar sua conta.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <InputField
               name="email"
               label="E-mail"
@@ -80,33 +80,37 @@ export function LoginForm() {
               disabled={isLoading}
               autoComplete="email"
             />
-            <InputField
-              name="password"
-              label="Senha"
-              placeholder="••••••"
-              type="password"
-              disabled={isLoading}
-              autoComplete="current-password"
-            />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <div className="space-y-1">
+              <InputField
+                name="password"
+                label="Senha"
+                placeholder="••••••"
+                type="password"
+                disabled={isLoading}
+                autoComplete="current-password"
+              />
+            </div>
+            <Button type="submit" className="w-full h-11 text-base font-semibold transition-all hover:opacity-90 active:scale-[0.98]" disabled={isLoading}>
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex flex-wrap items-center justify-between gap-2">
-        <Link
-          href="/forgot-password"
-          className="text-sm text-muted-foreground hover:underline"
-        >
-          Esqueceu a senha?
-        </Link>
-        <Link
-          href="/register"
-          className="text-sm text-muted-foreground hover:underline"
-        >
-          Não tem uma conta? Cadastre-se
-        </Link>
+      <CardFooter className="flex flex-col space-y-4 pt-2 pb-8 px-6">
+        <div className="flex flex-wrap items-center justify-between w-full gap-2">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            Esqueceu a senha?
+          </Link>
+          <Link
+            href="/register"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
+          >
+            Criar conta
+          </Link>
+        </div>
       </CardFooter>
     </Card>
   )

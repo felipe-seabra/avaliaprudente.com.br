@@ -61,14 +61,14 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Nova senha</CardTitle>
-        <CardDescription>Digite sua nova senha abaixo.</CardDescription>
+    <Card className="border-muted/50 shadow-xl rounded-3xl overflow-hidden">
+      <CardHeader className="space-y-1 pb-8 text-center">
+        <CardTitle className="text-2xl font-bold tracking-tight">Nova senha</CardTitle>
+        <CardDescription>Digite sua nova senha abaixo para recuperar o acesso.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <InputField
               name="password"
               label="Nova senha"
@@ -85,7 +85,7 @@ export function ResetPasswordForm() {
               disabled={isLoading}
               autoComplete="new-password"
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full h-11 text-base font-semibold transition-all hover:opacity-90 active:scale-[0.98]" disabled={isLoading}>
               {isLoading ? 'Atualizando...' : 'Atualizar senha'}
             </Button>
           </form>
