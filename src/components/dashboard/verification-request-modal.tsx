@@ -13,8 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ShieldCheck, Loader2, Clock, CheckCircle2, AlertCircle, Link, MessageSquare } from 'lucide-react'
 import { VerificationRepository, VerificationRequest } from '@/core/infrastructure/repositories/supabase-verification-repository'
-import { PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
-import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
+import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { toast } from 'sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
@@ -40,13 +39,13 @@ export function VerificationRequestModal({
   const [pendingRequest, setPendingRequest] = useState<VerificationRequest | null>(null)
   
   // Eligibility state
-  const [hasPageLinks, setHasPageLinks] = useState(false)
+  const [hasSocialLinks, setHasSocialLinks] = useState(false)
   const [hasReviewLink, setHasReviewLink] = useState(false)
   
   // Repositories
   const [repo] = useState(() => new VerificationRepository())
-  const [pageRepo] = useState(() => new PageLinkRepository())
-  const [reviewRepo] = useState(() => new ReviewLinkRepository())
+  const [pageRepo] = useState(() => new BusinessPageRepository())
+  const [linkRepo] = useState(() => new PageLinkRepository())
 
   const checkEligibility = useCallback(async () => {
     setIsChecking(true)
@@ -56,30 +55,24 @@ export function VerificationRequestModal({
       const pending = requests.find(r => r.status === 'pending')
       setPendingRequest(pending || null)
 
-      // 2. Check page links (Social/Business links)
-      // We need the page ID first. Since we don't have it easily here, 
-      // let's use a simpler way if possible, or fetch the page first.
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: page } = await supabase.from('business_pages').select('id').eq('business_id', businessId).maybeSingle()
+      // 2. Check page and links
+      const page = await pageRepo.getByBusinessId(businessId)
       
       if (page) {
-        const pLinks = await pageRepo.getByPageId(page.id)
-        setHasPageLinks(pLinks.length > 0)
+        const pLinks = await linkRepo.getByPageId(page.id)
+        setHasReviewLink(pLinks.some(l => l.type === 'google_review'))
+        setHasSocialLinks(pLinks.some(l => l.type !== 'google_review'))
       } else {
-        setHasPageLinks(false)
+        setHasReviewLink(false)
+        setHasSocialLinks(false)
       }
-
-      // 3. Check review links (Google link)
-      const rLinks = await reviewRepo.getByBusinessId(businessId)
-      setHasReviewLink(rLinks.length > 0)
 
     } catch (err) {
       console.error('Failed to check eligibility', err)
     } finally {
       setIsChecking(false)
     }
-  }, [businessId, repo, pageRepo, reviewRepo])
+  }, [businessId, repo, pageRepo, linkRepo])
 
   useEffect(() => {
     if (open && businessId) {
@@ -87,7 +80,7 @@ export function VerificationRequestModal({
     }
   }, [open, businessId, checkEligibility])
 
-  const isEligible = hasPageLinks && hasReviewLink
+  const isEligible = hasSocialLinks && hasReviewLink
 
   const handleSubmit = async () => {
     setIsLoading(true)
@@ -190,12 +183,12 @@ export function VerificationRequestModal({
                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
                        <div className="flex items-center gap-2 text-xs">
-                          <Link className={cn("h-3.5 w-3.5", hasPageLinks ? "text-green-500" : "text-muted-foreground")} />
-                          <span className={cn(hasPageLinks ? "text-foreground font-medium" : "text-muted-foreground")}>
+                          <Link className={cn("h-3.5 w-3.5", hasSocialLinks ? "text-green-500" : "text-muted-foreground")} />
+                          <span className={cn(hasSocialLinks ? "text-foreground font-medium" : "text-muted-foreground")}>
                             Mínimo de 1 link social/externo
                           </span>
                        </div>
-                       {hasPageLinks ? (
+                       {hasSocialLinks ? (
                           <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
                        ) : (
                           <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30" />

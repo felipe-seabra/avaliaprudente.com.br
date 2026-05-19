@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { AlertCircle, ArrowRight, CheckCircle2, MessageSquare, Link as LinkIcon, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
-import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { cn } from '@/lib/utils'
 
 interface BusinessOnboardingAlertProps {
@@ -14,7 +13,7 @@ interface BusinessOnboardingAlertProps {
 }
 
 export function BusinessOnboardingAlert({ businessId }: BusinessOnboardingAlertProps) {
-  const [hasPageLinks, setHasPageLinks] = useState(true)
+  const [hasSocialLinks, setHasSocialLinks] = useState(true)
   const [hasReviewLink, setHasReviewLink] = useState(true)
   const [isPublished, setIsPublished] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
@@ -25,21 +24,18 @@ export function BusinessOnboardingAlert({ businessId }: BusinessOnboardingAlertP
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       
-      const [pageRes, reviewLinks] = await Promise.all([
-        supabase.from('business_pages').select('id, is_published').eq('business_id', businessId).maybeSingle(),
-        new ReviewLinkRepository().getByBusinessId(businessId)
-      ])
+      const pageRes = await supabase.from('business_pages').select('id, is_published').eq('business_id', businessId).maybeSingle()
 
       if (pageRes.data) {
         const pageLinks = await new PageLinkRepository().getByPageId(pageRes.data.id)
-        setHasPageLinks(pageLinks.length > 0)
+        setHasReviewLink(pageLinks.some(l => l.type === 'google_review'))
+        setHasSocialLinks(pageLinks.some(l => l.type !== 'google_review'))
         setIsPublished(pageRes.data.is_published)
       } else {
-        setHasPageLinks(false)
+        setHasReviewLink(false)
+        setHasSocialLinks(false)
         setIsPublished(false)
       }
-
-      setHasReviewLink(reviewLinks.length > 0)
     } catch (err) {
       console.error('Failed to check onboarding status', err)
     } finally {
@@ -53,9 +49,9 @@ export function BusinessOnboardingAlert({ businessId }: BusinessOnboardingAlertP
     }
   }, [businessId, checkStatus])
 
-  if (isLoading || (hasPageLinks && hasReviewLink && isPublished)) return null
+  if (isLoading || (hasSocialLinks && hasReviewLink && isPublished)) return null
 
-  const isEligibleForVerification = hasPageLinks && hasReviewLink
+  const isEligibleForVerification = hasSocialLinks && hasReviewLink
 
   return (
     <Card className="border-yellow-500/20 bg-yellow-500/5 overflow-hidden">
@@ -91,13 +87,13 @@ export function BusinessOnboardingAlert({ businessId }: BusinessOnboardingAlertP
 
               <div className={cn(
                 "p-3 rounded-xl border flex items-center gap-3 transition-colors",
-                hasPageLinks ? "bg-green-500/5 border-green-500/20" : "bg-background border-border shadow-sm"
+                hasSocialLinks ? "bg-green-500/5 border-green-500/20" : "bg-background border-border shadow-sm"
               )}>
                 <div className={cn(
                   "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
-                  hasPageLinks ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
+                  hasSocialLinks ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
                 )}>
-                  {hasPageLinks ? <CheckCircle2 className="h-5 w-5" /> : <LinkIcon className="h-4 w-4" />}
+                  {hasSocialLinks ? <CheckCircle2 className="h-5 w-5" /> : <LinkIcon className="h-4 w-4" />}
                 </div>
                 <div>
                   <p className="text-xs font-bold text-foreground">Links Sociais</p>
@@ -126,7 +122,7 @@ export function BusinessOnboardingAlert({ businessId }: BusinessOnboardingAlertP
                 <ArrowRight className="h-4 w-4" />
               </Button>
             )}
-            {!hasPageLinks && (
+            {!hasSocialLinks && (
               <Button size="sm" variant={hasReviewLink ? "default" : "outline"} className="w-full gap-2 font-bold cursor-pointer" render={<Link href="/dashboard/page-editor" />}>
                 Adicionar Redes
                 <ArrowRight className="h-4 w-4" />

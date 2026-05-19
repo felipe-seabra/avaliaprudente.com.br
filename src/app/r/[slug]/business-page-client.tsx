@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { CTAButton } from '@/components/shared/cta-button'
-import { ReviewFlow } from '@/components/shared/review-flow'
 import { Star, ShieldCheck, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
 import { PageLink, BusinessPage, Review } from '@/core/domain/entities'
@@ -30,7 +29,6 @@ interface BusinessPageClientProps {
 }
 
 export function BusinessPageClient({ data }: BusinessPageClientProps) {
-  const [activeReviewLink, setActiveReviewLink] = useState<PageLink | null>(null)
   const { page, links, reviews } = data
 
   const themeConfig = (page.theme_config || {}) as { primary_color?: string }
@@ -61,24 +59,6 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
   const avgRating = reviews.length > 0 
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
     : '5.0'
-
-  if (activeReviewLink) {
-    return (
-      <div 
-        className="min-h-screen bg-muted/30 p-4 md:p-8 flex flex-col items-center animate-in fade-in slide-in-from-right-4 duration-500"
-        style={{ '--primary': primaryColor } as React.CSSProperties}
-      >
-        <div className="w-full max-w-[500px]">
-          <ReviewFlow 
-            businessId={page.business_id}
-            businessName={page.businesses.name}
-            googleReviewUrl={activeReviewLink.url}
-            onClose={() => setActiveReviewLink(null)}
-          />
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div 
@@ -155,7 +135,6 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
                 <CTAButton 
                   link={link} 
                   businessId={page.business_id}
-                  onClick={link.type === 'google_review' ? () => setActiveReviewLink(link) : undefined}
                 />
               </div>
             ))
