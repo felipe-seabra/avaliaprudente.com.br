@@ -4,7 +4,6 @@ import { BusinessPageRepository } from '@/core/infrastructure/repositories/supab
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { Business, BusinessPage } from '@/core/domain/entities'
-import { APP_CONFIG } from '@/lib/constants'
 
 // Route segment config
 export const runtime = 'edge'
@@ -22,32 +21,6 @@ export const size = {
   height: 630,
 }
 export const contentType = 'image/png'
-
-/**
- * Robust fetch for assets to avoid Satori crashes.
- */
-async function getBase64Image(url: string): Promise<string | null> {
-  if (!url) return null
-  try {
-    const response = await fetch(url, { 
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(3000)
-    })
-    if (!response.ok) return null
-    const arrayBuffer = await response.arrayBuffer()
-    
-    // Edge Runtime safe base64 conversion
-    const base64 = btoa(
-      new Uint8Array(arrayBuffer)
-        .reduce((data, byte) => data + String.fromCharCode(byte), '')
-    )
-    const contentType = response.headers.get('content-type') || 'image/png'
-    return `data:${contentType};base64,${base64}`
-  } catch (error) {
-    console.error('Failed to fetch asset for OG:', url, error)
-    return null
-  }
-}
 
 /**
  * Normalizes hex color for Satori
@@ -95,41 +68,10 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     }
 
     if (!data) {
-      return new ImageResponse(
-        (
-          <div
-            style={{
-              fontSize: 64,
-              background: 'white',
-              width: 1200,
-              height: 630,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#7c3aed',
-              fontWeight: 900,
-            }}
-          >
-            <div style={{ marginBottom: 20, display: 'flex' }}>Avalia Prudente</div>
-            <div style={{ fontSize: 24, color: '#71717a', display: 'flex' }}>avaliaprudente.com.br</div>
-          </div>
-        ),
-        { ...size }
-      )
+      throw new Error('Business not found')
     }
 
     const businessName = data.businesses.name || 'Empresa'
-    const businessLogo = data.businesses.logo_url
-    
-    // Robust URL construction for the logo
-    const absoluteLogoUrl = businessLogo 
-      ? (businessLogo.startsWith('http') ? businessLogo : `${APP_CONFIG.url.replace(/\/$/, '')}/${businessLogo.replace(/^\//, '')}`)
-      : null
-
-    // Pre-fetch logo
-    const logoBase64 = absoluteLogoUrl ? await getBase64Image(absoluteLogoUrl) : null
-
     const isVerified = data.businesses.is_verified
     const themeConfig = (data.theme_config || {}) as ThemeConfig
     const primaryColor = normalizeColor(themeConfig.primary_color)
@@ -176,44 +118,31 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             }}
           />
 
-          {/* Logo Container */}
+          {/* Logo Container (CSS-Based Placeholder for Stability) */}
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 200,
-              height: 200,
-              borderRadius: 50,
-              overflow: 'hidden',
+              width: 180,
+              height: 180,
+              borderRadius: 45,
               background: 'white',
-              border: `8px solid ${primaryColor}20`,
+              border: `6px solid ${primaryColor}20`,
               marginBottom: 32,
               boxShadow: '0 20px 50px rgba(0,0,0,0.05)',
             }}
           >
-            {logoBase64 ? (
-              <img
-                src={logoBase64}
-                alt={businessName}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  fontSize: 100,
-                  fontWeight: 900,
-                  color: primaryColor,
-                  display: 'flex',
-                }}
-              >
-                {businessName.substring(0, 1).toUpperCase()}
-              </div>
-            )}
+            <div
+              style={{
+                fontSize: 90,
+                fontWeight: 900,
+                color: primaryColor,
+                display: 'flex',
+              }}
+            >
+              {businessName.substring(0, 1).toUpperCase()}
+            </div>
           </div>
 
           {/* Business Info */}

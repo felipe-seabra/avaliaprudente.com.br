@@ -13,38 +13,8 @@ export const size = {
 
 export const contentType = 'image/png'
 
-/**
- * Robust fetch for assets to avoid Satori crashes.
- */
-async function getBase64Image(url: string): Promise<string | null> {
-  if (!url) return null
-  try {
-    const response = await fetch(url, { 
-      next: { revalidate: 86400 }, // Cache for 24h
-      signal: AbortSignal.timeout(3000)
-    })
-    if (!response.ok) return null
-    const arrayBuffer = await response.arrayBuffer()
-    
-    // Edge Runtime safe base64 conversion
-    const base64 = btoa(
-      new Uint8Array(arrayBuffer)
-        .reduce((data, byte) => data + String.fromCharCode(byte), '')
-    )
-    const contentType = response.headers.get('content-type') || 'image/png'
-    return `data:${contentType};base64,${base64}`
-  } catch (error) {
-    console.error('Failed to fetch asset for OG:', url, error)
-    return null
-  }
-}
-
 // Image generation
 export default async function Image() {
-  // Try to load the official logo
-  const logoUrl = `${APP_CONFIG.url}/branding/logo-horizontal.webp`
-  const logoBase64 = await getBase64Image(logoUrl)
-
   return new ImageResponse(
     (
       <div
@@ -60,7 +30,7 @@ export default async function Image() {
           padding: '80px',
         }}
       >
-        {/* Decorative Glow - Using rgba instead of transparent to avoid Satori crashes */}
+        {/* Decorative Glow */}
         <div
           style={{
             position: 'absolute',
@@ -68,20 +38,8 @@ export default async function Image() {
             left: '50%',
             width: '800px',
             height: '800px',
-            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, rgba(9, 9, 11, 0) 70%)',
+            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, rgba(9, 9, 11, 0) 70%)',
             transform: 'translate(-50%, -50%)',
-            display: 'flex',
-          }}
-        />
-
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-100px',
-            right: '-100px',
-            width: '400px',
-            height: '400px',
-            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, rgba(9, 9, 11, 0) 70%)',
             display: 'flex',
           }}
         />
@@ -95,7 +53,7 @@ export default async function Image() {
             zIndex: 10,
           }}
         >
-          {/* Logo Area */}
+          {/* Logo Area (CSS Based for Stability) */}
           <div
             style={{
               display: 'flex',
@@ -104,61 +62,50 @@ export default async function Image() {
               marginBottom: '60px',
             }}
           >
-            {logoBase64 ? (
-              <img
-                src={logoBase64}
-                alt={APP_CONFIG.name}
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div
                 style={{
+                  background: '#7c3aed',
+                  width: '100px',
                   height: '100px',
-                  objectFit: 'contain',
+                  borderRadius: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '32px',
+                  boxShadow: '0 0 40px rgba(124, 58, 237, 0.4)',
                 }}
-              />
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div
-                  style={{
-                    background: '#7c3aed',
-                    width: '80px',
-                    height: '80px',
-                    borderRadius: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: '24px',
-                    boxShadow: '0 0 30px rgba(124, 58, 237, 0.4)',
-                  }}
-                >
-                  <div style={{ color: 'white', fontSize: 48, fontWeight: 900 }}>A</div>
-                </div>
-                <div
-                  style={{
-                    fontSize: 84,
-                    fontWeight: 900,
-                    color: 'white',
-                    letterSpacing: '-3px',
-                    display: 'flex',
-                  }}
-                >
-                  Avalia Prudente
-                </div>
+              >
+                <div style={{ color: 'white', fontSize: 60, fontWeight: 900 }}>A</div>
               </div>
-            )}
+              <div
+                style={{
+                  fontSize: 100,
+                  fontWeight: 900,
+                  color: 'white',
+                  letterSpacing: '-4px',
+                  display: 'flex',
+                }}
+              >
+                Avalia Prudente
+              </div>
+            </div>
           </div>
 
           {/* Tagline */}
           <div
             style={{
-              fontSize: 40,
+              fontSize: 44,
               fontWeight: 600,
               color: '#a1a1aa',
               textAlign: 'center',
-              maxWidth: '900px',
+              maxWidth: '950px',
               lineHeight: 1.4,
               letterSpacing: '-1px',
               display: 'flex',
             }}
           >
-            A plataforma definitiva para avaliações e reputação digital via NFC
+            A tag inteligente que conecta seu balcão ao mundo digital
           </div>
 
           {/* Bottom Badge */}
@@ -167,15 +114,13 @@ export default async function Image() {
               marginTop: '80px',
               display: 'flex',
               alignItems: 'center',
-              gap: '16px',
-              padding: '16px 40px',
-              background: 'rgba(255, 255, 255, 0.03)',
+              padding: '16px 48px',
+              background: 'rgba(255, 255, 255, 0.05)',
               borderRadius: '100px',
               border: '1px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#7c3aed', display: 'flex' }} />
-            <span style={{ fontSize: 20, fontWeight: 800, color: 'white', letterSpacing: '4px', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: 24, fontWeight: 800, color: '#7c3aed', letterSpacing: '4px', textTransform: 'uppercase' }}>
               NFC TECHNOLOGY
             </span>
           </div>
@@ -186,8 +131,8 @@ export default async function Image() {
           style={{
             position: 'absolute',
             bottom: '40px',
-            fontSize: 22,
-            color: '#52525b',
+            fontSize: 24,
+            color: '#3f3f46',
             fontWeight: 700,
             display: 'flex',
           }}
