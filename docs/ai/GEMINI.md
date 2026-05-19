@@ -7,7 +7,7 @@ This document is the official entrypoint for Gemini CLI execution workflows.
 ## 1. Repository Execution Workflow
 - **Local Analysis:** Use `grep_search`, `list_directory`, and `read_file` to map the codebase before executing changes.
 - **Empirical Validation:** Prioritize reproducing bugs or validating current state locally.
-- **Automated Validation:** After any code modification, run `npm run lint` and `npm run build`. Fix all errors autonomously before proceeding.
+- **Automated Validation:** After any code modification, run `npm run lint`, `npm run test`, and `npm run build`. Fix all errors autonomously before proceeding.
 
 ## 2. Commit Flow & Project Memory
 - **Changelog:** Update `CHANGELOG.md` under the `[Unreleased]` or current version tag.
@@ -24,10 +24,12 @@ This document is the official entrypoint for Gemini CLI execution workflows.
 - **Database Safety Guard:** ALWAYS use the `npm run` prefixed commands for Supabase (e.g., `npm run supabase:reset`) to trigger the safety guard script. NEVER run `npx supabase db reset --linked` directly without confirming the target environment.
 - **RLS Recursion:** NEVER write RLS policies that query `profiles` directly. ALWAYS use the `is_admin()` security definer function to avoid infinite loops (Error 500).
 - **Moderation Bypass:** Admins (`role = 'admin'`) MUST bypass all moderation blocks. This logic is centralized in `src/middleware.ts` and the database layer.
-- **Public Visibility:** ALWAYS filter out `is_frozen = true` items in public repository lookups and public RLS policies. Custom slugs for frozen businesses must return 404 or a "Business Unavailable" state.
-- **Soft Delete Pattern:** Use `is_deleted = true` for profile deactivation. Do not delete profile rows.
+- **Public Visibility:** ALWAYS filter out `is_frozen = true` items in public repository lookups and public RLS policies.
+- **Slug Integrity:** Any slug update must be validated via `is_slug_available` and check for reserved system routes. Slugs must be normalized to lowercase.
+- **OG Rendering:** Be cautious when editing `src/app/opengraph-image.tsx`. It runs on the Edge runtime and has strict limitations (no heavy libraries, no local FS access).
 
 ## 5. Essential Verification
 - After any auth/middleware change, verify that an Admin can still access `/admin/dashboard`.
-- Always run `npm run lint` and `npm run build` before finalizing a task.
+- Always run `npm run lint`, `npm run build`, and `npm run test` before finalizing a task.
+- Verify that `is_frozen` businesses are not accessible via public routes.
 

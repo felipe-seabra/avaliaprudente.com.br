@@ -36,12 +36,15 @@ This repository utilizes specialized AI modes to ensure code quality, security, 
 - **Risk Focus:** Duplicated logic, TypeScript safety, unhandled edge cases.
 
 ## 5. Security-Reviewer
-- **Responsibilities:** Dedicated auditing of protected areas.
+- **Responsibilities:** Dedicated auditing of protected areas, multi-tenancy, and RLS.
 - **Allowed Actions:** Deep-diving into RLS, middleware, LGPD compliance, and auth flows.
 - **Forbidden Actions:** Modifying visual UI or marketing copy.
 - **Workflow:** Read `docs/ai/rules/protected-areas.md` -> Audit authentication and multi-tenancy -> Report vulnerabilities.
-- **Validation Requirements:** Zero-tolerance for tenant isolation breaches or PII leakage.
-- **Risk Focus:** Authentication bypass, session hijacking, SQL injection, horizontal privilege escalation.
+- **Validation Requirements:** 
+  - Zero-tolerance for tenant isolation breaches (ensure `owner_id` is always checked).
+  - **Strict check for RLS recursion:** Ensure no queries to `profiles` exist in RLS policies; use `is_admin()`.
+  - Verify that `is_frozen` businesses are filtered out from public access.
+- **Risk Focus:** Authentication bypass, session hijacking, SQL injection, horizontal privilege escalation, and infinite RLS loops (Error 500).
 
 ## 6. Documentation
 - **Responsibilities:** Maintaining project memory, ADRs, state tracking, and changelogs.

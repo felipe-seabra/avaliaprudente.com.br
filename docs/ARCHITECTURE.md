@@ -9,82 +9,86 @@
 ## Layers
 
 ### 1. Domain (`src/core/domain`)
-- **Entities:** Pure business objects.
-- **Interfaces:** Repository and Service definitions.
-- **Value Objects:** Simple objects without identity.
+- **Entities:** Pure business objects (e.g., `Business`, `Review`).
+- **Interfaces:** Repository and Service definitions (Abstractions).
 
 ### 2. Application (`src/core/application`)
-- **Use Cases:** Orchestrate the flow of data to and from the domain entities.
-- **DTOs:** Data Transfer Objects for input/output.
+- **Use Cases:** Orchestrate the flow of data. Examples: `get-public-rankings.ts`, `submit-verification-request.ts`.
+- **DTOs:** Data Transfer Objects for clean boundaries.
 
 ### 3. Infrastructure (`src/core/infrastructure`)
-- **Repositories:** Implementations of domain interfaces (e.g., Supabase, LocalStorage).
-- **Mappers:** Transform data between infrastructure and domain formats.
-- **Services:** External integrations (e.g., Google Maps API).
+- **Repositories:** Concrete implementations (e.g., `SupabaseBusinessRepository`).
+- **Mappers:** Transform data between DB schema and Domain entities.
 
 ### 4. UI Layer (`src/components`, `src/app`)
-- **Next.js Pages:** Entry points for the application.
-- **Hooks:** Local state and side-effect management.
-- **Providers:** Global state and context.
+- **Server Components:** Default for data fetching and initial rendering.
+- **Client Components:** Used for interactivity (forms, modals, real-time feedback).
+- **Hooks:** Domain-specific hooks (`useBusiness`, `useReviews`).
 
-## State Management
+## State Management & Auth Flow
 
-- **Server State:** Handled by Next.js Server Components and Server Actions.
-- **Client State:** Handled by React `useState`, `useContext`, or specialized hooks.
-- **Persistence:** Supabase (PostgreSQL + Auth).
+- **Server State:** Handled by Next.js Server Components.
+- **Client State:** React `useState`, `useActionState` (React 19), and Context Providers.
+- **Middleware:** `src/middleware.ts` intercepts all requests to:
+  1. Refresh Supabase session (ensures fresh account status).
+  2. Implement Rate Limiting.
+  3. Enforce Moderation Blocks (Banned, Suspended, Deleted).
+  4. Enforce Terms of Use Re-acceptance.
+  5. **Admin Master Bypass:** Guarantee that `role = 'admin'` users bypass all moderation blocks.
 
-## Authentication Flow & Middleware Routing
+## Core Systems
 
-1. User logs in via Supabase Auth.
-2. The `src/middleware.ts` intercepts every request to refresh the session and perform centralized state validation.
-3. Middleware enforces Moderation Constraints (redirects to `/blocked` if the user is suspended, banned, or deleted).
-4. Middleware implements Admin Master Bypass: Users with `role = 'admin'` bypass all moderation blocks and have guaranteed access to both the dashboard and the admin panel.
-5. Server Components access the user session via `createClient` from `@/lib/supabase/server` for rendering data safely.
-
-## Data Isolation & Security
-
-### Multi-tenant Isolation
-The platform uses a strict tenant isolation model based on `owner_id`.
-- **Businesses:** Users can only view and modify businesses where `owner_id = auth.uid()`.
-- **Pages & Links:** Access is cascaded via the `business_id` or `page_id`.
-- **Analytics:** Data is strictly isolated; owners only see events related to their own businesses.
-
-### Row Level Security (RLS) Logic
-- **Admin Access:** Enforced via a `SECURITY DEFINER` function `is_admin()`. This architectural pattern is mandatory; doing direct `profiles` lookups inside RLS policies causes infinite recursion failures.
-- **Public Access:** Anonymous users can read `businesses`, `business_pages`, and `page_links` to view public profiles, but **only if** the business is not frozen (`is_frozen = false`).
-- **Customer Access:** Restricted to their own created entities, but only if their account is not suspended/banned (`is_suspended() = false`).
-
-## Core Workflows
-
-### Moderation System & Admin Infrastructure
-The platform implements a progressive moderation escalation system:
-1. **Terms of Use Acceptance:** Mandatory acceptance of platform rules during signup or upon major updates (v1.2+). Tracked via `terms_accepted_at` and `terms_version` in `profiles`. Middleware enforces re-acceptance by redirecting users with outdated versions to `/terms-reaccept`.
-2. **Transparency Center:** Users have access to `/dashboard/moderation`, a central hub showing their account status, warning count, and full audit history of moderation actions.
-3. **Appeals System:** Moderated users can submit formal appeals via the Transparency Center. Appeals are tracked in `moderation_appeals` and can lead to automated reversal of sanctions if approved by an admin.
-4. **Moderation Visibility:** Users see their current status (warnings, suspension, ban) directly in the dashboard via a status badge that links to the Transparency Center.
-5. **Warnings:** Soft interventions tracked in `moderation_actions`. Two warnings automatically escalate to a suspension suggestion.
-6. **Suspensions (Temporary):** Blocks access to the dashboard for 3 to 90 days. Public business pages remain active. Handled by `suspended_until`. Users are redirected to `/blocked?type=suspended` with a link back to their transparency details.
-3. **Bans (Permanent):** Permanently blocks account access. Tracked via `account_status = 'banned'`. Users are redirected to `/blocked?type=banned`.
-4. **Soft Delete (Deactivation):** Marks an account as deleted (`is_deleted = true`) to disable login without destroying relational database integrity. Users are redirected to `/blocked?type=deleted`.
-5. **Business Freezing:** An isolated state where a business is removed from public visibility (`is_frozen = true`) and all custom domain slugs and review links are disabled, regardless of the owner's account status.
-
-### Verification System
-1. **Request:** A business owner submits a request via `VerificationRequestModal`. A record is created in `verification_requests` with status `pending`.
-2. **Moderation:** Admins view the request in `/admin/verifications`.
-3. **Approval:** Admin approves the request. This triggers:
-   - Update of `verification_requests.status` to `approved`.
-   - Update of `businesses.is_verified` to `true`.
-   - Notification of the business owner.
-4. **Rejection:** Admin rejects the request with a reason. The business status is set to `rejected`.
+### Moderation & Appeals
+1. **Sanctions:** Warnings (soft), Suspensions (temp block), Bans (perm block), Soft Delete (deactivation).
+2. **Transparency Center:** Users view their status at `/dashboard/moderation`.
+3. **Appeals Flow:** 
+   - User submits an appeal via `ModerationAppealModal`.
+   - Admin reviews in `/admin/appeals`.
+   - Approval triggers automated reversal of the sanction and notifies the user.
+4. **Business Freezing:** `is_frozen = true` disables public visibility, slugs, and review links.
 
 ### Ranking System (Bayesian Average)
-To prevent businesses with a single 5-star review from outranking those with hundreds of 4.8-star reviews, we use a Bayesian Average algorithm:
+Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair rankings:
 - **Formula:** `(v*R + m*C) / (v+m)`
-  - `v`: Number of reviews for the business.
-  - `m`: Minimum reviews required to be considered (threshold).
-  - `R`: Average rating of the business.
-  - `C`: Mean rating across the entire platform.
-- **Boosts:** Verified businesses and "Featured" (is_featured) businesses receive additional weighting in the final score.
+  - `v`: Number of reviews.
+  - `m`: Threshold (minimum reviews).
+  - `R`: Average rating.
+  - `C`: Platform-wide average.
+- **Weights:** Verified and Featured businesses receive additional multipliers.
 
-## Storage Management
-- **Logo Cleanup:** When a business logo is updated or deleted, the system automatically removes the old file from Supabase Storage (`business-assets` bucket) to prevent orphaned files.
+### OG Image Architecture
+- **Tech:** `next/og` running on **Vercel Edge Runtime**.
+- **Rendering:** JSX-to-SVG via Satori.
+- **Caching:** `Cache-Control: public, max-age=31536000, immutable`.
+- **Constraint:** Must not use Node.js-only libraries (e.g., `fs`, `path`).
+
+### Slug Validation & Protection
+- **Uniqueness:** Guaranteed by `is_slug_available` database RPC.
+- **Normalization:** Forced lowercase and accent removal.
+- **Route Protection:** Prevents slugs from matching internal routes (`admin`, `dashboard`, `login`, `register`, `blocked`, `terms-reaccept`, `forgot-password`, `reset-password`).
+
+## Security (RLS & Tenancy)
+
+- **Isolation:** Multi-tenant strictness via `owner_id`.
+- **RLS Safety:** Use `is_admin()` security definer to avoid infinite recursion. NEVER query `profiles` directly in RLS.
+- **Public Access:** Anonymous access to `businesses` is restricted to `is_frozen = false`.
+
+## Maintainability & Folder Structure
+
+### Important Routes
+- `src/app/(auth)`: Authentication flows.
+- `src/app/dashboard`: Business owner panel.
+- `src/app/admin`: Platform administration.
+- `src/app/[slug]`: Public business pages (The "Product").
+- `src/app/r/[slug]`: Public review flow.
+
+### Critical Infrastructure Files
+- `src/middleware.ts`: Global security and routing.
+- `src/lib/supabase/middleware.ts`: Session and account status synchronization.
+- `scripts/db-safety.sh`: Database operations safety guard.
+- `scripts/docker-maintenance.sh`: Local environment cleanup.
+
+### Testing Structure
+- `src/**/*.test.ts`: Unit and integration tests using Vitest.
+- `vitest.setup.ts`: Environment configuration.
+- `src/middleware.test.ts`: Critical security testing.
