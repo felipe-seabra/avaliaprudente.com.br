@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { ShieldCheck, AlertCircle } from 'lucide-react'
+import { APP_CONFIG } from '@/lib/constants'
 
 export function TermsAcceptanceDialog() {
   const [open, setOpen] = useState(false)
@@ -34,7 +35,7 @@ export function TermsAcceptanceDialog() {
         .single()
       
       if (profile && profile.role !== 'admin') {
-        const currentVersion = '1.1'
+        const currentVersion = APP_CONFIG.currentTermsVersion
         if (!profile.terms_accepted_at || profile.terms_version !== currentVersion) {
           setOpen(true)
         }
@@ -59,7 +60,7 @@ export function TermsAcceptanceDialog() {
         .from('profiles')
         .update({
           terms_accepted_at: new Date().toISOString(),
-          terms_version: '1.1'
+          terms_version: APP_CONFIG.currentTermsVersion
         })
         .eq('id', user.id)
 
@@ -84,7 +85,7 @@ export function TermsAcceptanceDialog() {
             <DialogTitle className="text-xl">Atualização dos Termos de Uso</DialogTitle>
           </div>
           <DialogDescription className="text-base">
-            Para continuar utilizando a plataforma Avalia Prudente, você precisa revisar e aceitar a versão mais recente dos nossos Termos de Uso (v1.1).
+            Para continuar utilizando a plataforma Avalia Prudente, você precisa revisar e aceitar a versão mais recente dos nossos Termos de Uso (v{APP_CONFIG.currentTermsVersion}).
           </DialogDescription>
         </DialogHeader>
 
