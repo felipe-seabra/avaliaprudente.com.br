@@ -11,10 +11,13 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { ShieldCheck, Loader2, Clock, CheckCircle2 } from 'lucide-react'
+import { ShieldCheck, Loader2, Clock, CheckCircle2, AlertCircle, Link, MessageSquare } from 'lucide-react'
 import { VerificationRepository, VerificationRequest } from '@/core/infrastructure/repositories/supabase-verification-repository'
+import { PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
+import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { toast } from 'sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { cn } from '@/lib/utils'
 
 interface VerificationRequestModalProps {
   businessId: string
@@ -36,27 +39,55 @@ export function VerificationRequestModal({
   const [isChecking, setIsChecking] = useState(true)
   const [pendingRequest, setPendingRequest] = useState<VerificationRequest | null>(null)
   
-  // Memoize repo
+  // Eligibility state
+  const [hasPageLinks, setHasPageLinks] = useState(false)
+  const [hasReviewLink, setHasReviewLink] = useState(false)
+  
+  // Repositories
   const [repo] = useState(() => new VerificationRepository())
+  const [pageRepo] = useState(() => new PageLinkRepository())
+  const [reviewRepo] = useState(() => new ReviewLinkRepository())
 
-  const checkPendingRequest = useCallback(async () => {
+  const checkEligibility = useCallback(async () => {
     setIsChecking(true)
     try {
+      // 1. Check pending requests
       const requests = await repo.getByBusinessId(businessId)
       const pending = requests.find(r => r.status === 'pending')
       setPendingRequest(pending || null)
+
+      // 2. Check page links (Social/Business links)
+      // We need the page ID first. Since we don't have it easily here, 
+      // let's use a simpler way if possible, or fetch the page first.
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: page } = await supabase.from('business_pages').select('id').eq('business_id', businessId).maybeSingle()
+      
+      if (page) {
+        const pLinks = await pageRepo.getByPageId(page.id)
+        setHasPageLinks(pLinks.length > 0)
+      } else {
+        setHasPageLinks(false)
+      }
+
+      // 3. Check review links (Google link)
+      const rLinks = await reviewRepo.getByBusinessId(businessId)
+      setHasReviewLink(rLinks.length > 0)
+
     } catch (err) {
-      console.error('Failed to check pending requests', err)
+      console.error('Failed to check eligibility', err)
     } finally {
       setIsChecking(false)
     }
-  }, [businessId, repo])
+  }, [businessId, repo, pageRepo, reviewRepo])
 
   useEffect(() => {
     if (open && businessId) {
-      checkPendingRequest()
+      checkEligibility()
     }
-  }, [open, businessId, checkPendingRequest])
+  }, [open, businessId, checkEligibility])
+
+  const isEligible = hasPageLinks && hasReviewLink
 
   const handleSubmit = async () => {
     setIsLoading(true)
@@ -151,15 +182,49 @@ export function VerificationRequestModal({
         ) : (
           <div className="space-y-6 py-4">
             <div className="space-y-4">
-              <div className="p-4 bg-muted/50 rounded-xl space-y-2 border border-border/50">
+              <div className="p-4 bg-muted/50 rounded-xl space-y-3 border border-border/50">
                  <p className="text-sm font-bold flex items-center gap-2">
-                   <CheckCircle2 className="h-4 w-4 text-primary" /> Por que verificar?
+                   <CheckCircle2 className="h-4 w-4 text-primary" /> Requisitos para Verificação
                  </p>
-                 <ul className="text-xs text-muted-foreground space-y-1.5 list-disc list-inside">
-                   <li>Maior credibilidade para seus clientes</li>
-                   <li>Destaque visual no ranking da cidade</li>
-                   <li>Prioridade em resultados de busca internos</li>
-                 </ul>
+                 
+                 <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-2 text-xs">
+                          <Link className={cn("h-3.5 w-3.5", hasPageLinks ? "text-green-500" : "text-muted-foreground")} />
+                          <span className={cn(hasPageLinks ? "text-foreground font-medium" : "text-muted-foreground")}>
+                            Mínimo de 1 link social/externo
+                          </span>
+                       </div>
+                       {hasPageLinks ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                       ) : (
+                          <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30" />
+                       )}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-2 text-xs">
+                          <MessageSquare className={cn("h-3.5 w-3.5", hasReviewLink ? "text-green-500" : "text-muted-foreground")} />
+                          <span className={cn(hasReviewLink ? "text-foreground font-medium" : "text-muted-foreground")}>
+                            Link de Avaliação Google configurado
+                          </span>
+                       </div>
+                       {hasReviewLink ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                       ) : (
+                          <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30" />
+                       )}
+                    </div>
+                 </div>
+
+                 {!isEligible && (
+                    <div className="mt-3 p-2 bg-destructive/5 rounded-lg border border-destructive/10 flex gap-2">
+                       <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
+                       <p className="text-[10px] text-destructive leading-tight">
+                         Sua empresa ainda não atende aos requisitos mínimos para verificação. Complete seu perfil para continuar.
+                       </p>
+                    </div>
+                 )}
               </div>
 
               <div className="space-y-2">
@@ -171,7 +236,7 @@ export function VerificationRequestModal({
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="resize-none h-24"
-                  disabled={isLoading}
+                  disabled={isLoading || !isEligible}
                 />
               </div>
             </div>
@@ -187,7 +252,7 @@ export function VerificationRequestModal({
               </Button>
               <Button 
                 onClick={handleSubmit} 
-                disabled={isLoading || isChecking}
+                disabled={isLoading || isChecking || !isEligible}
                 className="gap-2 font-bold cursor-pointer"
               >
                 {isLoading ? (

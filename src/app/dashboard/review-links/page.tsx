@@ -10,6 +10,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { CreateReviewLinkDialog } from '@/components/dashboard/create-review-link-dialog'
+import { GoogleReviewTutorial } from '@/components/dashboard/google-review-tutorial'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { AlertCircle } from 'lucide-react'
 
 export default function ReviewLinksPage() {
   const { currentBusiness } = useBusiness()
@@ -75,10 +78,28 @@ export default function ReviewLinksPage() {
               ))}
             </div>
           ) : links.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-center">
-              <Link2 className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
-              <p className="text-muted-foreground">Você ainda não tem links de redirecionamento ativos.</p>
-              <p className="text-sm text-muted-foreground">Por padrão, o link principal é <strong>/r/{currentBusiness.slug}</strong>.</p>
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <div className="max-w-md w-full space-y-6">
+                <div className="flex flex-col items-center">
+                  <Link2 className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
+                  <p className="text-muted-foreground">Você ainda não tem links de redirecionamento ativos.</p>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Configure seu link do Google para começar a coletar avaliações.
+                  </p>
+                </div>
+
+                <Alert className="text-left bg-primary/5 border-primary/20">
+                  <AlertCircle className="h-4 w-4 text-primary" />
+                  <AlertTitle className="text-sm font-bold">Por que configurar?</AlertTitle>
+                  <AlertDescription className="text-xs">
+                    O link de avaliação é obrigatório para solicitar a verificação oficial e para que seus clientes possam te avaliar via NFC.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="text-left border rounded-xl p-4 bg-muted/30">
+                  <GoogleReviewTutorial />
+                </div>
+              </div>
             </div>
           ) : (
             <Table>

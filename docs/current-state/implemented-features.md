@@ -26,6 +26,10 @@
 - [x] Branded QR Code generator.
 - [x] Bayesian Ranking system.
 - [x] Verification request flow.
+- [x] Enforced Onboarding (Mandatory Google Review Link).
+- [x] Verification Eligibility Rules (Checklist of requirements).
+- [x] Interactive Google Review Tutorial.
+- [x] Draft/Unpublished states for business pages.
 
 ## Public Flow
 - [x] 1-5 Star Rating system.

@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { APP_CONFIG } from '@/lib/constants'
+import { BusinessOnboardingAlert } from '@/components/dashboard/business-onboarding-alert'
 
 export default function DashboardPage() {
   const { currentBusiness, businesses, isLoading: isBusinessLoading } = useBusiness()
@@ -103,6 +104,8 @@ export default function DashboardPage() {
           Aqui está o resumo de <strong>{currentBusiness.name}</strong>.
         </p>
       </div>
+
+      <BusinessOnboardingAlert businessId={currentBusiness.id} />
 
       {/* Public Link UX */}
       <Card className="bg-primary/5 border-primary/20 overflow-hidden relative">

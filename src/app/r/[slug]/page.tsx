@@ -6,7 +6,7 @@ import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabas
 import { BusinessPageClient } from './business-page-client'
 import { notFound, redirect } from 'next/navigation'
 import { APP_CONFIG } from '@/lib/constants'
-import { AlertTriangle, Home } from 'lucide-react'
+import { AlertTriangle, Home, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -23,6 +23,7 @@ interface BusinessData {
   links: PageLink[]
   reviews: Review[]
   isAdmin: boolean
+  isOwner: boolean
   isReviewLink: boolean
   redirectUrl: string | null
 }
@@ -69,9 +70,11 @@ async function getBusinessData(slug: string): Promise<BusinessData | null> {
 
   if (!page) return null
 
-  // Check if user is admin to bypass frozen check in UI
+  // Check auth status
   const { data: { user } } = await supabase.auth.getUser()
   let isAdmin = false
+  let isOwner = false
+
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -79,6 +82,9 @@ async function getBusinessData(slug: string): Promise<BusinessData | null> {
       .eq('id', user.id)
       .single()
     isAdmin = profile?.role === 'admin'
+    
+    // Check if user is owner of this business
+    isOwner = page.businesses.owner_id === user.id
   }
 
   const [links, reviews] = await Promise.all([
@@ -86,7 +92,7 @@ async function getBusinessData(slug: string): Promise<BusinessData | null> {
     reviewRepo.getByBusinessId(page.business_id)
   ])
 
-  return { page, links, reviews, isAdmin, isReviewLink, redirectUrl }
+  return { page, links, reviews, isAdmin, isOwner, isReviewLink, redirectUrl }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -96,6 +102,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data || (data.page.businesses.is_frozen && !data.isAdmin)) {
     return {
       title: 'Página Indisponível | Avalia Prudente',
+    }
+  }
+
+  // Handle unpublished pages
+  if (!data.page.is_published && !data.isAdmin && !data.isOwner) {
+    return {
+      title: 'Página em Configuração | Avalia Prudente',
     }
   }
 
@@ -156,6 +169,38 @@ export default async function BusinessPublicPage({ params }: Props) {
            <h1 className="text-2xl font-black tracking-tight mb-2">Empresa Indisponível</h1>
            <p className="text-muted-foreground text-sm leading-relaxed mb-8">
              A página de <strong>{data.page.businesses.name}</strong> está temporariamente suspensa por nossa equipe de moderação ou por solicitação do proprietário.
+           </p>
+           <div className="flex flex-col gap-3">
+              <Link 
+                href="/" 
+                className={cn(
+                  buttonVariants({ variant: 'default' }),
+                  "rounded-2xl h-12 font-bold shadow-lg shadow-primary/20"
+                )}
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Voltar para o Início
+              </Link>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold pt-4">
+                Avalia Prudente — Reputação Digital
+              </p>
+           </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Handle unpublished pages for non-owners and non-admins
+  if (!data.page.is_published && !data.isAdmin && !data.isOwner) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-full max-w-md bg-background rounded-[2.5rem] p-10 shadow-xl border-2 border-primary/10 animate-in zoom-in-95 duration-500">
+           <div className="h-20 w-20 rounded-3xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6">
+              <Settings className="h-10 w-10" />
+           </div>
+           <h1 className="text-2xl font-black tracking-tight mb-2">Página em Configuração</h1>
+           <p className="text-muted-foreground text-sm leading-relaxed mb-8">
+             A página de <strong>{data.page.businesses.name}</strong> ainda está sendo configurada pelo proprietário. Em breve, você poderá ver as avaliações e links desta empresa.
            </p>
            <div className="flex flex-col gap-3">
               <Link 

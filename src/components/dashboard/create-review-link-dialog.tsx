@@ -22,11 +22,12 @@ import { InputField } from '@/components/shared/input-field'
 import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { useBusiness } from '@/providers/business-provider'
 import { parseError, logError } from '@/lib/error-handler'
-import { isValidSlug } from '@/lib/utils'
+import { isValidSlug, isValidGoogleReviewUrl } from '@/lib/utils'
+import { GoogleReviewTutorial } from './google-review-tutorial'
 
 const createReviewLinkSchema = z.object({
   slug: z.string().min(2, 'Slug deve ter pelo menos 2 caracteres').refine(isValidSlug, 'Slug inválido ou reservado'),
-  redirect_url: z.string().url('URL inválida. Comece com https://'),
+  redirect_url: z.string().url('URL inválida. Comece com https://').refine(isValidGoogleReviewUrl, 'O link deve ser um link válido de avaliações do Google'),
 })
 
 type CreateReviewLinkInput = z.infer<typeof createReviewLinkSchema>
@@ -87,7 +88,21 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
         slug: data.slug.toLowerCase(),
         business_id: currentBusiness.id,
       })
-      toast.success('Link criado com sucesso!')
+
+      // Requirement: Encourage/Auto-activate public profile if this is the first Google link
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: page } = await supabase.from('business_pages').select('id, is_published').eq('business_id', currentBusiness.id).maybeSingle()
+      
+      if (page && !page.is_published) {
+        await supabase.from('business_pages').update({ is_published: true }).eq('id', page.id)
+        toast.success('Link criado e página ativada!', {
+          description: 'Sua empresa agora está visível para o público.'
+        })
+      } else {
+        toast.success('Link criado com sucesso!')
+      }
+
       setOpen(false)
       form.reset()
       onCreated?.()
@@ -144,6 +159,9 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
               disabled={isLoading}
               description="Cole aqui o link direto da sua página de avaliações no Google."
             />
+
+            <GoogleReviewTutorial />
+
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancelar

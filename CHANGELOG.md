@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.12.0] - 2026-05-19
+
+### Added
+- **Enforced Business Onboarding & Quality Rules:**
+  - **Mandatory Google Review Link:** New businesses now start as `is_published = false` (Draft Mode) and require a valid Google Review link to be fully activated.
+  - **Verification Eligibility Protection:** Formalized requirements for the "Official Verification" request: minimum of 1 social/external link AND a valid Google Review link.
+  - **Smart Onboarding Alert:** New dashboard component that guides users through missing steps (Google Link, Social Links) and blocks verification requests until criteria are met.
+  - **Google Review Tutorial:** Integrated step-by-step interactive tutorial with visual examples to help users find and configure their correct Google Review URLs.
+  - **Unpublished Page State:** Implemented a "Página em Configuração" fallback for public links of businesses that haven't completed onboarding, protecting platform quality.
+  - **Robust URL Validation:** Enhanced `isValidGoogleReviewUrl` with support for `maps.app.goo.gl`, `g.page`, and direct search result patterns, including domain-level safety checks.
+  - **Auto-Activation Flow:** Creating the first Google Review link now offers/triggers automatic page publication, streamlining the "Go-Live" experience.
+
+### Changed
+- **Database Trigger Refactor:** Updated `handle_new_business` trigger to default new business pages to `is_published = false`.
+- **Public Page Logic:** Enhanced `BusinessPublicPage` and `getBusinessData` to respect publication status while allowing owners and admins to preview draft pages.
+- **Verification UI:** Improved `VerificationRequestModal` with real-time requirement checklists and clear messaging for ineligible businesses.
+
+### Fixed
+- **Build Stability:** Resolved type errors in `@base-ui` Accordion components and restored accidentally removed utility functions (`isValidSlug`).
+- **Lint Cleanup:** Removed unused imports and variables in onboarding components.
+
 ## [0.11.0] - 2026-05-19
 
 ### Changed

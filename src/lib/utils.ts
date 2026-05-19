@@ -32,10 +32,63 @@ export function slugify(text: string): string {
 }
 
 /**
- * Validates if a slug is safe and not reserved.
+ * Validates if a slug is safe to use.
+ * - Not in RESERVED_SLUGS
+ * - No special characters except -
+ * - Length between 2 and 50
  */
 export function isValidSlug(slug: string): boolean {
-  if (!slug || slug.length < 2) return false
+  if (!slug) return false
+  if (slug.length < 2 || slug.length > 50) return false
   if (RESERVED_SLUGS.includes(slug.toLowerCase())) return false
-  return /^[a-z0-9-]+$/.test(slug)
+  
+  // Standard slug pattern
+  const pattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+  return pattern.test(slug)
+}
+
+/**
+ * Validates if a URL is a legitimate Google Review link.
+ */
+export function isValidGoogleReviewUrl(url: string): boolean {
+  if (!url) return false
+  
+  // common Google Review URL patterns
+  const patterns = [
+    /search\.google\.com\/local\/writereview/i,
+    /g\.page\/r\/[a-zA-Z0-9_-]+\/review/i,
+    /g\.page\/[a-zA-Z0-9_-]+\/review/i,
+    /goo\.gl\/maps\/[a-zA-Z0-9]+/i,
+    /maps\.app\.goo\.gl\/[a-zA-Z0-9]+/i,
+    /google\.com\/maps\/place/i,
+    /business\.google\.com\/reviews/i,
+    /google\.com\/search\?.*q=.*#lrd=/i
+  ]
+  
+  try {
+    const trimmedUrl = url.trim()
+    if (!trimmedUrl) return false
+    
+    const parsedUrl = new URL(trimmedUrl)
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return false
+    
+    // Check if it's a known Google domain or one of the shorteners
+    const allowedDomains = [
+      'google.com', 
+      'google.com.br', 
+      'g.page', 
+      'goo.gl', 
+      'maps.app.goo.gl'
+    ]
+    
+    const hasAllowedDomain = allowedDomains.some(domain => 
+      parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain)
+    )
+
+    if (!hasAllowedDomain) return false
+
+    return patterns.some(pattern => pattern.test(trimmedUrl))
+  } catch {
+    return false
+  }
 }
