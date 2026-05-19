@@ -10,7 +10,9 @@ export class ReviewRepository {
   }
 
   async getByBusinessId(businessId: string): Promise<Review[]> {
-    // Virtual Demo Reviews
+    // 💡 VIRTUAL DEMO REVIEWS
+    // These reviews are displayed on the "/r/demo" page.
+    // They are linked to the virtual business ID: 00000000-0000-0000-0000-000000000000
     if (businessId === '00000000-0000-0000-0000-000000000000') {
       return [
         {

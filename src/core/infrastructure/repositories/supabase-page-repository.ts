@@ -36,7 +36,9 @@ export class BusinessPageRepository {
   }
 
   async getBySlug(slug: string): Promise<PageWithBusiness | null> {
-    // 1. Check for Virtual Demo Profile
+    // 💡 VIRTUAL DEMO PROFILE
+    // This defines the business identity for "/r/demo". 
+    // Logo, name and verification status are controlled here.
     if (slug === 'demo' || slug === 'demonstracao') {
       const demoBusiness = {
         id: '00000000-0000-0000-0000-000000000000',
@@ -135,7 +137,9 @@ export class PageLinkRepository {
       return []
     }
 
-    // Virtual Demo Links
+    // 💡 VIRTUAL DEMO DATA SOURCE
+    // This section defines the links shown on the "/r/demo" and "/r/demonstracao" pages.
+    // Update these objects to change the demo experience without touching the database.
     if (pageId === 'demo-page') {
       return [
         {
@@ -170,6 +174,18 @@ export class PageLinkRepository {
           url: 'https://instagram.com/avaliaprudenteoficial',
           icon_name: null,
           sort_order: 2,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_active: true
+        },
+        {
+          id: 'demo-link-4',
+          page_id: 'demo-page',
+          type: 'linkedin',
+          title: 'Conecte-se no LinkedIn',
+          url: 'https://www.linkedin.com/company/avaliaprudente/',
+          icon_name: null,
+          sort_order: 3,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           is_active: true
