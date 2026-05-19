@@ -14,11 +14,22 @@ To prevent accidental data loss in remote/production environments, follow this s
    ```bash
    npm run supabase:reset
    ```
-3. **Deployment to Cloud:** Only push to the linked project AFTER local validation.
+   *You must confirm that local tests pass before proceeding.*
+3. **Migration Review (PR Stage):** Before merging to `main`, ensure that your pull request has been validated in the CI pipeline. Migrations should be peer-reviewed for syntax and safety.
+4. **Staging Verification:** Run `npx supabase db push` against the Staging environment before executing in Production. Test the application against this new schema.
+5. **Deployment to Cloud:** Only push to the linked production project AFTER staging validation.
    ```bash
    npm run db:push
    ```
    *The **Safety Guard** will ask for confirmation if a remote project is detected.*
+
+### Branch Strategy & Safe Merge Workflow
+
+- **`main`**: The single source of truth for production. Protected branch. Requires passing status checks (lint, build, test).
+- **Feature Branches**: Created from `main` (e.g., `feature/moderation-ui`). Must be merged via Pull Requests.
+- **Hotfix Branches**: Created from `main` for critical bugs (e.g., `hotfix/rls-recursion`).
+
+Quando lidar com migrações de banco em Pull Requests, sempre teste o upgrade E o rollback localmente se possível.
 
 ---
 

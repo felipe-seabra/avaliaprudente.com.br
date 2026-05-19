@@ -1,6 +1,29 @@
 # Production Deployment Guide
 
-Este guia descreve os procedimentos para colocar a plataforma Avalia Prudente em produção, migrando do ambiente local para o Supabase Cloud.
+Este guia descreve os procedimentos para colocar a plataforma Avalia Prudente em produção, migrando do ambiente local para o Supabase Cloud, e estabelece a nossa estratégia de ambiente de Staging.
+
+## CI/CD & Quality Gates
+
+Implementamos um workflow de CI/CD rigoroso com GitHub Actions para garantir a qualidade de cada pull request e push para a branch `main`.
+
+**Obrigatoriedade:**
+- `npm run lint`: Nenhuma PR pode ser mergeada com erros de lint.
+- `npm run test`: Todos os testes (Vitest) devem passar no ambiente CI.
+- `npm run build`: O build de produção do Next.js deve concluir sem erros.
+
+## Estratégia de Ambientes (Staging)
+
+A transição segura para produção exige a validação em um ambiente intermediário (Staging):
+
+1. **Desenvolvimento Local:** Utiliza Docker e Supabase Local. Nunca usar dados reais.
+2. **Staging (Preview):** Deploy na Vercel conectado a um projeto Supabase "Staging". Este ambiente DEVE refletir a infraestrutura de produção, mas contendo dados fakes e usuários de teste.
+3. **Produção:** Deploy principal na Vercel com o banco de produção.
+
+### Preparação do Ambiente Staging
+- Crie um projeto Supabase separado (ex: `avaliaprudente-staging`).
+- Rode as migrações: `npx supabase db push --db-url <url-do-staging>`.
+- Configure as variáveis na Vercel no ambiente de **Preview**.
+- Apenas promova para a Produção após testes empíricos de UX e performance no Staging.
 
 ## Infraestrutura Recomendada
 

@@ -48,3 +48,5 @@ O motor de moderação é centralizado e progressivo:
 - **Troubleshooting Auth:** Verifique os logs do Middleware no console. Eles indicam o fluxo de redirecionamento (User ID, Role, Status).
 - **Safe Reset:** `npm run supabase:stop && npm run supabase:start` limpa o estado local se o banco ficar inconsistente.
 - **Debug Moderation:** Teste o comportamento de bloqueio usando o painel Admin para suspender/banir contas de teste.
+- **CI/CD & Quality Gates:** Nunca proponha um merge/commit na `main` sem que as etapas de validação (`npm run lint`, `npm run test`, `npm run build`) estejam limpas. Respeite as ações do GitHub CI.
+- **Safe Merge Workflow:** `main` é branch protegida. Sempre opere via Pull Requests (branches de feature/hotfix). Teste migrações E rollbacks localmente antes de propor a PR.
