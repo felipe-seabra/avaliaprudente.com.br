@@ -38,7 +38,7 @@ async function getBase64Image(url: string): Promise<string | null> {
     const arrayBuffer = await response.arrayBuffer()
     const base64 = Buffer.from(arrayBuffer).toString('base64')
     const contentType = response.headers.get('content-type') || 'image/png'
-    return 'data:${contentType};base64,${base64}'
+    return `data:${contentType};base64,${base64}`
   } catch (error) {
     console.error('Failed to fetch logo for OG:', url, error)
     return null
