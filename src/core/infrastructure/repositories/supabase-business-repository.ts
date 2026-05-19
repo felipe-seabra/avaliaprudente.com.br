@@ -39,11 +39,47 @@ export class BusinessRepository {
     const { data, error } = await this.supabase
       .from('businesses')
       .select('*')
-      .eq('slug', slug)
+      .eq('slug', slug.toLowerCase())
       .single()
 
     if (error) return null
     return data
+  }
+
+  async isSlugAvailable(slug: string, excludeBusinessId?: string): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .rpc('is_slug_available', { 
+        slug_to_check: slug.toLowerCase(),
+        exclude_business_id: excludeBusinessId
+      })
+
+    if (error) {
+      console.error('Error checking slug availability:', error)
+      // Fallback to manual check if RPC fails (e.g. migration not applied yet)
+      const existing = await this.getBySlug(slug)
+      if (excludeBusinessId) {
+        return !existing || existing.id === excludeBusinessId
+      }
+      return !existing
+    }
+
+    return !!data
+  }
+
+  async getAvailableSlug(baseSlug: string, excludeBusinessId?: string): Promise<string> {
+    let slug = baseSlug
+    let counter = 1
+    let available = await this.isSlugAvailable(slug, excludeBusinessId)
+
+    while (!available && counter < 100) {
+      // Try suffixes like -2, -3, or -oficial, -sp if we want more fancy suggestions
+      // For now, let's keep it simple with numeric suffixes
+      slug = `${baseSlug}-${counter}`
+      available = await this.isSlugAvailable(slug, excludeBusinessId)
+      counter++
+    }
+
+    return slug
   }
 
   async create(business: CreateBusinessDTO): Promise<Business> {

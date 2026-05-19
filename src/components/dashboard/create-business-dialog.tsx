@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { Plus, ShieldAlert, Sparkles } from 'lucide-react'
+import { Plus, ShieldAlert, Sparkles, Loader2, CheckCircle2, XCircle, Wand2 } from 'lucide-react'
 
 import {
   Dialog,
@@ -25,10 +25,11 @@ import { useBusiness } from '@/providers/business-provider'
 import { parseError, logError } from '@/lib/error-handler'
 import { PRICING_PLANS, APP_CONFIG } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/client'
+import { slugify, isValidSlug } from '@/lib/utils'
 
 const createBusinessSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  slug: z.string().min(2, 'Slug deve ter pelo menos 2 caracteres').regex(/^[a-z0-9-]+$/, 'Slug inválido'),
+  slug: z.string().min(2, 'Slug deve ter pelo menos 2 caracteres').refine(isValidSlug, 'Slug inválido ou reservado'),
   logo_url: z.string().optional(),
 })
 
@@ -37,10 +38,12 @@ type CreateBusinessInput = z.infer<typeof createBusinessSchema>
 export function CreateBusinessDialog({ children }: { children?: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingSlug, setIsCheckingSlug] = useState(false)
+  const [slugStatus, setSlugStatus] = useState<'available' | 'unavailable' | 'idle'>('idle')
   const [userRole, setUserRole] = useState('customer')
   const { businesses, refreshBusinesses, setCurrentBusiness } = useBusiness()
-  const repository = new BusinessRepository()
-  const supabase = createClient()
+  const repository = useMemo(() => new BusinessRepository(), [])
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     async function getRole() {
@@ -64,18 +67,37 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
 
   // Auto-generate slug from name
   const name = form.watch('name')
+  const watchedSlug = form.watch('slug')
+
   React.useEffect(() => {
     if (name && !form.formState.touchedFields.slug) {
-      const slug = name
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '')
-      form.setValue('slug', slug)
+      const generatedSlug = slugify(name)
+      form.setValue('slug', generatedSlug)
     }
   }, [name, form])
+
+  // Real-time slug validation
+  React.useEffect(() => {
+    const checkSlug = async () => {
+      if (!watchedSlug || watchedSlug.length < 2) {
+        setSlugStatus('idle')
+        return
+      }
+
+      setIsCheckingSlug(true)
+      try {
+        const available = await repository.isSlugAvailable(watchedSlug)
+        setSlugStatus(available ? 'available' : 'unavailable')
+      } catch (error) {
+        console.error('Error checking slug:', error)
+      } finally {
+        setIsCheckingSlug(false)
+      }
+    }
+
+    const timer = setTimeout(checkSlug, 500)
+    return () => clearTimeout(timer)
+  }, [watchedSlug, repository])
 
   const canCreate = userRole === 'admin' || businesses.length < PRICING_PLANS.FREE.maxBusinesses
 
@@ -89,14 +111,21 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
 
     setIsLoading(true)
     try {
-      // Check if slug exists
-      const existing = await repository.getBySlug(data.slug)
-      if (existing) {
+      // Final availability check
+      const available = await repository.isSlugAvailable(data.slug)
+      if (!available) {
+        const suggested = await repository.getAvailableSlug(data.slug)
         form.setError('slug', { message: 'Este slug já está em uso' })
+        toast.error('Slug indisponível', {
+          description: `Que tal usar "${suggested}"?`
+        })
         return
       }
 
-      const newBusiness = await repository.create(data)
+      const newBusiness = await repository.create({
+        ...data,
+        slug: data.slug.toLowerCase()
+      })
       toast.success('Empresa criada com sucesso!')
       await refreshBusinesses()
       setCurrentBusiness(newBusiness)
@@ -108,6 +137,17 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
       toast.error(normalized.message)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleSuggest = async () => {
+    if (!watchedSlug) return
+    setIsCheckingSlug(true)
+    try {
+      const suggested = await repository.getAvailableSlug(watchedSlug)
+      form.setValue('slug', suggested, { shouldValidate: true, shouldDirty: true, shouldTouch: true })
+    } finally {
+      setIsCheckingSlug(false)
     }
   }
 
@@ -184,13 +224,36 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
                     placeholder="Ex: Pizzaria do João"
                     disabled={isLoading}
                   />
-                  <InputField
-                    name="slug"
-                    label="Slug (URL amigável)"
-                    placeholder="ex: pizzaria-do-joao"
-                    disabled={isLoading}
-                    description="Link: avaliaprudente.com.br/r/seu-slug"
-                  />
+                  <div className="relative">
+                    <InputField
+                      name="slug"
+                      label="Slug (URL amigável)"
+                      placeholder="ex: pizzaria-do-joao"
+                      disabled={isLoading}
+                      description="Link: avaliaprudente.com.br/r/seu-slug"
+                    />
+                    <div className="absolute top-9 right-3 flex items-center gap-2">
+                      {isCheckingSlug && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                      {!isCheckingSlug && slugStatus === 'available' && (
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      )}
+                      {!isCheckingSlug && slugStatus === 'unavailable' && (
+                        <div className="flex items-center gap-2">
+                          <XCircle className="h-4 w-4 text-destructive" />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-primary hover:text-primary-foreground hover:bg-primary"
+                            onClick={handleSuggest}
+                            title="Sugerir disponível"
+                          >
+                            <Wand2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -198,7 +261,7 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
                 <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="cursor-pointer" disabled={isLoading}>
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={isLoading} className="cursor-pointer font-bold">
+                <Button type="submit" disabled={isLoading || isCheckingSlug || slugStatus === 'unavailable'} className="cursor-pointer font-bold">
                   {isLoading ? 'Criando...' : 'Criar Empresa'}
                 </Button>
               </DialogFooter>

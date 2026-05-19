@@ -24,7 +24,7 @@ export class ReviewLinkRepository {
     const { data, error } = await this.supabase
       .from('review_links')
       .select('*, businesses(*)')
-      .eq('slug', slug)
+      .eq('slug', slug.toLowerCase())
       .eq('is_active', true)
       .single()
       .returns<ReviewLink & { businesses: Business }>()
@@ -39,6 +39,25 @@ export class ReviewLinkRepository {
     }
 
     return result
+  }
+
+  async isSlugAvailable(slug: string): Promise<boolean> {
+    const { data, error } = await this.supabase
+      .rpc('is_slug_available', { 
+        slug_to_check: slug.toLowerCase()
+      })
+
+    if (error) {
+      console.error('Error checking slug availability:', error)
+      const { data: existing } = await this.supabase
+        .from('review_links')
+        .select('id')
+        .eq('slug', slug.toLowerCase())
+        .maybeSingle()
+      return !existing
+    }
+
+    return !!data
   }
 
   async create(link: CreateReviewLinkDTO): Promise<ReviewLink> {

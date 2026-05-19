@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2026-05-19
+
+### Added
+- **Customizable Unique Slugs:** Users can now personalize their business slugs during creation and editing.
+- **Real-time Slug Validation:** Visual feedback on slug availability and validity directly in the forms.
+- **Automatic Slug Suggestions:** Suggests available alternatives if the desired slug is already taken.
+- **Database-level Slug Protection:** Added check constraints and uniqueness verification to prevent collisions across the entire platform.
+- **Reserved Route Protection:** Prevents using slugs that conflict with system routes like `admin`, `dashboard`, `login`, etc.
+
+### Changed
+- **Case-Insensitive Slugs:** All slugs are now automatically normalized to lowercase and accent-stripped for better SEO and reliability.
+- **Slug Editing:** Enabled slug modification in Business Settings with clear warnings about the impact on printed materials.
+
 ## [0.7.0] - 2026-05-19
 
 ### Added
