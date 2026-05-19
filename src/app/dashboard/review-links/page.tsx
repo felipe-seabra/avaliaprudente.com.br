@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { useBusiness } from '@/providers/business-provider'
-import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
-import { ReviewLink } from '@/core/domain/entities'
+import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
+import { PageLink } from '@/core/domain/entities'
 import { Card, CardContent } from '@/components/ui/card'
-import { Link2, MoreVertical, Trash2, ExternalLink } from 'lucide-react'
+import { MoreVertical, Trash2, ExternalLink, Star } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -16,35 +16,42 @@ import { AlertCircle } from 'lucide-react'
 
 export default function ReviewLinksPage() {
   const { currentBusiness } = useBusiness()
-  const [links, setLinks] = useState<ReviewLink[]>([])
+  const [links, setLinks] = useState<PageLink[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const repository = useMemo(() => new ReviewLinkRepository(), [])
+  const pageRepo = useMemo(() => new BusinessPageRepository(), [])
+  const linkRepo = useMemo(() => new PageLinkRepository(), [])
 
   const fetchLinks = useCallback(async () => {
     if (!currentBusiness) return
     setIsLoading(true)
     try {
-      const data = await repository.getByBusinessId(currentBusiness.id)
-      setLinks(data)
+      const page = await pageRepo.getByBusinessId(currentBusiness.id)
+      if (page) {
+        const data = await linkRepo.getByPageId(page.id)
+        // Only show Google Review type links here
+        setLinks(data.filter(l => l.type === 'google_review'))
+      } else {
+        setLinks([])
+      }
     } catch {
-      toast.error('Erro ao carregar links')
+      toast.error('Erro ao carregar botões de avaliação')
     } finally {
       setIsLoading(false)
     }
-  }, [currentBusiness, repository])
+  }, [currentBusiness, pageRepo, linkRepo])
 
   useEffect(() => {
     fetchLinks()
   }, [fetchLinks])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este link?')) return
+    if (!confirm('Tem certeza que deseja excluir este botão de avaliação?')) return
     try {
-      await repository.delete(id)
-      toast.success('Link excluído com sucesso')
+      await linkRepo.delete(id)
+      toast.success('Botão excluído com sucesso')
       fetchLinks()
     } catch {
-      toast.error('Erro ao excluir link')
+      toast.error('Erro ao excluir botão')
     }
   }
 
@@ -52,7 +59,7 @@ export default function ReviewLinksPage() {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center">
         <h1 className="text-2xl font-bold">Nenhuma empresa selecionada</h1>
-        <p className="text-muted-foreground mt-2">Selecione uma empresa na barra lateral para ver seus links.</p>
+        <p className="text-muted-foreground mt-2">Selecione uma empresa na barra lateral para ver seus botões de avaliação.</p>
       </div>
     )
   }
@@ -81,10 +88,10 @@ export default function ReviewLinksPage() {
             <div className="flex flex-col items-center justify-center p-8 text-center">
               <div className="max-w-md w-full space-y-6">
                 <div className="flex flex-col items-center">
-                  <Link2 className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
+                  <Star className="h-12 w-12 text-primary mb-4 opacity-20" />
                   <p className="text-muted-foreground">Você ainda não tem botões de avaliação configurados.</p>
                   <p className="text-sm text-muted-foreground mb-6">
-                    Crie uma chamada para ação personalizada para começar a coletar avaliações.
+                    Crie uma chamada para ação personalizada para começar a coletar avaliações no Google.
                   </p>
                 </div>
 
@@ -92,7 +99,7 @@ export default function ReviewLinksPage() {
                   <AlertCircle className="h-4 w-4 text-primary" />
                   <AlertTitle className="text-sm font-bold">Por que configurar?</AlertTitle>
                   <AlertDescription className="text-xs">
-                    Ter pelo menos um botão de avaliação configurado é necessário para que seus clientes possam te avaliar via NFC ou QR Code.
+                    Ter um botão de avaliação configurado é obrigatório para que seus clientes possam te avaliar via NFC ou QR Code e para obter o selo de verificação.
                   </AlertDescription>
                 </Alert>
 
@@ -106,7 +113,7 @@ export default function ReviewLinksPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Texto do Botão</TableHead>
-                  <TableHead>Link de Destino</TableHead>
+                  <TableHead>Link de Destino (Google)</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -114,13 +121,13 @@ export default function ReviewLinksPage() {
               <TableBody>
                 {links.map((link) => (
                   <TableRow key={link.id}>
-                    <TableCell className="font-medium">{link.slug}</TableCell>
+                    <TableCell className="font-medium">{link.title}</TableCell>
                     <TableCell className="max-w-[300px] truncate text-muted-foreground">
-                      {link.redirect_url}
+                      {link.url}
                     </TableCell>
                     <TableCell>
                       <span className="inline-flex items-center rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-600">
-                        Ativo
+                        Ativo na Página
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
@@ -135,7 +142,7 @@ export default function ReviewLinksPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem 
                             className="cursor-pointer"
-                            onClick={() => window.open(`/r/${link.slug}`, '_blank')}
+                            onClick={() => window.open(link.url, '_blank')}
                           >
                             <ExternalLink className="mr-2 h-4 w-4" />
                             Testar Botão

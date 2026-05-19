@@ -2,9 +2,8 @@ import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
-import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { BusinessPageClient } from './business-page-client'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { APP_CONFIG } from '@/lib/constants'
 import { AlertTriangle, Home, Settings } from 'lucide-react'
 import Link from 'next/link'
@@ -33,40 +32,9 @@ async function getBusinessData(slug: string): Promise<BusinessData | null> {
   const pageRepo = new BusinessPageRepository(supabase)
   const linkRepo = new PageLinkRepository(supabase)
   const reviewRepo = new ReviewRepository(supabase)
-  const reviewLinkRepo = new ReviewLinkRepository(supabase)
 
-  // 1. Check if it's a Direct Business Page slug
-  let page = await pageRepo.getBySlug(slug) as PageWithBusiness | null
-  let isReviewLink = false
-  let redirectUrl = null
-
-  // 2. If not found, check if it's a Review Link slug
-  if (!page) {
-    const reviewLink = await reviewLinkRepo.getBySlug(slug)
-    if (reviewLink) {
-      isReviewLink = true
-      redirectUrl = reviewLink.redirect_url
-      // Fetch the business page for this link to show its metadata/branding
-      page = await pageRepo.getByBusinessId(reviewLink.business_id) as PageWithBusiness | null
-      
-      // If still no page, create a fallback one for metadata
-      if (!page) {
-        page = {
-          id: 'fallback-page',
-          business_id: reviewLink.business_id,
-          description: '',
-          theme_config: { primary_color: '#7c3aed' },
-          is_published: true,
-          businesses: reviewLink.businesses,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } as PageWithBusiness
-      } else {
-        // Ensure businesses data is attached if it wasn't
-        page.businesses = reviewLink.businesses
-      }
-    }
-  }
+  // Resolve Business Page by slug
+  const page = await pageRepo.getBySlug(slug) as PageWithBusiness | null
 
   if (!page) return null
 
@@ -92,7 +60,15 @@ async function getBusinessData(slug: string): Promise<BusinessData | null> {
     reviewRepo.getByBusinessId(page.business_id)
   ])
 
-  return { page, links, reviews, isAdmin, isOwner, isReviewLink, redirectUrl }
+  return { 
+    page, 
+    links, 
+    reviews, 
+    isAdmin, 
+    isOwner, 
+    isReviewLink: false, 
+    redirectUrl: null 
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -151,11 +127,6 @@ export default async function BusinessPublicPage({ params }: Props) {
 
   if (!data) {
     notFound()
-  }
-
-  // Handle Review Link redirection
-  if (data.isReviewLink && data.redirectUrl) {
-    redirect(data.redirectUrl)
   }
 
   // Handle Frozen Business for non-admins
