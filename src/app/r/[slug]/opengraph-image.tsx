@@ -38,7 +38,7 @@ async function getBase64Image(url: string): Promise<string | null> {
     const arrayBuffer = await response.arrayBuffer()
     const base64 = Buffer.from(arrayBuffer).toString('base64')
     const contentType = response.headers.get('content-type') || 'image/png'
-    return \`data:\${contentType};base64,\${base64}\`
+    return 'data:${contentType};base64,${base64}'
   } catch (error) {
     console.error('Failed to fetch logo for OG:', url, error)
     return null
@@ -50,7 +50,7 @@ async function getBase64Image(url: string): Promise<string | null> {
  */
 function normalizeColor(color?: string): string {
   if (!color) return '#7c3aed'
-  const hex = color.startsWith('#') ? color : \`#\${color}\`
+  const hex = color.startsWith('#') ? color : `#${color}`
   if (/^#([0-9A-F]{3}){1,2}$/i.test(hex)) return hex
   return '#7c3aed'
 }
@@ -120,7 +120,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     
     // Robust URL construction for the logo
     const absoluteLogoUrl = businessLogo 
-      ? (businessLogo.startsWith('http') ? businessLogo : \`\${APP_CONFIG.url.replace(/\\/$/, '')}/\${businessLogo.replace(/^\\//, '')}\`)
+      ? (businessLogo.startsWith('http') ? businessLogo : `${APP_CONFIG.url.replace(/\/$/, '')}/${businessLogo.replace(/^\//, '')}`)
       : null
 
     // Pre-fetch logo to base64 for stability in Satori
@@ -131,7 +131,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     const primaryColor = normalizeColor(themeConfig.primary_color)
     
     // Defensive review fetch
-    let reviews: any[] = []
+    let reviews: {rating: number}[] = []
     try {
         reviews = await reviewRepo.getByBusinessId(data.business_id)
     } catch (e) {
@@ -167,7 +167,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               right: 0,
               height: '400px',
               display: 'flex',
-              background: \`linear-gradient(to bottom, \${primaryColor}20, transparent)\`,
+              background: `linear-gradient(to bottom, ${primaryColor}20, transparent)`,
             }}
           />
           
@@ -195,7 +195,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               height: 180,
               borderRadius: 45,
               overflow: 'hidden',
-              border: \`6px solid \${primaryColor}40\`,
+              border: `6px solid ${primaryColor}40`,
               background: 'white',
               marginBottom: 32,
             }}
