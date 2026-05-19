@@ -110,9 +110,10 @@ export function RegisterForm() {
               autoComplete="new-password"
             />
             
-            <div className="flex items-start space-x-2 pt-2">
+            <div className="flex items-start space-x-3 pt-4">
               <Checkbox
                 id="acceptTerms"
+                className="mt-0.5"
                 checked={form.watch('acceptTerms')}
                 onCheckedChange={(checked) => 
                   form.setValue('acceptTerms', checked === true, { shouldValidate: true })
@@ -122,10 +123,10 @@ export function RegisterForm() {
               <div className="grid gap-1.5 leading-none">
                 <label
                   htmlFor="acceptTerms"
-                  className="text-xs text-muted-foreground leading-normal"
+                  className="text-sm font-medium leading-normal cursor-pointer select-none text-foreground/90 dark:text-foreground/80"
                 >
                   Eu li e aceito os{' '}
-                  <Link href="/terms" target="_blank" className="text-primary hover:underline font-medium">
+                  <Link href="/terms" target="_blank" className="text-primary hover:underline font-bold">
                     Termos de Uso
                   </Link>
                   {' '}da plataforma.
