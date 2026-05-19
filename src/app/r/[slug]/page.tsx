@@ -2,25 +2,71 @@ import { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
+import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { BusinessPageClient } from './business-page-client'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { APP_CONFIG } from '@/lib/constants'
 import { AlertTriangle, Home } from 'lucide-react'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Business, BusinessPage, PageLink, Review } from '@/core/domain/entities'
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
-async function getBusinessData(slug: string) {
+type PageWithBusiness = BusinessPage & { businesses: Business }
+
+interface BusinessData {
+  page: PageWithBusiness
+  links: PageLink[]
+  reviews: Review[]
+  isAdmin: boolean
+  isReviewLink: boolean
+  redirectUrl: string | null
+}
+
+async function getBusinessData(slug: string): Promise<BusinessData | null> {
   const supabase = await createClient()
   const pageRepo = new BusinessPageRepository(supabase)
   const linkRepo = new PageLinkRepository(supabase)
   const reviewRepo = new ReviewRepository(supabase)
+  const reviewLinkRepo = new ReviewLinkRepository(supabase)
 
-  const page = await pageRepo.getBySlug(slug)
+  // 1. Check if it's a Direct Business Page slug
+  let page = await pageRepo.getBySlug(slug) as PageWithBusiness | null
+  let isReviewLink = false
+  let redirectUrl = null
+
+  // 2. If not found, check if it's a Review Link slug
+  if (!page) {
+    const reviewLink = await reviewLinkRepo.getBySlug(slug)
+    if (reviewLink) {
+      isReviewLink = true
+      redirectUrl = reviewLink.redirect_url
+      // Fetch the business page for this link to show its metadata/branding
+      page = await pageRepo.getByBusinessId(reviewLink.business_id) as PageWithBusiness | null
+      
+      // If still no page, create a fallback one for metadata
+      if (!page) {
+        page = {
+          id: 'fallback-page',
+          business_id: reviewLink.business_id,
+          description: '',
+          theme_config: { primary_color: '#7c3aed' },
+          is_published: true,
+          businesses: reviewLink.businesses,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } as PageWithBusiness
+      } else {
+        // Ensure businesses data is attached if it wasn't
+        page.businesses = reviewLink.businesses
+      }
+    }
+  }
+
   if (!page) return null
 
   // Check if user is admin to bypass frozen check in UI
@@ -40,7 +86,7 @@ async function getBusinessData(slug: string) {
     reviewRepo.getByBusinessId(page.business_id)
   ])
 
-  return { page, links, reviews, isAdmin }
+  return { page, links, reviews, isAdmin, isReviewLink, redirectUrl }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -65,7 +111,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : `Avaliações, contato e redes sociais da ${businessName} através da plataforma NFC da Avalia Prudente.`
 
   // Standardization: Use the new dynamic opengraph-image generator
-  // Next.js automatically detects opengraph-image.tsx, but we can be explicit
+  // Next.js automatically detects opengraph-image.tsx
   const ogImageUrl = `${APP_CONFIG.url}/r/${slug}/opengraph-image`
 
   return {
@@ -99,13 +145,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-
 export default async function BusinessPublicPage({ params }: Props) {
   const { slug } = await params
   const data = await getBusinessData(slug)
 
   if (!data) {
     notFound()
+  }
+
+  // Handle Review Link redirection
+  if (data.isReviewLink && data.redirectUrl) {
+    redirect(data.redirectUrl)
   }
 
   // Handle Frozen Business for non-admins

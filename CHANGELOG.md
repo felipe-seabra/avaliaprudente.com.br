@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2026-05-19
+
+### Added
+- **Dynamic Open Graph & Social Sharing:**
+  - **Dynamic OG Images:** Implemented a high-performance dynamic OG image generator for all business pages using Next.js Edge Runtime.
+  - **Real-time Stats:** Automatic inclusion of average ratings and total review counts in social previews.
+  - **Premium Branding:** Rich visual presentation featuring business logos, brand colors, and "Verified" trust badges.
+  - **Unified Slug Support:** Metadata and OG support for both direct business pages and Review Link redirects.
+  - **SEO Hardening:** Comprehensive metadata generation with `og:image`, `twitter:image`, and canonical URL support.
+
 ## [0.5.0] - 2026-05-19
 
 ### Added
@@ -18,35 +28,6 @@ All notable changes to this project will be documented in this file.
 - **Terms & Moderation Transparency (Phase 2):** Enhanced enforcement and user transparency.
   - **Terms Version Enforcement:** Implemented a robust re-acceptance flow when platform terms are updated.
   - **Moderation Transparency Center:** New `/dashboard/moderation` page where users can view their full moderation history, warning counts, and status details.
-  - **Improved Blocked UX:** Redesigned `/blocked` page with specific messaging for suspensions, permanent bans, and account deactivations.
-  - **Dashboard Integration:** Updated `ModerationStatusBadge` and sidebar to provide direct access to transparency details.
-  - **Surgical RLS Updates:** Added policies allowing users to read their own moderation audit logs while preserving admin-only write access.
-
-## [0.3.7] - 2026-05-18
-
-### Added
-- **Terms of Use & Moderation Awareness (Phase 1):** Implemented mandatory terms acceptance and increased moderation visibility.
-  - **Terms Acceptance Flow:** New checkbox in registration and a mandatory `TermsAcceptanceDialog` in the dashboard for existing users or version updates.
-  - **Database Hardening:** Added `terms_accepted_at`, `terms_version`, and `last_warning_at` to profiles.
-  - **Trigger Optimization:** Updated `handle_new_user` trigger to automatically capture terms metadata from auth registration.
-  - **Moderation Visibility:** New `ModerationStatusBadge` in the dashboard header showing warning counts, suspension status, or ban status to the user.
-  - **Updated Content:** Fully revised `Terms of Use` page with clear sections on prohibited behavior, fake reviews, and moderation escalation.
-
-## [0.3.6] - 2026-05-18
-
-### Fixed
-- **Total Public Isolation for Frozen Businesses:** Hardened public-facing repositories to prevent direct access to frozen content via slugs or review links.
-  - **Repository Hardening:** Updated `BusinessPageRepository` and `ReviewLinkRepository` to explicitly validate `is_frozen` status for all public-facing slug resolutions.
-  - **Redirect Protection:** Ensured custom review link slugs (e.g., `/r/custom-slug`) are immediately disabled when the associated business is frozen by moderation.
-  - **Type Safety:** Refined TypeScript interfaces in repositories to eliminate `any` usage and improve data integrity during moderation checks.
-
-## [0.3.5] - 2026-05-18
-
-### Fixed
-- **Database & Middleware Synchronization (Phase 4):** Resolved a regression where the middleware failed to fetch profiles due to missing `is_deleted` column on the remote database.
-  - **Schema Alignment:** Applied missing Phase 3, 4, and 5 migrations to the remote Supabase instance.
-  - **Auth Stability:** Restored correct admin role resolution and dashboard access by ensuring all moderation-related fields are available for the middleware session check.
-  - **Build Integrity:** Verified full project stability with successful linting and production builds.
 
 ## [0.3.4] - 2026-05-18
 
