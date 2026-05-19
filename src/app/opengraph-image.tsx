@@ -20,8 +20,8 @@ export default async function Image() {
       <div
         style={{
           background: '#09090b',
-          width: '100%',
-          height: '100%',
+          width: 1200,
+          height: 630,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -40,6 +40,7 @@ export default async function Image() {
             height: '600px',
             background: 'radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%)',
             transform: 'translate(-50%, -50%)',
+            display: 'flex',
           }}
         />
 
@@ -51,6 +52,7 @@ export default async function Image() {
             width: '400px',
             height: '400px',
             background: 'radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%)',
+            display: 'flex',
           }}
         />
 
@@ -72,23 +74,22 @@ export default async function Image() {
               marginBottom: '40px',
             }}
           >
-            {/* We'll use a text-based logo representation since we can't reliably load external assets in OG without more setup */}
             <div
               style={{
                 background: '#7c3aed',
-                width: '80px',
-                height: '80px',
-                borderRadius: '20px',
+                width: '100px',
+                height: '100px',
+                borderRadius: '25px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginRight: '24px',
+                marginRight: '32px',
                 boxShadow: '0 0 40px rgba(124, 58, 237, 0.4)',
               }}
             >
               <svg
-                width="40"
-                height="40"
+                width="50"
+                height="50"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="white"
@@ -101,10 +102,11 @@ export default async function Image() {
             </div>
             <div
               style={{
-                fontSize: 72,
+                fontSize: 84,
                 fontWeight: 900,
                 color: 'white',
-                letterSpacing: '-2px',
+                letterSpacing: '-3px',
+                display: 'flex',
               }}
             >
               Avalia Prudente
@@ -114,13 +116,14 @@ export default async function Image() {
           {/* Tagline */}
           <div
             style={{
-              fontSize: 32,
+              fontSize: 36,
               fontWeight: 600,
               color: '#a1a1aa',
               textAlign: 'center',
-              maxWidth: '800px',
+              maxWidth: '900px',
               lineHeight: 1.4,
               letterSpacing: '-0.5px',
+              display: 'flex',
             }}
           >
             A plataforma NFC para avaliações e reputação digital
@@ -132,15 +135,15 @@ export default async function Image() {
               marginTop: '60px',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
-              padding: '12px 24px',
+              gap: '16px',
+              padding: '12px 32px',
               background: 'rgba(255, 255, 255, 0.05)',
               borderRadius: '100px',
               border: '1px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#7c3aed' }} />
-            <span style={{ fontSize: 16, fontWeight: 700, color: 'white', letterSpacing: '2px', textTransform: 'uppercase' }}>
+            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#7c3aed', display: 'flex' }} />
+            <span style={{ fontSize: 18, fontWeight: 800, color: 'white', letterSpacing: '3px', textTransform: 'uppercase' }}>
               NFC TECHNOLOGY
             </span>
           </div>
@@ -151,9 +154,10 @@ export default async function Image() {
           style={{
             position: 'absolute',
             bottom: '40px',
-            fontSize: 18,
+            fontSize: 20,
             color: '#52525b',
-            fontWeight: 500,
+            fontWeight: 600,
+            display: 'flex',
           }}
         >
           {APP_CONFIG.url.replace('https://', '')}
@@ -162,6 +166,9 @@ export default async function Image() {
     ),
     {
       ...size,
+      headers: {
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
     }
   )
 }
