@@ -7,8 +7,11 @@ import { FAQ } from '@/components/marketing/faq'
 import { Footer } from '@/components/marketing/footer'
 import { BusinessRanking } from '@/components/marketing/business-ranking'
 import { Star, ShieldCheck, Zap, ShoppingBag } from 'lucide-react'
+import { getPublicRankings } from '@/core/application/use-cases/get-public-rankings'
 
-export default function Home() {
+export default async function Home() {
+  const { topRated, mostViewed } = await getPublicRankings()
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -57,7 +60,7 @@ export default function Home() {
                  Conheça os negócios que estão transformando sua reputação digital com o Avalia Prudente.
                </p>
              </div>
-             <BusinessRanking />
+             <BusinessRanking topRated={topRated} mostViewed={mostViewed} />
           </div>
         </section>
 

@@ -25,18 +25,22 @@ export const contentType = 'image/png'
 
 /**
  * Robust fetch for remote images to avoid Satori crashes.
- * Using base64 ensures the image is fully loaded before Satori starts rendering.
  */
 async function getBase64Image(url: string): Promise<string | null> {
   if (!url) return null
   try {
     const response = await fetch(url, { 
       next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(4000) // 4s timeout to avoid hanging Edge function
+      signal: AbortSignal.timeout(3000)
     })
     if (!response.ok) return null
     const arrayBuffer = await response.arrayBuffer()
-    const base64 = Buffer.from(arrayBuffer).toString('base64')
+    
+    // Edge Runtime safe base64 conversion
+    const base64 = btoa(
+      new Uint8Array(arrayBuffer)
+        .reduce((data, byte) => data + String.fromCharCode(byte), '')
+    )
     const contentType = response.headers.get('content-type') || 'image/png'
     return `data:${contentType};base64,${base64}`
   } catch (error) {
@@ -46,7 +50,7 @@ async function getBase64Image(url: string): Promise<string | null> {
 }
 
 /**
- * Normalizes hex color and ensures it has a valid format for Satori
+ * Normalizes hex color for Satori
  */
 function normalizeColor(color?: string): string {
   if (!color) return '#7c3aed'
@@ -115,7 +119,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       )
     }
 
-    const businessName = data.businesses.name
+    const businessName = data.businesses.name || 'Empresa'
     const businessLogo = data.businesses.logo_url
     
     // Robust URL construction for the logo
@@ -123,24 +127,25 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       ? (businessLogo.startsWith('http') ? businessLogo : `${APP_CONFIG.url.replace(/\/$/, '')}/${businessLogo.replace(/^\//, '')}`)
       : null
 
-    // Pre-fetch logo to base64 for stability in Satori
+    // Pre-fetch logo to base64
     const logoBase64 = absoluteLogoUrl ? await getBase64Image(absoluteLogoUrl) : null
 
     const isVerified = data.businesses.is_verified
     const themeConfig = (data.theme_config || {}) as ThemeConfig
     const primaryColor = normalizeColor(themeConfig.primary_color)
     
-    // Defensive review fetch
-    let reviews: {rating: number}[] = []
+    // Stats fetch
+    let reviews: { rating: number }[] = []
     try {
-        reviews = await reviewRepo.getByBusinessId(data.business_id)
+        const fetchedReviews = await reviewRepo.getByBusinessId(data.business_id)
+        reviews = fetchedReviews || []
     } catch (e) {
         console.error('Failed to fetch reviews for OG:', e)
     }
 
     const reviewCount = reviews.length
     const avgRating = reviewCount > 0 
-      ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount).toFixed(1)
+      ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviewCount).toFixed(1)
       : '5.0'
 
     return new ImageResponse(
@@ -158,7 +163,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             position: 'relative',
           }}
         >
-          {/* Decorative Background Elements */}
+          {/* Top decorative gradient - Using rgba instead of transparent to avoid Satori u2 error */}
           <div
             style={{
               position: 'absolute',
@@ -167,21 +172,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               right: 0,
               height: '400px',
               display: 'flex',
-              background: `linear-gradient(to bottom, ${primaryColor}20, transparent)`,
-            }}
-          />
-          
-          <div
-            style={{
-              position: 'absolute',
-              bottom: -100,
-              right: -100,
-              width: 400,
-              height: 400,
-              borderRadius: 200,
-              background: primaryColor,
-              opacity: 0.05,
-              display: 'flex',
+              backgroundImage: `linear-gradient(to bottom, rgba(124, 58, 237, 0.05), rgba(255, 255, 255, 0))`,
             }}
           />
 
@@ -195,8 +186,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               height: 180,
               borderRadius: 45,
               overflow: 'hidden',
-              border: `6px solid ${primaryColor}40`,
               background: 'white',
+              border: '6px solid rgba(124, 58, 237, 0.1)',
               marginBottom: 32,
             }}
           >
@@ -277,19 +268,15 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                   marginTop: 24,
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '8px 24px',
+                  padding: '8px 32px',
                   background: '#eff6ff',
                   borderRadius: 100,
                   border: '1px solid #dbeafe',
                 }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 10 }}>
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-                  <path d="m9 12 2 2 4-4" />
-                </svg>
-                <span style={{ fontSize: 18, fontWeight: 900, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex' }}>
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex' }}>
                   Empresa Verificada
-                </span>
+                </div>
               </div>
             )}
           </div>
@@ -304,9 +291,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             }}
           >
             <div style={{ width: 36, height: 36, borderRadius: 10, background: primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="white" />
-              </svg>
+               <div style={{ color: 'white', fontSize: 20, fontWeight: 900 }}>★</div>
             </div>
             <span style={{ fontSize: 24, color: '#09090b', fontWeight: 900, letterSpacing: '-0.5px', display: 'flex' }}>AVALIA PRUDENTE</span>
             <span style={{ fontSize: 18, color: '#71717a', fontWeight: 600, letterSpacing: '2px', display: 'flex', marginLeft: 12 }}>• PLATAFORMA NFC</span>
@@ -321,11 +306,25 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       }
     )
   } catch (error) {
-    console.error('OG Render Error:', error)
+    console.error('OG Image Generation Error:', error)
     return new ImageResponse(
       (
-        <div style={{ background: '#7c3aed', width: 1200, height: 630, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 60 }}>
-          Avalia Prudente
+        <div
+          style={{
+            fontSize: 48,
+            background: 'white',
+            width: 1200,
+            height: 630,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#7c3aed',
+            fontWeight: 900,
+          }}
+        >
+          <div style={{ display: 'flex' }}>Avalia Prudente</div>
+          <div style={{ fontSize: 20, color: '#71717a', marginTop: 10, display: 'flex' }}>avaliaprudente.com.br</div>
         </div>
       ),
       { ...size }

@@ -2,14 +2,13 @@
 
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Star, Loader2, ChevronRight, LucideIcon, ShieldCheck, Trophy, Zap, ChevronLeft } from 'lucide-react'
+import { Star, ChevronRight, LucideIcon, ShieldCheck, Trophy, Zap, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
-interface RankedBusiness {
+export interface RankedBusiness {
   id: string
   name: string
   slug: string
@@ -23,135 +22,12 @@ interface RankedBusiness {
   trending_score: number
 }
 
-interface SupabaseBusinessResponse {
-  id: string
-  name: string
-  slug: string
-  logo_url: string | null
-  is_verified: boolean
-  is_featured: boolean
-  reviews: { rating: number, created_at: string }[]
-  analytics_events: { event_type: string, created_at: string }[]
+interface BusinessRankingProps {
+  topRated: RankedBusiness[]
+  mostViewed: RankedBusiness[]
 }
 
-export function BusinessRanking() {
-  const [mostViewed, setMostViewed] = useState<RankedBusiness[]>([])
-  const [topRated, setTopRated] = useState<RankedBusiness[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
-
-  useEffect(() => {
-    async function loadRanking() {
-      try {
-        const thirtyDaysAgo = new Date()
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-        
-        // Fetch businesses with reviews and analytics
-        const { data: businesses, error } = await supabase
-          .from('businesses')
-          .select(`
-            id, 
-            name, 
-            slug, 
-            logo_url,
-            is_verified,
-            is_featured,
-            is_frozen,
-            reviews (rating, created_at),
-            analytics_events (event_type, created_at)
-          `)
-          .eq('is_frozen', false)
-          .limit(100)
-          .returns<SupabaseBusinessResponse[]>()
-
-        if (error) throw error
-
-        const typedBusinesses = businesses as unknown as SupabaseBusinessResponse[]
-
-        // Algorithm Constants
-        const MIN_REVIEWS_THRESHOLD = 2
-        const GLOBAL_MEAN_RATING = 4.0
-        const FEATURED_BOOST = 0.5
-
-        // Process data
-        const processed = (typedBusinesses || []).map(b => {
-          const reviews = b.reviews || []
-          const analytics = b.analytics_events || []
-          
-          const reviewCount = reviews.length
-          const avgRating = reviewCount > 0 
-            ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount 
-            : 0
-
-          // 1. Elite Score (Bayesian Average)
-          let eliteScore = reviewCount >= MIN_REVIEWS_THRESHOLD
-            ? (reviewCount * avgRating + MIN_REVIEWS_THRESHOLD * GLOBAL_MEAN_RATING) / (reviewCount + MIN_REVIEWS_THRESHOLD)
-            : (reviewCount * avgRating) / 2 // Penalty for very low volume
-
-          if (b.is_featured) eliteScore += FEATURED_BOOST
-
-          // 2. Trending Score (Recent Engagement)
-          const recentAnalytics = analytics.filter(e => {
-             const eventDate = new Date(e.created_at)
-             return eventDate >= thirtyDaysAgo && e.event_type === 'page_visit'
-          })
-          
-          const trendingScore = recentAnalytics.length + (b.is_featured ? 10 : 0)
-
-          return {
-            id: b.id,
-            name: b.name,
-            slug: b.slug,
-            logo_url: b.logo_url,
-            avg_rating: avgRating || 5.0,
-            review_count: reviewCount,
-            visit_count: recentAnalytics.length,
-            rank_score: eliteScore,
-            trending_score: trendingScore,
-            is_verified: b.is_verified, // Use real DB value
-            is_featured: b.is_featured
-          }
-        })
-
-        const limit = 5
-        
-        // Final Sorting: Stable Descending
-        const eliteRanking = [...processed]
-          .filter(b => b.review_count > 0)
-          .sort((a, b) => {
-            if (b.rank_score !== a.rank_score) return b.rank_score - a.rank_score
-            return b.review_count - a.review_count // Tie-break with volume
-          })
-          .slice(0, limit)
-
-        const trendingRanking = [...processed]
-          .filter(b => b.visit_count > 0 || b.is_featured)
-          .sort((a, b) => {
-            if (b.trending_score !== a.trending_score) return b.trending_score - a.trending_score
-            return b.rank_score - a.rank_score // Tie-break with rating
-          })
-          .slice(0, limit)
-
-        setTopRated(eliteRanking)
-        setMostViewed(trendingRanking)
-      } catch (err) {
-        console.error('Failed to load ranking:', err)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadRanking()
-  }, [supabase])
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-50" />
-      </div>
-    )
-  }
-
+export function BusinessRanking({ topRated, mostViewed }: BusinessRankingProps) {
   const RankingCarousel = ({ 
     title, 
     icon: Icon, 
