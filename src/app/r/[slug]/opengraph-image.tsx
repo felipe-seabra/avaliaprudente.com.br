@@ -38,7 +38,7 @@ async function getBase64Image(url: string): Promise<string | null> {
     const arrayBuffer = await response.arrayBuffer()
     const base64 = Buffer.from(arrayBuffer).toString('base64')
     const contentType = response.headers.get('content-type') || 'image/png'
-    return `data:${contentType};base64,${base64}`
+    return \`data:\${contentType};base64,\${base64}\`
   } catch (error) {
     console.error('Failed to fetch logo for OG:', url, error)
     return null
@@ -50,8 +50,7 @@ async function getBase64Image(url: string): Promise<string | null> {
  */
 function normalizeColor(color?: string): string {
   if (!color) return '#7c3aed'
-  const hex = color.startsWith('#') ? color : `#${color}`
-  // Basic hex validation (3 or 6 chars)
+  const hex = color.startsWith('#') ? color : \`#\${color}\`
   if (/^#([0-9A-F]{3}){1,2}$/i.test(hex)) return hex
   return '#7c3aed'
 }
@@ -67,7 +66,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     const reviewRepo = new ReviewRepository(supabase)
     const reviewLinkRepo = new ReviewLinkRepository(supabase)
     
-    // Resolve business data (supports direct business slugs and review link slugs)
+    // Resolve business data
     let data = await pageRepo.getBySlug(slug) as PageWithBusiness | null
     
     if (!data) {
@@ -91,7 +90,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       }
     }
 
-    // Default Fallback UI if no business found at all
     if (!data) {
       return new ImageResponse(
         (
@@ -122,7 +120,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     
     // Robust URL construction for the logo
     const absoluteLogoUrl = businessLogo 
-      ? (businessLogo.startsWith('http') ? businessLogo : `${APP_CONFIG.url.replace(/\/$/, '')}/${businessLogo.replace(/^\//, '')}`)
+      ? (businessLogo.startsWith('http') ? businessLogo : \`\${APP_CONFIG.url.replace(/\\/$/, '')}/\${businessLogo.replace(/^\\//, '')}\`)
       : null
 
     // Pre-fetch logo to base64 for stability in Satori
@@ -132,8 +130,14 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     const themeConfig = (data.theme_config || {}) as ThemeConfig
     const primaryColor = normalizeColor(themeConfig.primary_color)
     
-    // Fetch reviews for dynamic stats
-    const reviews = await reviewRepo.getByBusinessId(data.business_id)
+    // Defensive review fetch
+    let reviews: any[] = []
+    try {
+        reviews = await reviewRepo.getByBusinessId(data.business_id)
+    } catch (e) {
+        console.error('Failed to fetch reviews for OG:', e)
+    }
+
     const reviewCount = reviews.length
     const avgRating = reviewCount > 0 
       ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviewCount).toFixed(1)
@@ -154,7 +158,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             position: 'relative',
           }}
         >
-          {/* Decorative Background Elements - Using simplified opacity for stability */}
+          {/* Decorative Background Elements */}
           <div
             style={{
               position: 'absolute',
@@ -163,7 +167,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               right: 0,
               height: '400px',
               display: 'flex',
-              background: `linear-gradient(to bottom, ${primaryColor}20, transparent)`,
+              background: \`linear-gradient(to bottom, \${primaryColor}20, transparent)\`,
             }}
           />
           
@@ -191,7 +195,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               height: 180,
               borderRadius: 45,
               overflow: 'hidden',
-              border: `6px solid ${primaryColor}40`,
+              border: \`6px solid \${primaryColor}40\`,
               background: 'white',
               marginBottom: 32,
             }}
@@ -312,30 +316,16 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       {
         ...size,
         headers: {
-          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
         },
       }
     )
   } catch (error) {
-    console.error('OG Image Generation Error:', error)
+    console.error('OG Render Error:', error)
     return new ImageResponse(
       (
-        <div
-          style={{
-            fontSize: 48,
-            background: 'white',
-            width: 1200,
-            height: 630,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#7c3aed',
-            fontWeight: 900,
-          }}
-        >
-          <div style={{ display: 'flex' }}>Avalia Prudente</div>
-          <div style={{ fontSize: 20, color: '#71717a', marginTop: 10, display: 'flex' }}>avaliaprudente.com.br</div>
+        <div style={{ background: '#7c3aed', width: 1200, height: 630, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 60 }}>
+          Avalia Prudente
         </div>
       ),
       { ...size }
