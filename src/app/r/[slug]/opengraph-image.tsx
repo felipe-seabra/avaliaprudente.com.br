@@ -24,7 +24,7 @@ export const size = {
 export const contentType = 'image/png'
 
 /**
- * Robust fetch for remote images to avoid Satori crashes.
+ * Robust fetch for assets to avoid Satori crashes.
  */
 async function getBase64Image(url: string): Promise<string | null> {
   if (!url) return null
@@ -44,7 +44,7 @@ async function getBase64Image(url: string): Promise<string | null> {
     const contentType = response.headers.get('content-type') || 'image/png'
     return `data:${contentType};base64,${base64}`
   } catch (error) {
-    console.error('Failed to fetch logo for OG:', url, error)
+    console.error('Failed to fetch asset for OG:', url, error)
     return null
   }
 }
@@ -127,7 +127,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       ? (businessLogo.startsWith('http') ? businessLogo : `${APP_CONFIG.url.replace(/\/$/, '')}/${businessLogo.replace(/^\//, '')}`)
       : null
 
-    // Pre-fetch logo to base64
+    // Pre-fetch logo
     const logoBase64 = absoluteLogoUrl ? await getBase64Image(absoluteLogoUrl) : null
 
     const isVerified = data.businesses.is_verified
@@ -163,7 +163,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             position: 'relative',
           }}
         >
-          {/* Top decorative gradient - Using rgba instead of transparent to avoid Satori u2 error */}
+          {/* Decorative Background Elements */}
           <div
             style={{
               position: 'absolute',
@@ -182,13 +182,14 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: 180,
-              height: 180,
-              borderRadius: 45,
+              width: 200,
+              height: 200,
+              borderRadius: 50,
               overflow: 'hidden',
               background: 'white',
-              border: '6px solid rgba(124, 58, 237, 0.1)',
+              border: `8px solid ${primaryColor}20`,
               marginBottom: 32,
+              boxShadow: '0 20px 50px rgba(0,0,0,0.05)',
             }}
           >
             {logoBase64 ? (
@@ -204,7 +205,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             ) : (
               <div
                 style={{
-                  fontSize: 80,
+                  fontSize: 100,
                   fontWeight: 900,
                   color: primaryColor,
                   display: 'flex',
@@ -268,14 +269,14 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                   marginTop: 24,
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '8px 32px',
+                  padding: '10px 32px',
                   background: '#eff6ff',
                   borderRadius: 100,
                   border: '1px solid #dbeafe',
                 }}
               >
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex' }}>
-                  Empresa Verificada
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', display: 'flex' }}>
+                   ✓ Empresa Verificada
                 </div>
               </div>
             )}
@@ -288,13 +289,23 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               bottom: 40,
               display: 'flex',
               alignItems: 'center',
+              opacity: 0.8,
             }}
           >
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-               <div style={{ color: 'white', fontSize: 20, fontWeight: 900 }}>★</div>
+            <div style={{ 
+              width: 32, 
+              height: 32, 
+              borderRadius: 8, 
+              background: '#7c3aed', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              marginRight: 12 
+            }}>
+               <div style={{ color: 'white', fontSize: 18, fontWeight: 900 }}>A</div>
             </div>
-            <span style={{ fontSize: 24, color: '#09090b', fontWeight: 900, letterSpacing: '-0.5px', display: 'flex' }}>AVALIA PRUDENTE</span>
-            <span style={{ fontSize: 18, color: '#71717a', fontWeight: 600, letterSpacing: '2px', display: 'flex', marginLeft: 12 }}>• PLATAFORMA NFC</span>
+            <span style={{ fontSize: 22, color: '#09090b', fontWeight: 900, letterSpacing: '-0.5px', display: 'flex' }}>AVALIA PRUDENTE</span>
+            <span style={{ fontSize: 16, color: '#71717a', fontWeight: 600, letterSpacing: '2px', display: 'flex', marginLeft: 12 }}>• PLATAFORMA NFC</span>
           </div>
         </div>
       ),
