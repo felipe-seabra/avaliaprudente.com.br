@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2026-05-19
+
+### Added
+- **Supabase Auth Configuration Guide:** Created `docs/SUPABASE_AUTH_CONFIG.md` with detailed instructions for production setup.
+- **Personalized Auth Emails:** Prepared high-quality HTML templates for Sign-up Confirmation, Password Reset, and Magic Link with Avalia Prudente branding.
+
+### Fixed
+- **Production Auth Redirects:** Corrected the fallback URL in `src/lib/constants.ts` to `https://avaliaprudente.com.br` to prevent `localhost` redirects in production.
+- **URL Consistency:** Standardized the production domain across code and documentation, removing the `www` sub-domain to match the Supabase dashboard configuration.
+
 ## [0.6.0] - 2026-05-19
 
 ### Added

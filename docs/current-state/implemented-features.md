@@ -6,6 +6,10 @@
 - [x] Middleware session hardening & central routing.
 - [x] Blocked user detection (suspended, banned, deleted).
 - [x] Infinite recursion RLS protections (`is_admin` security definer).
+- [x] Corrected production redirect URLs (localhost removal).
+- [x] Standardized production domain consistency.
+- [x] Personalized HTML Email templates (Signup, Reset, Magic Link).
+- [x] Centralized Supabase Auth configuration guide.
 
 ## Moderation System
 - [x] Audit Logs (`moderation_actions`).
