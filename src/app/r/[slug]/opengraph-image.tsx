@@ -23,6 +23,39 @@ export const size = {
 }
 export const contentType = 'image/png'
 
+/**
+ * Robust fetch for remote images to avoid Satori crashes.
+ * Using base64 ensures the image is fully loaded before Satori starts rendering.
+ */
+async function getBase64Image(url: string): Promise<string | null> {
+  if (!url) return null
+  try {
+    const response = await fetch(url, { 
+      next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(4000) // 4s timeout to avoid hanging Edge function
+    })
+    if (!response.ok) return null
+    const arrayBuffer = await response.arrayBuffer()
+    const base64 = Buffer.from(arrayBuffer).toString('base64')
+    const contentType = response.headers.get('content-type') || 'image/png'
+    return `data:${contentType};base64,${base64}`
+  } catch (error) {
+    console.error('Failed to fetch logo for OG:', url, error)
+    return null
+  }
+}
+
+/**
+ * Normalizes hex color and ensures it has a valid format for Satori
+ */
+function normalizeColor(color?: string): string {
+  if (!color) return '#7c3aed'
+  const hex = color.startsWith('#') ? color : `#${color}`
+  // Basic hex validation (3 or 6 chars)
+  if (/^#([0-9A-F]{3}){1,2}$/i.test(hex)) return hex
+  return '#7c3aed'
+}
+
 // Image generation
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -42,7 +75,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       if (reviewLink) {
         data = await pageRepo.getByBusinessId(reviewLink.business_id) as PageWithBusiness | null
         if (!data) {
-          // Fallback if business has no page yet
           data = {
             id: 'fallback',
             business_id: reviewLink.business_id,
@@ -59,6 +91,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       }
     }
 
+    // Default Fallback UI if no business found at all
     if (!data) {
       return new ImageResponse(
         (
@@ -76,8 +109,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               fontWeight: 900,
             }}
           >
-            <div style={{ marginBottom: 20 }}>Avalia Prudente</div>
-            <div style={{ fontSize: 24, color: '#71717a' }}>avaliaprudente.com.br</div>
+            <div style={{ marginBottom: 20, display: 'flex' }}>Avalia Prudente</div>
+            <div style={{ fontSize: 24, color: '#71717a', display: 'flex' }}>avaliaprudente.com.br</div>
           </div>
         ),
         { ...size }
@@ -87,15 +120,18 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     const businessName = data.businesses.name
     const businessLogo = data.businesses.logo_url
     
-    // Robust Absolute URL for Logo (Satori requires absolute URLs)
+    // Robust URL construction for the logo
     const absoluteLogoUrl = businessLogo 
-      ? (businessLogo.startsWith('http') ? businessLogo : `${APP_CONFIG.url}${businessLogo}`)
+      ? (businessLogo.startsWith('http') ? businessLogo : `${APP_CONFIG.url.replace(/\/$/, '')}/${businessLogo.replace(/^\//, '')}`)
       : null
+
+    // Pre-fetch logo to base64 for stability in Satori
+    const logoBase64 = absoluteLogoUrl ? await getBase64Image(absoluteLogoUrl) : null
 
     const isVerified = data.businesses.is_verified
     const themeConfig = (data.theme_config || {}) as ThemeConfig
-    const primaryColor = themeConfig.primary_color || '#7c3aed'
-
+    const primaryColor = normalizeColor(themeConfig.primary_color)
+    
     // Fetch reviews for dynamic stats
     const reviews = await reviewRepo.getByBusinessId(data.business_id)
     const reviewCount = reviews.length
@@ -118,7 +154,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             position: 'relative',
           }}
         >
-          {/* Decorative Background Elements */}
+          {/* Decorative Background Elements - Using simplified opacity for stability */}
           <div
             style={{
               position: 'absolute',
@@ -127,7 +163,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               right: 0,
               height: '400px',
               display: 'flex',
-              background: `linear-gradient(to bottom, ${primaryColor}15, transparent)`,
+              background: `linear-gradient(to bottom, ${primaryColor}20, transparent)`,
             }}
           />
           
@@ -138,7 +174,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               right: -100,
               width: 400,
               height: 400,
-              borderRadius: '200px',
+              borderRadius: 200,
               background: primaryColor,
               opacity: 0.05,
               display: 'flex',
@@ -151,18 +187,18 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '180px',
-              height: '180px',
-              borderRadius: '45px',
+              width: 180,
+              height: 180,
+              borderRadius: 45,
               overflow: 'hidden',
-              border: `6px solid ${primaryColor}30`,
+              border: `6px solid ${primaryColor}40`,
               background: 'white',
-              marginBottom: '32px',
+              marginBottom: 32,
             }}
           >
-            {absoluteLogoUrl ? (
+            {logoBase64 ? (
               <img
-                src={absoluteLogoUrl}
+                src={logoBase64}
                 alt={businessName}
                 style={{
                   width: '100%',
@@ -191,7 +227,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               flexDirection: 'column',
               alignItems: 'center',
               textAlign: 'center',
-              maxWidth: '1000px',
+              maxWidth: 1000,
             }}
           >
             <div
@@ -201,7 +237,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 color: '#09090b',
                 margin: 0,
                 letterSpacing: '-4px',
-                lineHeight: 1,
+                lineHeight: 1.1,
                 display: 'flex',
               }}
             >
@@ -213,19 +249,18 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '24px',
-                marginTop: '40px',
+                marginTop: 40,
                 background: '#f4f4f5',
                 padding: '16px 40px',
-                borderRadius: '100px',
+                borderRadius: 100,
                 border: '1px solid #e4e4e7',
               }}
             >
-               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: 40, color: '#eab308', display: 'flex' }}>★</span>
+               <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ fontSize: 40, color: '#eab308', display: 'flex', marginRight: 12 }}>★</span>
                   <span style={{ fontSize: 40, fontWeight: 900, color: '#09090b', display: 'flex' }}>{avgRating}</span>
                </div>
-               <div style={{ width: 2, height: 40, background: '#e4e4e7', display: 'flex' }} />
+               <div style={{ width: 2, height: 40, background: '#e4e4e7', display: 'flex', margin: '0 24px' }} />
                <div style={{ fontSize: 28, fontWeight: 700, color: '#71717a', display: 'flex' }}>
                  {reviewCount} {reviewCount === 1 ? 'avaliação' : 'avaliações'}
                </div>
@@ -235,22 +270,20 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             {isVerified && (
               <div
                 style={{
-                  marginTop: '24px',
+                  marginTop: 24,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
-                  color: '#2563eb',
-                  padding: '8px 20px',
+                  padding: '8px 24px',
                   background: '#eff6ff',
-                  borderRadius: '100px',
+                  borderRadius: 100,
                   border: '1px solid #dbeafe',
                 }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 10 }}>
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
                   <path d="m9 12 2 2 4-4" />
                 </svg>
-                <span style={{ fontSize: 18, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                <span style={{ fontSize: 18, fontWeight: 900, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex' }}>
                   Empresa Verificada
                 </span>
               </div>
@@ -264,16 +297,15 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               bottom: 40,
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
             }}
           >
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="white" />
               </svg>
             </div>
             <span style={{ fontSize: 24, color: '#09090b', fontWeight: 900, letterSpacing: '-0.5px', display: 'flex' }}>AVALIA PRUDENTE</span>
-            <span style={{ fontSize: 18, color: '#71717a', fontWeight: 600, letterSpacing: '2px', display: 'flex' }}>• PLATAFORMA NFC</span>
+            <span style={{ fontSize: 18, color: '#71717a', fontWeight: 600, letterSpacing: '2px', display: 'flex', marginLeft: 12 }}>• PLATAFORMA NFC</span>
           </div>
         </div>
       ),
@@ -302,8 +334,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             fontWeight: 900,
           }}
         >
-          <div>Avalia Prudente</div>
-          <div style={{ fontSize: 20, color: '#71717a', marginTop: 10 }}>avaliaprudente.com.br</div>
+          <div style={{ display: 'flex' }}>Avalia Prudente</div>
+          <div style={{ fontSize: 20, color: '#71717a', marginTop: 10, display: 'flex' }}>avaliaprudente.com.br</div>
         </div>
       ),
       { ...size }
