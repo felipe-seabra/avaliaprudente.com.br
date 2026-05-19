@@ -90,6 +90,27 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviewCount).toFixed(1)
       : '5.0'
 
+    // Fetch logo as ArrayBuffer for Satori stability
+    let logoBuffer: ArrayBuffer | null = null
+    if (data.businesses.logo_url) {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 3000)
+        
+        const response = await fetch(data.businesses.logo_url, {
+          signal: controller.signal,
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (response.ok) {
+          logoBuffer = await response.arrayBuffer()
+        }
+      } catch (e) {
+        console.error('Failed to fetch business logo for OG:', e)
+      }
+    }
+
     return new ImageResponse(
       (
         <div
@@ -118,7 +139,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             }}
           />
 
-          {/* Logo Container (CSS-Based Placeholder for Stability) */}
+          {/* Logo Container */}
           <div
             style={{
               display: 'flex',
@@ -131,18 +152,32 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               border: `6px solid ${primaryColor}20`,
               marginBottom: 32,
               boxShadow: '0 20px 50px rgba(0,0,0,0.05)',
+              overflow: 'hidden',
             }}
           >
-            <div
-              style={{
-                fontSize: 90,
-                fontWeight: 900,
-                color: primaryColor,
-                display: 'flex',
-              }}
-            >
-              {businessName.substring(0, 1).toUpperCase()}
-            </div>
+            {logoBuffer ? (
+              <img
+                src={logoBuffer as unknown as string}
+                alt={businessName}
+                width="180"
+                height="180"
+                style={{
+                  objectFit: 'cover',
+                  borderRadius: 39, // Slightly less than container to look good with border
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  fontSize: 90,
+                  fontWeight: 900,
+                  color: primaryColor,
+                  display: 'flex',
+                }}
+              >
+                {businessName.substring(0, 1).toUpperCase()}
+              </div>
+            )}
           </div>
 
           {/* Business Info */}
@@ -182,7 +217,15 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               }}
             >
                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={{ fontSize: 40, color: '#eab308', display: 'flex', marginRight: 12 }}>★</span>
+                  <svg 
+                    width="40" 
+                    height="40" 
+                    viewBox="0 0 24 24" 
+                    fill="#eab308" 
+                    style={{ marginRight: 12, display: 'flex' }}
+                  >
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                  </svg>
                   <span style={{ fontSize: 40, fontWeight: 900, color: '#09090b', display: 'flex' }}>{avgRating}</span>
                </div>
                <div style={{ width: 2, height: 40, background: '#e4e4e7', display: 'flex', margin: '0 24px' }} />
