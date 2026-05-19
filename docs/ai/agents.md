@@ -44,6 +44,7 @@ This repository utilizes specialized AI modes to ensure code quality, security, 
   - Zero-tolerance for tenant isolation breaches (ensure `owner_id` is always checked).
   - **Strict check for RLS recursion:** Ensure no queries to `profiles` exist in RLS policies; use `is_admin()`.
   - Verify that `is_frozen` businesses are filtered out from public access.
+  - Audit `terms-reaccept` logic to ensure legal compliance.
 - **Risk Focus:** Authentication bypass, session hijacking, SQL injection, horizontal privilege escalation, and infinite RLS loops (Error 500).
 
 ## 6. Documentation

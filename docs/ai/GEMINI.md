@@ -20,8 +20,8 @@ This document is the official entrypoint for Gemini CLI execution workflows.
 - **Parallelism:** Execute independent read/search tools concurrently to save turns.
 
 ## 4. Protected Areas & Architectural Constraints
-- **Database Modifiers:** Do not run arbitrary bash scripts that modify database schemas without verifying against `docs/ai/rules/database-rules.md` and `docs/ai/rules/protected-areas.md`.
-- **Database Safety Guard:** ALWAYS use the `npm run` prefixed commands for Supabase (e.g., `npm run supabase:reset`) to trigger the safety guard script. NEVER run `npx supabase db reset --linked` directly without confirming the target environment.
+- **Database Modifiers:** Do not run arbitrary bash scripts that modify database schemas without verifying against `docs/ai/rules/database-rules.md`. Use `npm run supabase:migration`.
+- **Database Safety Guard:** ALWAYS use the `npm run` prefixed commands for Supabase (e.g., `npm run supabase:reset`) to trigger the safety guard script.
 - **RLS Recursion:** NEVER write RLS policies that query `profiles` directly. ALWAYS use the `is_admin()` security definer function to avoid infinite loops (Error 500).
 - **Moderation Bypass:** Admins (`role = 'admin'`) MUST bypass all moderation blocks. This logic is centralized in `src/middleware.ts` and the database layer.
 - **Public Visibility:** ALWAYS filter out `is_frozen = true` items in public repository lookups and public RLS policies.
@@ -31,5 +31,6 @@ This document is the official entrypoint for Gemini CLI execution workflows.
 ## 5. Essential Verification
 - After any auth/middleware change, verify that an Admin can still access `/admin/dashboard`.
 - Always run `npm run lint`, `npm run build`, and `npm run test` before finalizing a task.
-- Verify that `is_frozen` businesses are not accessible via public routes.
+- Verify that `is_frozen` businesses are not accessible via public routes (`/[slug]` and `/r/[slug]`).
+- Check if `terms-reaccept` flow is triggered for accounts needing it.
 

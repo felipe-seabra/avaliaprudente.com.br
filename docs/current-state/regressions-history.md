@@ -8,8 +8,8 @@ Este documento rastreia regressões conhecidas e corrigidas para evitar que se r
 - **Correção:** Simplificação da política ou uso de funções RPC que ignoram RLS temporariamente (Security Definer).
 - **Prevenção:** Evitar subqueries circulares em políticas RLS.
 
-## [2026-05-16] Falha de Acesso Público a Logos
-- **Problema:** Logos de empresas não apareciam para usuários não autenticados.
-- **Causa:** Bucket do Supabase Storage estava configurado como privado e sem políticas de leitura pública.
-- **Correção:** Configuração do bucket `business-assets` como público e adição de política `SELECT` para usuários anônimos.
-- **Prevenção:** Sempre testar visualização anônima ao adicionar novos assets.
+## [2026-05-19] Perda de Metadados em Perfis (Trigger Sync)
+- **Problema:** Atualizações no perfil do usuário via aplicação causavam a perda de metadados críticos (como aceite de termos) sincronizados pelo Auth.
+- **Causa:** O trigger `handle_new_user` e as lógicas de update não estavam preservando campos incrementais de metadados em determinados fluxos.
+- **Correção:** Refatoração da função `handle_new_user` e dos triggers de atualização para garantir o merge seguro de metadados do `auth.users`.
+- **Prevenção:** Sempre usar `COALESCE` ou lógicas de merge ao sincronizar dados do Auth para o Profile.

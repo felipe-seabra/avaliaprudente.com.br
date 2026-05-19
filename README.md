@@ -4,38 +4,39 @@ Plataforma NFC inteligente para negócios locais. Transforme seu balcão em uma 
 
 ## O Produto
 
-O Avalia Prudente é uma solução baseada em NFC (Near Field Communication) que permite que empresas criem páginas públicas personalizadas acessíveis via aproximação ou QR Code.
+O Avalia Prudente é uma solução completa baseada em NFC (Near Field Communication) e QR Codes que permite que empresas criem páginas públicas personalizadas e gerenciem sua reputação online de forma inteligente.
 
 ### Principais Funcionalidades
 
-- **Páginas de Negócio Personalizáveis:** Crie uma vitrine digital com sua marca, logo e descrição.
-- **Sistema de CTAs Modular:** Adicione botões para WhatsApp, Instagram, Website, Portfólio e mais.
-- **Filtro Inteligente de Avaliações Google:** Capture feedbacks internos para notas baixas e direcione notas altas direto para o Google.
-- **Sistema de Verificação Oficial (Selo Azul):** Workflow completo de solicitação e aprovação de selos de confiança para empresas.
-- **Rankings Inteligentes:** Algoritmos Bayesianos para listar os melhores estabelecimentos da cidade ("Elite") e os mais acessados ("Em Alta").
-- **Sistema de Moderação e Auditoria:** Motor completo para Advertências, Suspensões, Banimentos e Congelamento de Empresas.
-- **Central de Transparência e Recursos:** Painel dedicado para usuários acompanharem seu status e contestarem ações de moderação.
-- **Gestão Multi-empresa:** Gerencie múltiplos locais em um único painel.
-- **Painel Administrativo (RBAC):** Interface completa para moderação de empresas, usuários e solicitações de verificação.
-- **OG Image System:** Geração dinâmica de imagens para redes sociais (OpenGraph) otimizada para Edge.
+- **Páginas de Negócio Dinâmicas:** Vitrine digital personalizada com branding (logo, cores), descrição e links sociais.
+- **Sistema de CTAs Modular:** Botões configuráveis para WhatsApp, Instagram, Website, Portfólio e mais.
+- **Filtro Inteligente de Avaliações (Google Review Gate):** Capture feedbacks internos para notas baixas e direcione notas altas automaticamente para o Google Business.
+- **Rankings Inteligentes (Algoritmo Bayesiano):** Listagem automatizada baseada em score ponderado (volume + média + verificação), destacando empresas "Elite" e "Em Alta".
+- **Sistema de Moderação Completo:** Gestão de infrações com Advertências, Suspensões, Banimentos e Congelamento de Empresas (`is_frozen`).
+- **Central de Transparência e Recursos:** Painel para usuários visualizarem sanções e submeterem contestações (Appeals).
+- **Workflow de Verificação Oficial:** Processo formal de solicitação e aprovação do "Selo Azul" de confiança.
+- **Onboarding de Alta Qualidade:** Fluxo guiado para criação de empresas garantindo completude de dados e prevenção de spam.
+- **OG Image System (Edge):** Geração dinâmica de imagens OpenGraph para compartilhamento social, otimizada para o Vercel Edge Runtime.
+- **Gestão Multi-empresa:** Dashboard centralizado para gerenciar múltiplos estabelecimentos com isolamento total (Tenant Isolation).
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router - React 19)
-- **Language:** TypeScript (Strict Mode)
-- **Styling:** Tailwind CSS 4 + shadcn/ui
-- **Backend/Auth:** Supabase (SSR)
-- **Database:** PostgreSQL (RLS Hardened)
-- **Design System:** OKLCH Colors + Modern SaaS Identity
+- **Frontend:** Next.js 15 (App Router - React 19)
+- **Backend/Auth:** Supabase (Auth, DB, Storage) com SSR
+- **Database:** PostgreSQL com RLS Hardened (Row Level Security)
+- **Styling:** Tailwind CSS 4 + shadcn/ui (Radix Primitives)
 - **Testing:** Vitest + React Testing Library
+- **Runtime:** Node.js + Vercel Edge Runtime (OG Images)
 
 ## Arquitetura (Clean Architecture)
 
-- `src/core/domain`: Entidades e regras de negócio puras.
-- `src/core/application`: Casos de uso (Orquestração).
-- `src/core/infrastructure`: Repositórios Supabase e implementações técnicas.
-- `src/components`: UI (shadcn), Shared, Marketing, Dashboard e Admin.
-- `src/middleware.ts`: Roteamento centralizado, Segurança (Rate Limit, Auth, Moderation) e Admin Master Bypass.
+O projeto segue padrões estritos de separação de responsabilidades:
+
+- `src/core/domain`: Entidades puras e interfaces de repositórios (regras de negócio).
+- `src/core/application`: Casos de uso e orquestração (ex: lógica de rankings, submissão de reviews).
+- `src/core/infrastructure`: Implementações técnicas (Repositórios Supabase, Mappers).
+- `src/components`: UI components organizados por domínio (Admin, Dashboard, Marketing, Shared).
+- `src/middleware.ts`: Núcleo de segurança (Auth, Rate Limit, Moderation Blocks, Admin Bypass).
 
 ## Desenvolvimento Local
 
@@ -43,27 +44,25 @@ Consulte [docs/LOCAL_SUPABASE.md](docs/LOCAL_SUPABASE.md) para configurar o ambi
 
 ### Comandos de Banco de Dados (Seguros)
 
-Implementamos um **Safety Guard** (`scripts/db-safety.sh`) que protege contra resets acidentais em ambientes remotos. Utilize sempre os comandos via `npm run`:
+Utilizamos o **Safety Guard** (`scripts/db-safety.sh`) para proteger ambientes remotos:
 
 - `npm run supabase:start`: Inicia o ambiente local.
-- `npm run supabase:reset`: Reseta o banco local (Seguro, valida ambiente).
-- `npm run db:push`: Envia migrações para o banco vinculado (Solicita confirmação).
+- `npm run supabase:reset`: Reseta o banco local (limpa dados e re-seeda). **Seguro.**
+- `npm run db:push`: Envia migrações para a nuvem. **Exige confirmação.**
 
-### Manutenção do Docker e Ambiente
-Se o Docker estiver consumindo muito espaço ou o ambiente estiver instável:
-- `npm run docker:audit`: Analisa o uso de disco.
-- `npm run docker:clean`: Limpeza segura de recursos não utilizados.
-- `npm run docker:reset-supa`: Hard Reset do ambiente Supabase local.
+### Qualidade e Estabilidade
+- `npm run lint`: Verificação de padrões e erros.
+- `npm run test`: Suíte de testes unitários e integração.
+- `npm run build`: Validação completa de tipos, compilação e SSR.
 
-### Qualidade e Testes
-- `npm run lint`: Verificação de padrões e erros de código.
-- `npm run test`: Execução da suíte de testes unitários e de integração.
-- `npm run build`: Validação completa de compilação e SSR.
+## Governança e Operações
 
-## Segurança e Operações
+1. **Segurança RLS:** Isolamento multi-tenant garantido por políticas não-recursivas (uso de `is_admin()`).
+2. **Ciclo de Moderação:** Proteção da plataforma contra abusos, com bypass garantido para administradores master.
+3. **Reserva de Slugs:** Sistema de proteção contra colisão de rotas e nomes reservados.
+4. **Manutenção Docker:** `npm run docker:audit` e `npm run docker:clean` para gestão de recursos.
 
-1. **Proteção de Dados:** Isolamento multi-tenant via RLS garantido por políticas não-recursivas.
-2. **Estabilidade de Autenticação:** Middleware valida sessões em tempo real contra o banco de dados.
-3. **Migrações Incrementais:** Fluxo rigoroso de validação local antes de push para produção.
-4. **Reserva de Slugs:** Sistema de proteção contra colisão com rotas do sistema.
+---
+
+Para detalhes técnicos profundos, consulte a pasta `docs/`.
 

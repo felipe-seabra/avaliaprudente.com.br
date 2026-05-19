@@ -33,6 +33,24 @@ Quando lidar com migrações de banco em Pull Requests, sempre teste o upgrade E
 
 ---
 
+## [20260519100000 - 20260519140000] Moderation Appeals, Quality Enforcement & Stability
+
+### Purpose
+Completes the moderation lifecycle with an appeals system and enforces data quality during the business onboarding process. Also stabilizes business slug uniqueness and profile update triggers.
+
+### Affected Tables
+- `public.moderation_appeals`: Created to track user contests against sanctions.
+- `public.businesses`: Enforced unique slugs and added quality check constraints.
+- `public.profiles`: Stabilized triggers for metadata persistence.
+
+### Key Features
+- **Appeals System:** Integrated workflow for users to appeal bans or suspensions, with dedicated RLS policies for secure access.
+- **Slug Uniqueness:** Hardened slug management to prevent collisions, ensuring each business has a unique public URL.
+- **Onboarding Quality:** Database-level enforcement to ensure businesses have required branding and contact info before becoming fully active.
+- **Profile Stability:** Fixed regressions in user profile updates that were causing metadata loss during auth state changes.
+
+---
+
 ## [20260518210000 - 20260518211000] Terms of Use & Trigger Optimization
 
 ### Purpose

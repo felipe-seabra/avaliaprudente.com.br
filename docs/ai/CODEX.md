@@ -10,12 +10,13 @@ This document is optimized for GitHub Copilot / Codex sessions, focusing on impl
 - **UI Components:** Use Radix primitives via `shadcn/ui`. Apply styles using Tailwind CSS 4 (`globals.css` tokens).
 - **Data Fetching:** Use Server Components for initial load; use custom hooks (`useBusiness`, etc.) for client-side state.
 - **Dependency Mapping:** Before injecting a new repository or service, verify if an abstraction already exists in `src/core/infrastructure/repositories`.
+- **Onboarding Logic:** Ensure any new UI for business creation follows the multi-step onboarding flow and quality enforcement rules.
 
 ## 3. Refactor Safety Rules
 - **No Unrelated Changes:** Codex should NOT suggest formatting or structural changes outside the immediate lines being edited.
 - **Preserve RLS & Tenant Context:** When refactoring database queries, ensure `owner_id` filters and RLS compatibility remain intact.
 - **RLS Recursion Alert:** Avoid queries to `profiles` within RLS. Use `is_admin()`.
-- **Public Filtering:** Ensure public queries (rankings, pages) explicitly check for `is_frozen = false`.
+- **Public Filtering:** Ensure public queries (rankings, pages, review-links) explicitly check for `is_frozen = false`.
 - **Slug Integrity:** Ensure any business update logic preserves the `is_slug_available` check and lowercase normalization.
 
 ## 4. Validation Workflow

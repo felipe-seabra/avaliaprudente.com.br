@@ -19,6 +19,8 @@
 - [x] Account Deactivation (Soft Delete).
 - [x] Business Freezing (Hiding from public without deletion).
 - [x] Complete Admin Bypass mechanism.
+- [x] **Transparency Center:** Dashboard for users to view sanctions.
+- [x] **Appeals Workflow:** System for contesting moderation actions.
 
 ## Core SaaS
 - [x] Public Business Page (NFC-ready).
@@ -30,6 +32,8 @@
 - [x] Verification Eligibility Rules (Checklist of requirements).
 - [x] Interactive Google Review Tutorial.
 - [x] Draft/Unpublished states for business pages.
+- [x] **Slug Uniqueness & Reservation:** Protection against collisions and reserved routes.
+- [x] **Quality Enforcement:** Database-level checks for business profile completeness.
 
 ## Public Flow
 - [x] 1-5 Star Rating system.

@@ -46,3 +46,8 @@ Before any change to RLS or Repositories:
 1. Verify that queries always include an `owner_id` or `business_id` filter.
 2. Verify that RLS policies for `UPDATE` and `DELETE` strictly check `auth.uid() = owner_id`.
 3. Ensure no infinite recursion is introduced by querying `profiles` inside RLS (use `is_admin()`).
+
+## 5. Moderation & Governance Safety
+1. **Admin Master Bypass:** Always ensure that `is_admin()` users can bypass blocks. Breaking this can lock out administrators.
+2. **Appeals Workflow:** When reviewing an appeal, verify that the reversing action (e.g., unfreezing a business) is atomic and audited in `moderation_actions`.
+3. **Onboarding Quality:** Any change to the business creation flow must respect the database-level quality constraints (slugs, required branding).
