@@ -28,3 +28,9 @@
 - [x] Conditional Google redirection.
 - [x] Private feedback capture.
 - [x] Logo & branding uploads.
+
+## Testing & Stability (Phase 4)
+- [x] Automated Testing Infrastructure (Vitest & React Testing Library).
+- [x] Critical E2E and Unit Flow tests (Middleware, Utils, Env Validation).
+- [x] Type Safety Hardening (`any` usage reduced, Supabase Types regenerated).
+- [x] Safeguards against schema drift and missing profiles.

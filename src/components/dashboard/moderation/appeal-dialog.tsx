@@ -40,8 +40,7 @@ export function AppealDialog({ actionId, actionType, reason, onSuccess }: Appeal
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Não autenticado')
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase.from('moderation_appeals' as any) as any)
+      const { error } = await supabase.from('moderation_appeals')
         .insert({
           moderation_action_id: actionId,
           user_id: user.id,

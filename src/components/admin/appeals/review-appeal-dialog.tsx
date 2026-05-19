@@ -44,8 +44,7 @@ export function ReviewAppealDialog({ appealId, userName, reason, userMessage, on
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Não autenticado')
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase.from('moderation_appeals' as any) as any)
+      const { error } = await supabase.from('moderation_appeals')
         .update({
           status,
           admin_response: adminResponse.trim(),

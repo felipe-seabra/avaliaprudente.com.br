@@ -50,8 +50,7 @@ export default function AdminAppealsPage() {
   const fetchAppeals = React.useCallback(async () => {
     setIsLoading(true)
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let query = (supabase.from('moderation_appeals' as any) as any)
+      let query = supabase.from('moderation_appeals')
         .select(`
           *,
           user:profiles(full_name, email),

@@ -35,7 +35,7 @@ CREATE POLICY "Admins can update appeals"
 
 -- 4. Helper function to handle appeal resolution (automatic reversal of moderation if approved)
 CREATE OR REPLACE FUNCTION public.process_appeal_resolution()
-RETURNS trigger AS 70253
+RETURNS trigger AS $$
 DECLARE
   v_action_type text;
   v_target_user_id uuid;
@@ -99,7 +99,7 @@ BEGIN
 
   RETURN NEW;
 END;
-70253 LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 5. Trigger for appeal resolution
 CREATE TRIGGER on_appeal_resolved
