@@ -4,6 +4,7 @@ import { BusinessPageRepository } from '@/core/infrastructure/repositories/supab
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { Business, BusinessPage } from '@/core/domain/entities'
+import { APP_CONFIG } from '@/lib/constants'
 
 // Route segment config
 export const runtime = 'edge'
@@ -84,6 +85,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
   const businessName = data.businesses.name
   const businessLogo = data.businesses.logo_url
+  
+  // Robust Absolute URL for Logo (Satori requires absolute URLs)
+  const absoluteLogoUrl = businessLogo 
+    ? (businessLogo.startsWith('http') ? businessLogo : `${APP_CONFIG.url}${businessLogo}`)
+    : null
+
   const isVerified = data.businesses.is_verified
   const themeConfig = (data.theme_config || {}) as ThemeConfig
   const primaryColor = themeConfig.primary_color || '#7c3aed'
@@ -151,9 +158,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             marginBottom: '32px',
           }}
         >
-          {businessLogo ? (
+          {absoluteLogoUrl ? (
             <img
-              src={businessLogo}
+              src={absoluteLogoUrl}
               alt={businessName}
               style={{
                 width: '100%',

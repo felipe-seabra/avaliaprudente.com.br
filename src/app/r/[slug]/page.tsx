@@ -110,10 +110,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? page.description 
     : `Avaliações, contato e redes sociais da ${businessName} através da plataforma NFC da Avalia Prudente.`
 
-  // Standardization: Use the new dynamic opengraph-image generator
-  // Next.js automatically detects opengraph-image.tsx
-  const ogImageUrl = `${APP_CONFIG.url}/r/${slug}/opengraph-image`
-
   return {
     title,
     description,
@@ -127,20 +123,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `${APP_CONFIG.url}/r/${slug}`,
       siteName: 'Avalia Prudente',
       locale: 'pt_BR',
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: businessName,
-        },
-      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [ogImageUrl],
     },
   }
 }
