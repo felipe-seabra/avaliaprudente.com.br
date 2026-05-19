@@ -1,12 +1,14 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { CTAButton } from '@/components/shared/cta-button'
+import { ReviewFlow } from '@/components/shared/review-flow'
 import { Star, ShieldCheck, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
 import { PageLink, BusinessPage, Review } from '@/core/domain/entities'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useEffect } from 'react'
 import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase-analytics-repository'
 
@@ -29,10 +31,13 @@ interface BusinessPageClientProps {
 }
 
 export function BusinessPageClient({ data }: BusinessPageClientProps) {
+  const [isReviewing, setIsReviewing] = useState(false)
   const { page, links, reviews } = data
 
   const themeConfig = (page.theme_config || {}) as { primary_color?: string }
   const primaryColor = themeConfig.primary_color || '#7c3aed'
+
+  const googleReviewLink = links.find(l => l.type === 'google_review')
 
   useEffect(() => {
     // Track visit
@@ -59,6 +64,24 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
   const avgRating = reviews.length > 0 
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
     : '5.0'
+
+  if (isReviewing) {
+    return (
+      <div 
+        className="min-h-screen bg-muted/30 p-4 md:p-8 flex flex-col items-center animate-in fade-in slide-in-from-right-4 duration-500"
+        style={{ '--primary': primaryColor } as React.CSSProperties}
+      >
+        <div className="w-full max-w-[500px]">
+          <ReviewFlow 
+            businessId={page.business_id}
+            businessName={page.businesses.name}
+            googleReviewUrl={googleReviewLink?.url || ''}
+            onClose={() => setIsReviewing(false)}
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div 
@@ -117,6 +140,20 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
               {page.description}
             </p>
           )}
+        </div>
+
+        {/* Primary Native Review Action */}
+        <div className="w-full px-2 mb-8">
+          <Button 
+            className="w-full h-16 text-lg font-bold rounded-[1.25rem] shadow-xl shadow-primary/20 cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98] gap-2"
+            onClick={() => setIsReviewing(true)}
+          >
+            <Star className="h-5 w-5 fill-current" />
+            Avaliar Agora
+          </Button>
+          <p className="text-[10px] text-muted-foreground text-center mt-3 uppercase tracking-widest font-bold opacity-40">
+            Sua opinião é fundamental para nós
+          </p>
         </div>
 
         {/* Modular CTAs */}
