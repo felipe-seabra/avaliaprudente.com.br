@@ -35,6 +35,7 @@ export function RegisterForm() {
       fullName: '',
       email: '',
       password: '',
+      confirmPassword: '',
       acceptTerms: false,
     },
   })
@@ -104,6 +105,14 @@ export function RegisterForm() {
             <InputField
               name="password"
               label="Senha"
+              placeholder="••••••"
+              type="password"
+              disabled={isLoading}
+              autoComplete="new-password"
+            />
+            <InputField
+              name="confirmPassword"
+              label="Confirmar Senha"
               placeholder="••••••"
               type="password"
               disabled={isLoading}

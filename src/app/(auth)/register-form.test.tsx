@@ -27,6 +27,7 @@ describe('RegisterForm', () => {
     expect(screen.getByLabelText('Nome Completo')).toBeInTheDocument()
     expect(screen.getByLabelText('E-mail')).toBeInTheDocument()
     expect(screen.getByLabelText('Senha')).toBeInTheDocument()
+    expect(screen.getByLabelText('Confirmar Senha')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Cadastrar/i })).toBeInTheDocument()
   })
 })

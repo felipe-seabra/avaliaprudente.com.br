@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0] - 2026-05-19
+
+### Added
+- **Auth UX Improvements:**
+  - **Password Visibility Toggle:** Added "show/hide" functionality to password fields across all authentication forms.
+  - **Password Confirmation:** Added a mandatory "Confirm Password" field to the registration form with real-time validation.
+  - **Quick Navigation:** Added a "Back to Home" button on Login and Register pages for easier navigation.
+- **Accessibility Hardening:** Refactored `InputField` to ensure correct label-to-input association, maintaining WCAG compatibility while supporting complex UI elements.
+
 ## [0.8.0] - 2026-05-19
 
 ### Added
