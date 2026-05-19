@@ -158,7 +158,7 @@ export function Pricing() {
            </div>
            <p className="text-xs md:text-sm text-muted-foreground font-medium">
              Precisa de uma solução para grandes redes ou franquias? 
-             <a href={`https://wa.me/${APP_CONFIG.whatsappOrderNumber}`} className="text-primary font-black ml-1 hover:underline underline-offset-4 transition-all">Fale com nosso time comercial</a>
+             <a href={`https://wa.me/${APP_CONFIG.whatsappOrderNumber}?text=${encodeURIComponent('Olá! Gostaria de falar com o time comercial sobre soluções para grandes redes.')}`} className="text-primary font-black ml-1 hover:underline underline-offset-4 transition-all">Fale com nosso time comercial</a>
            </p>
         </div>
       </div>

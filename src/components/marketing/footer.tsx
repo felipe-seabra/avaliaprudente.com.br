@@ -23,16 +23,15 @@ export function Footer() {
             <p className="text-muted-foreground max-w-sm mb-6">
               Plataforma NFC inteligente para negócios locais. Aumente suas avaliações no Google e digitalize seu atendimento com uma única tag.
             </p>
-            <a 
-              href="https://wa.me/5511999999999" 
-              target="_blank" 
+            <a
+              href={`https://wa.me/${APP_CONFIG.whatsappOrderNumber}?text=${encodeURIComponent('Olá! Gostaria de saber mais sobre a Avalia Prudente.')}`}
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center text-sm font-medium text-primary hover:underline"
             >
               <MessageCircle className="mr-2 h-4 w-4" />
               Falar com o Comercial
-            </a>
-          </div>
+            </a>          </div>
           
           <div>
             <h4 className="font-semibold mb-4">Produto</h4>
