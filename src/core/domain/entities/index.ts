@@ -55,4 +55,5 @@ export interface CreateAnalyticsEventDTO {
   source?: string
   user_agent?: string
   metadata?: Record<string, unknown>
+  fingerprint?: string
 }

@@ -3,6 +3,7 @@ import { SupabaseClient } from '@supabase/supabase-js'
 import { CreateAnalyticsEventDTO } from '@/core/domain/entities'
 import { Json } from '@/types/supabase'
 import { hasConsent } from '@/components/shared/cookie-consent'
+import { getBrowserFingerprint } from '@/lib/utils'
 
 export class AnalyticsRepository {
   private supabase: SupabaseClient
@@ -17,6 +18,8 @@ export class AnalyticsRepository {
       return
     }
 
+    const fingerprint = event.fingerprint || (await getBrowserFingerprint())
+
     const { error } = await this.supabase
       .from('analytics_events')
       .insert({
@@ -27,6 +30,7 @@ export class AnalyticsRepository {
         source: event.source,
         metadata: (event.metadata || {}) as Json,
         user_agent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+        fingerprint,
       })
 
     if (error) {

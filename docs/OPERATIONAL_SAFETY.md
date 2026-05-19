@@ -55,6 +55,18 @@ The platform implements a hybrid protection system to prevent rating inflation a
 - **Per-Business Throttling:** A single device/browser (identified by an anonymous fingerprint) can only review the same business once every **60 minutes**.
 - **Content Deduplication:** Identical review text from the same fingerprint is blocked across any business for **10 minutes**.
 
+## 7. Analytics Anti-Inflation
+
+To preserve ranking integrity and metric accuracy, the platform deduplicates analytics signals.
+
+### Throttling Rules
+- **View/Click Cooldown:** Repeated events of the same type (`page_visit`, `cta_click`) for the same business from the same fingerprint are ignored if they occur within **15 minutes** of each other.
+- **Server-side Silencing:** Deduplication is handled by the `tr_enforce_analytics_deduplication` trigger, which silently drops duplicate insertions without affecting user experience.
+
+### Privacy & Fingerprinting
+- Uses the same anonymous SHA-256 fingerprinting system as the Anti-Spam protection.
+- No personal data or raw IPs are stored in the analytics pipeline.
+
 ### Implementation Details
 - **Anonymous Fingerprinting:** Uses a SHA-256 hash of stable browser characteristics (User Agent, timezone, screen resolution) combined with anonymized network signals. Raw IPs are NOT stored to preserve user privacy.
 - **Server-side Enforcement:** Protection is enforced via database triggers (`tr_enforce_review_abuse_protection`) on the `reviews` table. Frontend-only checks are never the sole protection.
