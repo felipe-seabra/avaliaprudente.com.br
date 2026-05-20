@@ -4,16 +4,23 @@ Este documento é o ponto de entrada oficial para os fluxos de trabalho de execu
 
 > **Regras Universais:** Todas as ações devem aderir estritamente a `docs/ai/shared-context.md`.
 
-## 1. Fluxo de Execução do Repositório
+## 1. Fluxo de Execução do Repositório (Mandatório)
+Toda tarefa deve seguir rigorosamente este ciclo de vida:
+1. **Implement:** Realizar a alteração técnica.
+2. **Lint:** Executar `npm run lint`.
+3. **Build:** Executar `npm run build`.
+4. **Test:** Executar `npm run test`.
+5. **Update Docs:** Avaliar e atualizar `CHANGELOG.md`, `docs/current-state/*` e outros documentos relevantes (ver Seção 5 de `shared-context.md`).
+6. **Commit:** Realizar o commit apenas após todos os passos acima passarem.
+
 - **Topic Updates:** Sempre use `update_topic` para informar o progresso de tarefas complexas.
 - **Análise Local:** Use `grep_search`, `list_directory` e `read_file` para mapear a base de código antes de executar mudanças.
 - **Validação Empírica:** Priorize a reprodução de bugs ou a validação do estado atual localmente.
-- **Validação Automatizada:** Após qualquer modificação de código, execute `npm run lint`, `npm run test` e `npm run build`. Corrija todos os erros autonomamente antes de prosseguir.
 
 ## 2. Fluxo de Commit e Memória do Projeto
-- **Changelog:** Atualize o `CHANGELOG.md` sob a tag `[Unreleased]` ou a versão atual.
-- **Atualização de Estado:** Se a arquitetura, dívida técnica ou funcionalidades implementadas mudarem, atualize os arquivos correspondentes em `docs/current-state/` e `docs/generated/`.
-- **Git Commit:** Adicione apenas os arquivos específicos modificados para a tarefa. Use Conventional Commits em inglês. NÃO faça push para o remoto, a menos que solicitado explicitamente. **Commit as mudanças de forma isolada.**
+- **Changelog Mandatório:** Atualize o `CHANGELOG.md` sob a tag `[Unreleased]` ou a versão atual antes de cada commit que altere o comportamento ou estrutura do sistema.
+- **Sincronização de Documentação:** Se a arquitetura, dívida técnica ou funcionalidades implementadas mudarem, é OBRIGATÓRIO atualizar os arquivos correspondentes em `docs/current-state/` e `docs/generated/`.
+- **Git Commit:** Adicione apenas os arquivos específicos modificados para a tarefa, incluindo as atualizações de documentação. Use Conventional Commits em inglês. NÃO faça push para o remoto, a menos que solicitado explicitamente.
 
 ## 3. Estratégia de Uso de Ferramentas
 - **Edições Cirúrgicas:** Use `replace` para edições direcionadas. Garanta que `old_string` corresponda exatamente.
@@ -30,11 +37,14 @@ Este documento é o ponto de entrada oficial para os fluxos de trabalho de execu
 - **Integridade de Slugs:** Qualquer atualização de slug deve ser validada via `is_slug_available` e verificar rotas reservadas do sistema. Slugs devem ser normalizados para minúsculas.
 - **Renderização OG:** Tenha cuidado ao editar `src/app/opengraph-image.tsx`. Ele roda no runtime Edge e possui limitações estritas (sem bibliotecas pesadas, sem acesso ao FS local).
 
-## 5. Verificação Essencial
-- Após qualquer mudança de autenticação/middleware, verifique se um Admin ainda consegue acessar `/admin/dashboard`.
-- Sempre execute `npm run lint`, `npm run build` e `npm run test` antes de finalizar uma tarefa.
-- Verifique se empresas com `is_frozen` não estão acessíveis via rotas públicas (`/[slug]` e `/r/[slug]`).
-- Verifique se o fluxo de `terms-reaccept` é disparado para contas que precisam dele.
+## 5. Verificação e Sincronização Final (Checklist)
+Antes de considerar uma tarefa como concluída, verifique:
+- [ ] O Admin ainda consegue acessar `/admin/dashboard` (se houve mudança em auth/middleware)?
+- [ ] `npm run lint`, `npm run build` e `npm run test` passam sem erros?
+- [ ] O `CHANGELOG.md` foi atualizado com as mudanças?
+- [ ] Os documentos em `docs/current-state/` refletem o novo estado (funcionalidades, bugs, dívida)?
+- [ ] Se houve mudança arquitetural, `docs/ARCHITECTURE.md` ou ADRs foram atualizados?
+- [ ] Empresas com `is_frozen` continuam inacessíveis via rotas públicas?
 
 ## 6. Melhores Práticas Operacionais do Gemini
 - **Estratégia de Commit Isolado:** Comite as mudanças em lotes pequenos e lógicos.

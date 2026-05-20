@@ -41,6 +41,12 @@
 - [x] Private feedback capture.
 - [x] Logo & branding uploads.
 
+## Operational Governance
+- [x] **Mandatory Documentation Sync:** Unified rule for all AI agents to keep documentation and changelog updated.
+- [x] **Completion Workflows:** Explicitly defined lifecycle (Implement -> Lint -> Build -> Test -> Docs -> Commit) in `GEMINI.md` and `CODEX.md`.
+- [x] **Shared Governance:** Centralized rules in `docs/ai/shared-context.md` covering all documentation types (current-state, architecture, security, onboarding).
+- [x] **Self-Documenting Repository:** Institutionalized the requirement to evaluate documentation impact before finishing any task.
+
 ## Testing & Stability (Phase 4)
 - [x] Automated Testing Infrastructure (Vitest & React Testing Library).
 - [x] Critical E2E and Unit Flow tests (Middleware, Utils, Env Validation).

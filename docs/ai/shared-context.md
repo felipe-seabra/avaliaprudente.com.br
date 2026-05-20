@@ -30,12 +30,16 @@ Any modification to the following areas requires extreme caution and a mandatory
 - `src/providers/root-provider.tsx` & `src/providers/business-provider.tsx` (Global Contexts).
 - LGPD / Privacy logic (Terms of Use, Cookie consent, data handling).
 
-## 5. Synchronization & Documentation Updates
-ALL AI agents MUST keep the documentation up-to-date:
-- **`CHANGELOG.md`:** Update upon completing a feature or fix.
-- **`docs/generated/project-memory.md` & `system-map.md`:** Update when architectural patterns change.
-- **`docs/current-state/*`:** Keep features, tech debt, and known bugs updated.
-- **`docs/ai/shared-context.md`:** Update if fundamental governance changes.
+## 5. Synchronization & Documentation Updates (Mandatory)
+ALL AI agents MUST keep the documentation up-to-date. Every implementation or change must evaluate if updates are required for:
+- **`CHANGELOG.md`:** Update upon completing any feature, fix, or architectural change.
+- **`docs/current-state/*`:** Keep features, tech debt, and known bugs updated to reflect the reality after the change.
+- **`docs/generated/project-memory.md` & `system-map.md`:** Update when architectural patterns, new modules, or significant logic changes occur.
+- **Operational Docs:** Update runtime guides (`docs/ai/GEMINI.md`, `docs/ai/CODEX.md`) or operational procedures if workflows change.
+- **Architecture & Design:** Update `docs/ARCHITECTURE.md` or ADRs if new patterns are introduced.
+- **Onboarding & Security:** Update `docs/ai/onboarding/flows.md` or `docs/ai/rules/security-rules.md` if business flows or security constraints are modified.
+
+**Goal:** The repository must be self-documenting. Never finish implementation without evaluating documentation impact.
 
 ## 6. Commit Standards
 - Use Conventional Commits (`type(scope): description`) in English.

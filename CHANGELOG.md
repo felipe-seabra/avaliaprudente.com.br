@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.15.0] - 2026-05-20
+
+### Added
+- **Mandatory Operational Governance & Documentation Sync:**
+  - **New Repository Rule:** Established that ALL implementation tasks must include mandatory documentation synchronization.
+  - **Shared Governance Update:** Updated `docs/ai/shared-context.md` with explicit requirements to evaluate documentation impact for every change (Changelog, Current State, Architecture, Security, etc.).
+  - **Hardened Completion Workflows:** Updated `docs/ai/GEMINI.md` and `docs/ai/CODEX.md` with a mandatory completion checklist and lifecycle (Implement -> Lint -> Build -> Test -> Docs -> Commit).
+  - **Project State Tracking:** Added "Operational Governance" section to `docs/current-state/implemented-features.md` to track the implementation of these disciplinary rules.
+
 ## [0.14.0] - 2026-05-20
 
 ### Changed
