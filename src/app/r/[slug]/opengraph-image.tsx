@@ -259,8 +259,23 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                   border: '1px solid #dbeafe',
                 }}
               >
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', display: 'flex' }}>
-                   ✓ Empresa Verificada
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <svg 
+                    width="20" 
+                    height="20" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="#2563eb" 
+                    strokeWidth="4" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    style={{ marginRight: 8, display: 'flex' }}
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span style={{ fontSize: 18, fontWeight: 900, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', display: 'flex' }}>
+                    Empresa Verificada
+                  </span>
                 </div>
               </div>
             )}
