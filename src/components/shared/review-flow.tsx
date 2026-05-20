@@ -1,13 +1,12 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { StarRating } from '@/components/shared/star-rating'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
-import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { toast } from 'sonner'
 import { CheckCircle2, ChevronLeft, Send, Sparkles } from 'lucide-react'
 import { getBrowserFingerprint } from '@/lib/utils'
@@ -27,8 +26,6 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
   const [customerName, setCustomerName] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
   
-  const repository = useMemo(() => new ReviewRepository(), [])
-
   const handleRatingSelect = (val: number) => {
     setRating(val)
     setStep('details')
@@ -47,17 +44,27 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
       const isInternal = rating < 4
       const fingerprint = await getBrowserFingerprint()
 
-      await repository.create({
-        business_id: businessId,
-        rating,
-        feedback: feedback.trim() || undefined,
-        customer_name: customerName.trim() || undefined,
-        customer_email: customerEmail.trim() || undefined,
-        is_internal: isInternal,
-        source: 'nfc-page',
-        submission_fingerprint: fingerprint,
-        browser_fingerprint: fingerprint,
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          business_id: businessId,
+          rating,
+          feedback: feedback.trim() || undefined,
+          customer_name: customerName.trim() || undefined,
+          customer_email: customerEmail.trim() || undefined,
+          is_internal: isInternal,
+          source: 'nfc-page',
+          browser_fingerprint: fingerprint,
+        }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao enviar avaliação')
+      }
 
       setStep('success')
 
@@ -70,13 +77,8 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
     } catch (err: unknown) {
       console.error('Review submission error:', err)
       
-      // Check if it's a known database error message from our anti-spam trigger
-      const errorMessage = err instanceof Error ? err.message : ''
-      if (errorMessage.includes('recentemente') || errorMessage.includes('spam')) {
-        toast.error(errorMessage)
-      } else {
-        toast.error('Não foi possível enviar sua avaliação. Tente novamente.')
-      }
+      const errorMessage = err instanceof Error ? err.message : 'Não foi possível enviar sua avaliação. Tente novamente.'
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
