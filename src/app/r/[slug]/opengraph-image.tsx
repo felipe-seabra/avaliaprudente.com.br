@@ -104,7 +104,19 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         clearTimeout(timeoutId)
         
         if (response.ok) {
-          logoBuffer = await response.arrayBuffer()
+          const contentType = response.headers.get('content-type')
+          const isSupported = contentType && (
+            contentType.includes('png') || 
+            contentType.includes('jpeg') || 
+            contentType.includes('jpg') ||
+            contentType.includes('svg+xml')
+          )
+
+          if (isSupported) {
+            logoBuffer = await response.arrayBuffer()
+          } else {
+            console.warn(`[OG Image] Unsupported logo format: ${contentType} for ${slug}. Falling back to text avatar.`)
+          }
         }
       } catch (e) {
         console.error('Failed to fetch business logo for OG:', e)
