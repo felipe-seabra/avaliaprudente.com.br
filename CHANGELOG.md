@@ -6,15 +6,19 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Dashboard Subscription Visibility:**
-  - **Plan Indicator:** Added `PlanBadge` component to display the current business plan ("Plano Gratuito" / "Free Plan") in the dashboard header and overview.
+  - **Plan Indicator:** Added `PlanBadge` component to display the current business plan ("Plano Gratuito" / "Free Plan") in the dashboard overview and sidebar.
   - **Upgrade CTA:** Introduced a "Fazer Upgrade" button in the sidebar (disabled with "Coming Soon" tooltip) to prepare for future monetization.
   - **Sidebar Plan Section:** Added a dedicated plan status area in the `AppSidebar`.
+  - **Admin Plan Context:** Refined `PlanBadge` to automatically display "Plano Business" for platform administrators, removing the "Free Plan" constraint from their view.
 
 ### Fixed
 - **Dashboard Stability & Admin Regression:**
   - **Context-Safe PlanBadge:** Refactored `PlanBadge` to use `useContext` safely, preventing crashes in areas without `BusinessProvider` (e.g., Admin Panel).
   - **Admin Layout Resilience:** Hidden the plan section in `AppSidebar` when navigating `/admin` routes to maintain a clean administrative experience.
   - **Role-Aware Sidebar:** Improved sidebar logic to conditionally render monetization features based on the current route context.
+- **UX Refinement & Badge Density:**
+  - **Visual Noise Reduction:** Removed the `PlanBadge` from `TopNav` to prioritize critical moderation alerts and notifications, maintaining a minimal and premium interface.
+  - **Hierarchical Clarity:** Consolidated plan information in the Sidebar and Page Header, where it provides the most value without cluttering transient navigation.
 
 ## [0.15.0] - 2026-05-20
 

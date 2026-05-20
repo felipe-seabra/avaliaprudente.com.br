@@ -1,15 +1,16 @@
 'use client'
 
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { BusinessContext } from '@/providers/business-provider'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, ShieldCheck } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { createClient } from '@/lib/supabase/client'
 
 interface PlanBadgeProps {
   showIcon?: boolean
@@ -18,40 +19,72 @@ interface PlanBadgeProps {
 
 /**
  * PlanBadge component that safely renders the business plan status.
- * It handles cases where it might be rendered outside of a BusinessProvider
- * (like in Admin area) by gracefully returning null instead of crashing.
+ * Admins are automatically shown as 'Business Plan' to reflect their operator status.
  */
 export function PlanBadge({ showIcon = true, className }: PlanBadgeProps) {
-  // Use useContext directly to avoid the "Error: useBusiness must be used within a BusinessProvider"
-  // which is thrown by the useBusiness hook when context is undefined.
   const context = useContext(BusinessContext);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const supabase = React.useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    async function checkRole() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.role === 'admin') {
+          setIsAdmin(true);
+        }
+      }
+    }
+    checkRole();
+  }, [supabase]);
   
-  // If we're outside the provider (context is undefined) or no business is selected, don't render.
+  // If we're outside the provider (context is undefined) or no business is selected, 
+  // we only show something if we are an admin (general platform context).
   if (!context || !context.currentBusiness) {
+    if (isAdmin) {
+      return (
+        <Badge variant="default" className={`cursor-default gap-1.5 px-3 py-1 font-bold uppercase tracking-wider text-[10px] bg-primary/10 text-primary border-primary/20 ${className}`}>
+           <ShieldCheck className="h-3 w-3 fill-current" />
+           Plano Business
+        </Badge>
+      );
+    }
     return null;
   }
 
   const { currentBusiness } = context;
   const plan = currentBusiness.plan_type || 'free'
-  const isFree = plan === 'free'
+  const isFree = plan === 'free' && !isAdmin;
+  
+  const label = isAdmin ? 'Plano Business' : (isFree ? 'Plano Gratuito' : plan);
+  const variant = isFree ? 'secondary' : 'default';
   
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger render={
           <Badge 
-            variant={isFree ? 'secondary' : 'default'} 
-            className={`cursor-default gap-1.5 px-3 py-1 font-bold uppercase tracking-wider text-[10px] ${className}`}
+            variant={variant} 
+            className={`cursor-default gap-1.5 px-3 py-1 font-bold uppercase tracking-wider text-[10px] ${isAdmin ? 'bg-primary/10 text-primary border-primary/20' : ''} ${className}`}
           >
-            {showIcon && !isFree && <Sparkles className="h-3 w-3 fill-current" />}
-            {isFree ? 'Plano Gratuito' : plan}
+            {showIcon && isAdmin && <ShieldCheck className="h-3 w-3 fill-current" />}
+            {showIcon && !isAdmin && !isFree && <Sparkles className="h-3 w-3 fill-current" />}
+            {label}
           </Badge>
         } />
         <TooltipContent>
           <p className="text-xs">
-            {isFree 
-              ? 'Você está usando a versão gratuita do Avalia Prudente.' 
-              : `Sua empresa está no plano ${plan}.`
+            {isAdmin 
+              ? 'Você tem acesso total como administrador da plataforma.' 
+              : isFree 
+                ? 'Você está usando a versão gratuita do Avalia Prudente.' 
+                : `Sua empresa está no plano ${plan}.`
             }
           </p>
         </TooltipContent>

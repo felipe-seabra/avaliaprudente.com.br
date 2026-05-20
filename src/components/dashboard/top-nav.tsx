@@ -15,7 +15,6 @@ import { usePathname } from 'next/navigation'
 import React from 'react'
 import { NotificationBell } from './notification-bell'
 import { ModerationStatusBadge } from './moderation-status-badge'
-import { PlanBadge } from './plan-badge'
 
 export function TopNav() {
   const pathname = usePathname()
@@ -54,10 +53,7 @@ export function TopNav() {
         </Breadcrumb>
       </div>
       <div className="px-4 flex items-center gap-4">
-        <div className="hidden sm:flex items-center gap-2">
-          <PlanBadge />
-          <ModerationStatusBadge />
-        </div>
+        <ModerationStatusBadge />
         <div className="flex items-center gap-2">
           <NotificationBell />
           <ThemeToggle />
