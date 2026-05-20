@@ -38,6 +38,7 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
   const primaryColor = themeConfig.primary_color || '#7c3aed'
 
   const googleReviewLink = links.find(l => l.type === 'google_review')
+  const displayLinks = links.filter(l => l.type !== 'google_review')
 
   useEffect(() => {
     // Track visit
@@ -158,12 +159,12 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
 
         {/* Modular CTAs */}
         <div className="w-full space-y-4 px-2 mb-12">
-          {links.length === 0 ? (
+          {displayLinks.length === 0 ? (
             <div className="py-16 px-8 border-2 border-dashed rounded-3xl opacity-40">
                <p className="text-sm text-muted-foreground">Nenhum link disponível no momento.</p>
             </div>
           ) : (
-            links.map((link, index) => (
+            displayLinks.map((link, index) => (
               <div 
                 key={link.id} 
                 className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"

@@ -565,6 +565,7 @@ export type Database = {
       }
       reviews: {
         Row: {
+          browser_fingerprint: string | null
           business_id: string
           created_at: string
           customer_email: string | null
@@ -574,8 +575,10 @@ export type Database = {
           is_internal: boolean
           rating: number
           source: string
+          submission_fingerprint: string | null
         }
         Insert: {
+          browser_fingerprint?: string | null
           business_id: string
           created_at?: string
           customer_email?: string | null
@@ -585,8 +588,10 @@ export type Database = {
           is_internal?: boolean
           rating: number
           source?: string
+          submission_fingerprint?: string | null
         }
         Update: {
+          browser_fingerprint?: string | null
           business_id?: string
           created_at?: string
           customer_email?: string | null
@@ -596,6 +601,7 @@ export type Database = {
           is_internal?: boolean
           rating?: number
           source?: string
+          submission_fingerprint?: string | null
         }
         Relationships: [
           {
