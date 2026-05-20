@@ -17,6 +17,8 @@ Este documento é a camada de inteligência primária e memória de longo prazo 
 - **Moderation Lifecycle:** Motor progressivo com Advertências (Warnings), Suspensão (Temporary), Banimento (Permanent), Desativação (Soft Delete) e Congelamento de Empresa (Frozen Business).
 - **Transparency Center:** Localizado em `/dashboard/moderation`, permite visualização de status e submissão de **Appeals (Contestações)** via `moderation_appeals`.
 - **Ranking System (Bayesian Average):** Localizado em `src/core/application/use-cases/get-public-rankings.ts`. Calcula o score ponderado baseado em volume de avaliações e média. Empresas **Verificadas** e **Featured** recebem multiplicadores de visibilidade.
+- **Anti-Spam & Abuse Prevention:** Sistema híbrido de fingerprinting anônimo (SHA-256) e cooldowns no banco de dados (`tr_enforce_review_abuse_protection`).
+- **Analytics Anti-Inflation:** Deduplicação de sinais de analytics via triggers (`tr_enforce_analytics_deduplication`) com janela de 15 minutos.
 - **Onboarding de Qualidade:** Fluxo rigoroso que exige dados completos da empresa antes da ativação pública. Protegido contra spam e duplicidade de slugs.
 - **OG Image System:** Localizado em `src/app/opengraph-image.tsx`. Utiliza `next/og` no Edge Runtime. Layouts dinâmicos baseados no branding da empresa (logo/cores).
 - **Slug Validation:** Proteção de unicidade via RPC `is_slug_available`. Slugs são normalizados e nomes de rotas do sistema são reservados.
@@ -37,7 +39,8 @@ Este documento é a camada de inteligência primária e memória de longo prazo 
 - **Admin Dashboard Test:** Qualquer alteração em Auth ou Middleware exige teste manual de login como Admin.
 - **Commit Discipline:** Use Conventional Commits em inglês. Mensagens curtas e assertivas.
 
-## 6. Guia Operacional
+## 6. Guia Operacional (AGY CLI)
 - **Safe Reset:** `npm run supabase:reset` limpa o estado local de forma segura.
 - **Docker Maintenance:** `npm run docker:audit` e `npm run docker:clean` para evitar estouro de disco.
 - **Production Guard:** Nunca rode comandos `supabase db push` ou `reset` sem ler os avisos do Safety Guard.
+- **AGY Workflow:** Siga as instruções em `docs/ai/AGY.md` para execução autônoma e segura.

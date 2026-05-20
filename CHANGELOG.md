@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.13.0] - 2026-05-20
+
+### Changed
+- **Operational Documentation Migration (Gemini CLI -> AGY):**
+  - **Renamed AI Operational Guide:** `docs/ai/GEMINI.md` is now `docs/ai/AGY.md`, reflecting the shift to the Antigravity CLI workflow.
+  - **Consolidated Architecture & Security Intelligence:** Updated `docs/ai/GPT.md` and `docs/ai/AGY.md` with the latest system state, including Review Abuse Prevention, Analytics Anti-Inflation, and OG Image stabilization.
+  - **Modernized AI Workflows:** Updated `docs/ai/onboarding/flows.md` and `docs/ai/shared-context.md` to align with the AGY agent-driven development cycle.
+  - **Hardened Operational Safety:** Refined `docs/OPERATIONAL_SAFETY.md` and `docs/ARCHITECTURE.md` to document trusted server-side ingestion and multi-tenant security guardrails.
+
 ## [0.12.0] - 2026-05-19
 
 ### Added

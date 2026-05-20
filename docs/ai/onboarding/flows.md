@@ -1,13 +1,13 @@
 # AI Onboarding Flow
 
 This directory details how to start and manage sessions across different AI agents.
+## 1. Starting an AGY CLI Session
 
-## 1. Starting a Gemini CLI Session
-1. Navigate to the project root.
-2. Ensure you have read `docs/ai/GEMINI.md`.
-3. Gemini will automatically parse the workspace and its context.
-4. If working on a specific feature, direct Gemini to read `docs/current-state/implemented-features.md` to avoid duplicating work.
-5. **Validation Expectation:** Gemini must autonomously run lint, build, and commit changes using Conventional Commits.
+1. Clone the repository and install dependencies (`npm install`).
+2. Ensure you have read `docs/ai/AGY.md`.
+3. AGY will automatically parse the workspace and its context.
+4. If working on a specific feature, direct AGY to read `docs/current-state/implemented-features.md` to avoid duplicating work.
+5. **Validation Expectation:** AGY must autonomously run lint, build, and commit changes using Conventional Commits.
 
 ## 2. Starting a Codex / GitHub Copilot Session
 1. Codex operates directly within the IDE.

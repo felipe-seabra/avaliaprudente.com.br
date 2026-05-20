@@ -1,6 +1,6 @@
-# GEMINI.md — Avalia Prudente: Gemini CLI Operational Guide
+# AGY.md — Avalia Prudente: Antigravity CLI (AGY) Operational Guide
 
-This document is the official entrypoint for Gemini CLI execution workflows.
+This document is the official entrypoint for AGY / Antigravity CLI execution workflows.
 
 > **Universal Rules:** All actions must strictly adhere to `docs/ai/shared-context.md`.
 
@@ -12,7 +12,7 @@ This document is the official entrypoint for Gemini CLI execution workflows.
 ## 2. Commit Flow & Project Memory
 - **Changelog:** Update `CHANGELOG.md` under the `[Unreleased]` or current version tag.
 - **State Updates:** If the architecture, tech debt, or implemented features change, update the corresponding files in `docs/current-state/` and `docs/generated/`.
-- **Git Commit:** Stage only the specific files modified for the task. Use Conventional Commits in English. Do NOT push to remote unless explicitly asked.
+- **Git Commit:** Stage only the specific files modified for the task. Use Conventional Commits in English. Do NOT push to remote unless explicitly asked. **Commit isolated changes.**
 
 ## 3. Tool Usage Strategy
 - **Surgical Edits:** Use `replace` for targeted edits. Ensure `old_string` matches exactly.
@@ -34,3 +34,8 @@ This document is the official entrypoint for Gemini CLI execution workflows.
 - Verify that `is_frozen` businesses are not accessible via public routes (`/[slug]` and `/r/[slug]`).
 - Check if `terms-reaccept` flow is triggered for accounts needing it.
 
+## 6. AGY Operational Best Practices
+- **Isolated Commit Strategy:** Commit changes in small, logical batches.
+- **Incremental Evolution:** Do not perform broad rewrites. Evolve the architecture incrementally.
+- **Safe Migration Discipline:** Always validate migrations locally with `npm run supabase:reset` before pushing.
+- **Production Safety:** Never use `--force` or similar destructive flags in remote environments.
