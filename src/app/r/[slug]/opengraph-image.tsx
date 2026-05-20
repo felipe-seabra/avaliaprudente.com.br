@@ -5,6 +5,7 @@ import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-re
 import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { Business, BusinessPage } from '@/core/domain/entities'
 import { isValidSafeRemoteUrl } from '@/lib/utils'
+import { APP_CONFIG } from '@/lib/constants'
 
 // Route segment config
 export const runtime = 'edge'
@@ -95,57 +96,69 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     let logoBuffer: ArrayBuffer | null = null
     const logoUrl = data.businesses.logo_url
 
-    if (logoUrl && isValidSafeRemoteUrl(logoUrl)) {
+    if (logoUrl) {
       try {
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 2000) // Reduced timeout for safety
         
-        // Strategy: If WebP, try to fetch the -og.png derivative first
-        let urlToFetch = logoUrl
+        // Resolve URL (handle local paths for demo/global branding)
+        const isLocalPath = logoUrl.startsWith('/')
+        const fullLogoUrl = isLocalPath ? `${APP_CONFIG.url}${logoUrl}` : logoUrl
+        
+        // Strategy: 
+        // 1. If it's a global branding WEBP, use the dedicated safe PNG asset
+        // 2. If it's a normal business WEBP, try to fetch the -og.png derivative first
+        let urlToFetch = fullLogoUrl
         const isWebP = logoUrl.toLowerCase().endsWith('.webp')
         
         if (isWebP) {
-          const ogUrl = logoUrl.replace(/\.webp$/i, '-og.png')
-          try {
-            // We use a separate fetch with a shorter timeout to check for existence
-            const ogResponse = await fetch(ogUrl, { 
-              method: 'HEAD',
-              signal: controller.signal 
-            })
-            if (ogResponse.ok) {
-              urlToFetch = ogUrl
+          if (logoUrl.includes('/branding/logo-')) {
+            urlToFetch = `${APP_CONFIG.url}/branding/og-logo.png`
+          } else {
+            const ogUrl = fullLogoUrl.replace(/\.webp$/i, '-og.png')
+            try {
+              const ogResponse = await fetch(ogUrl, { 
+                method: 'HEAD',
+                signal: controller.signal 
+              })
+              if (ogResponse.ok) {
+                urlToFetch = ogUrl
+              }
+            } catch (e) {
+              // Ignore OG fetch failure, fall back to original (which might still be rejected if WebP)
             }
-          } catch (e) {
-            // Ignore OG fetch failure, fall back to original (which might still be rejected if WebP)
           }
         }
 
-        const response = await fetch(urlToFetch, {
-          signal: controller.signal,
-        })
-        
-        clearTimeout(timeoutId)
-        
-        if (response.ok) {
-          const contentType = response.headers.get('content-type')
-          const isSupported = contentType && (
-            contentType.includes('png') || 
-            contentType.includes('jpeg') || 
-            contentType.includes('jpg') ||
-            contentType.includes('svg+xml')
-          )
+        // Final safety check before fetch (only remote or newly resolved global PNG)
+        if (isValidSafeRemoteUrl(urlToFetch)) {
+          const response = await fetch(urlToFetch, {
+            signal: controller.signal,
+          })
+          
+          clearTimeout(timeoutId)
+          
+          if (response.ok) {
+            const contentType = response.headers.get('content-type')
+            const isSupported = contentType && (
+              contentType.includes('png') || 
+              contentType.includes('jpeg') || 
+              contentType.includes('jpg') ||
+              contentType.includes('svg+xml')
+            )
 
-          if (isSupported) {
-            logoBuffer = await response.arrayBuffer()
-          } else {
-            console.warn(`[OG Image] Unsupported logo format: ${contentType} for ${slug}. Falling back to text avatar.`)
+            if (isSupported) {
+              logoBuffer = await response.arrayBuffer()
+            } else {
+              console.warn(`[OG Image] Unsupported logo format: ${contentType} for ${slug}. Falling back to text avatar.`)
+            }
           }
+        } else {
+          console.warn(`[OG Image] Blocked potentially unsafe or local-only logo URL: ${urlToFetch} for ${slug}`)
         }
       } catch (e) {
         console.error('Failed to fetch business logo for OG:', e)
       }
-    } else if (logoUrl) {
-      console.warn(`[OG Image] Blocked potentially unsafe logo URL: ${logoUrl} for ${slug}`)
     }
 
     return new ImageResponse(

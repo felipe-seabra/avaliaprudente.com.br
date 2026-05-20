@@ -41,11 +41,20 @@ export const metadata: Metadata = {
     title: 'Avalia Prudente | Plataforma NFC Inteligente',
     description: 'A plataforma definitiva para avaliações e reputação digital via NFC.',
     siteName: 'Avalia Prudente',
+    images: [
+      {
+        url: '/branding/og-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Avalia Prudente',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Avalia Prudente | Plataforma NFC Inteligente',
     description: 'Transforme clientes em avaliações reais com tecnologia NFC.',
+    images: ['/branding/og-logo.png'],
   },
 }
 
