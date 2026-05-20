@@ -1,6 +1,6 @@
 # Shared AI Context
 
-This file contains the universal governance rules, shared workflows, and operational standards that apply to ALL AI agents (AGY, Codex, ChatGPT, etc.) working on the Avalia Prudente repository.
+This file contains the universal governance rules, shared workflows, and operational standards that apply to ALL AI agents (Gemini CLI, Codex, ChatGPT, etc.) working on the Avalia Prudente repository.
 
 ## 1. Universal Repository Rules
 - **Language:** Code, variables, and commits MUST be in English. Terminal responses/explanations MUST be in Brazilian Portuguese.

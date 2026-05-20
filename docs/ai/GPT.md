@@ -39,8 +39,8 @@ Este documento é a camada de inteligência primária e memória de longo prazo 
 - **Admin Dashboard Test:** Qualquer alteração em Auth ou Middleware exige teste manual de login como Admin.
 - **Commit Discipline:** Use Conventional Commits em inglês. Mensagens curtas e assertivas.
 
-## 6. Guia Operacional (AGY CLI)
+## 6. Guia Operacional (Gemini CLI)
 - **Safe Reset:** `npm run supabase:reset` limpa o estado local de forma segura.
 - **Docker Maintenance:** `npm run docker:audit` e `npm run docker:clean` para evitar estouro de disco.
 - **Production Guard:** Nunca rode comandos `supabase db push` ou `reset` sem ler os avisos do Safety Guard.
-- **AGY Workflow:** Siga as instruções em `docs/ai/AGY.md` para execução autônoma e segura.
+- **Gemini CLI Workflow:** Siga as instruções em `GEMINI.md` para execução autônoma e segura.
