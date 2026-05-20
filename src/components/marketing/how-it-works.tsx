@@ -82,11 +82,11 @@ export function HowItWorks() {
                   Escaneie o QR Code ao lado com seu celular ou clique no botão abaixo para abrir a página de demonstração e ver como o sistema se comporta.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 w-full">
-                  <Button size="lg" className="h-14 px-8 rounded-2xl font-bold gap-2 cursor-pointer shadow-lg shadow-primary/20" render={<Link href="/r/demo" target="_blank" />}>
+                  <Button size="lg" className="h-14 px-8 rounded-2xl font-bold gap-2 cursor-pointer shadow-lg shadow-primary/20" render={<Link href="/r/demo" target="_blank" />} nativeButton={false}>
                     <ExternalLink className="h-5 w-5" />
                     Abrir Página Demo
                   </Button>
-                  <Button variant="outline" size="lg" className="h-14 px-8 rounded-2xl font-bold cursor-pointer" render={<Link href="/register" />}>
+                  <Button variant="outline" size="lg" className="h-14 px-8 rounded-2xl font-bold cursor-pointer" render={<Link href="/register" />} nativeButton={false}>
                     Criar Minha Empresa
                   </Button>
                 </div>
@@ -101,6 +101,7 @@ export function HowItWorks() {
                            src={qrCodeUrl} 
                            alt="Demo QR Code"
                            fill
+                           sizes="(max-width: 768px) 176px, 208px"
                            className="object-contain"
                            priority
                          />

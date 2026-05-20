@@ -155,7 +155,12 @@ export default function AdminDashboardPage() {
                  <span className="font-bold text-sm">Visitas a Páginas</span>
                  <span className="text-xl font-black">{stats?.totalVisits || 0}</span>
               </div>
-              <Button variant="outline" className="w-full font-bold mt-4" render={<Link href="/admin/stats" />}>
+              <Button
+                variant="outline"
+                className="w-full font-bold mt-4"
+                render={<Link href="/admin/stats" />}
+                nativeButton={false}
+              >
                  Ver Gráficos Detalhados
               </Button>
            </CardContent>

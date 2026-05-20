@@ -30,7 +30,7 @@ export default function Error({
         <Button onClick={() => reset()} variant="outline">
           Tentar novamente
         </Button>
-        <Button render={<Link href="/" />}>
+        <Button render={<Link href="/" />} nativeButton={false}>
           Voltar para o início
         </Button>
       </div>

@@ -16,6 +16,7 @@ export function Navbar() {
             alt={APP_CONFIG.name}
             width={180}
             height={40}
+            sizes="180px"
             className="h-8 w-auto object-contain"
             priority
           />
@@ -33,12 +34,12 @@ export function Navbar() {
         </nav>
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <Link href="/login" className="hidden md:block">
-            <Button variant="ghost" className="cursor-pointer">Entrar</Button>
-          </Link>
-          <Link href="/register">
-            <Button className="cursor-pointer">Começar grátis</Button>
-          </Link>
+          <Button variant="ghost" className="hidden md:flex cursor-pointer" render={<Link href="/login" />} nativeButton={false}>
+            Entrar
+          </Button>
+          <Button className="cursor-pointer" render={<Link href="/register" />} nativeButton={false}>
+            Começar grátis
+          </Button>
         </div>
       </div>
     </header>

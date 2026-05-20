@@ -163,6 +163,7 @@ export function ImageUpload({
               src={displayImage}
               alt="Preview"
               fill
+              sizes="(max-width: 768px) 128px, 160px"
               className="object-contain p-3 transition-transform group-hover:scale-105"
             />
             {isUploading && (

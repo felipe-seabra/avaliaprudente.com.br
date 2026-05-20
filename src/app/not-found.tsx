@@ -9,7 +9,7 @@ export default function NotFound() {
       <p className="text-muted-foreground max-w-md mb-8">
         A página que você está procurando pode ter sido removida, mudou de nome ou está temporariamente indisponível.
       </p>
-      <Button render={<Link href="/" />} size="lg">
+      <Button render={<Link href="/" />} size="lg" nativeButton={false}>
         Voltar para a página inicial
       </Button>
     </div>

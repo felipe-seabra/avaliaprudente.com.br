@@ -141,7 +141,7 @@ export function BusinessRanking({ topRated, mostViewed }: BusinessRankingProps) 
                     <div className="space-y-4 flex flex-col items-center w-full">
                       <div className="relative h-16 w-16 rounded-2xl overflow-hidden border-2 border-muted bg-white shrink-0 shadow-sm transition-transform group-hover/card:scale-110">
                         {item.logo_url ? (
-                          <Image src={item.logo_url} alt={item.name} fill className="object-contain p-1.5" />
+                          <Image src={item.logo_url} alt={item.name} fill sizes="64px" className="object-contain p-1.5" />
                         ) : (
                           <div className="h-full w-full flex items-center justify-center font-black text-primary text-2xl bg-primary/5 uppercase">
                             {item.name[0]}

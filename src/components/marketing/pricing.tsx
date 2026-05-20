@@ -55,7 +55,11 @@ export function Pricing() {
               </div>
             </CardContent>
             <CardFooter className="p-8 pt-0">
-              <Button className="w-full font-bold h-12 rounded-xl shadow-lg shadow-primary/20 cursor-pointer text-sm" render={<Link href="/register" />}>
+              <Button
+                className="w-full font-bold h-12 rounded-xl shadow-lg shadow-primary/20 cursor-pointer text-sm"
+                render={<Link href="/register" />}
+                nativeButton={false}
+              >
                 Começar Agora
               </Button>
             </CardFooter>

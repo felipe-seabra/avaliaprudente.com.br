@@ -104,6 +104,7 @@ export default function BusinessesPage() {
                         <ExternalLink className="h-4 w-4" />
                       </Link>
                     }
+                    nativeButton={false}
                   />
                 </div>
               </CardContent>

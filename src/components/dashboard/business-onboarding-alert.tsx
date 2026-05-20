@@ -117,19 +117,35 @@ export function BusinessOnboardingAlert({ businessId }: BusinessOnboardingAlertP
 
           <div className="bg-yellow-500/10 border-t md:border-t-0 md:border-l border-yellow-500/10 p-6 flex flex-col justify-center gap-3 w-full md:w-64">
             {!hasReviewLink && (
-              <Button size="sm" className="w-full gap-2 font-bold cursor-pointer" render={<Link href="/dashboard/review-links" />}>
+              <Button
+                size="sm"
+                className="w-full gap-2 font-bold cursor-pointer"
+                render={<Link href="/dashboard/review-links" />}
+                nativeButton={false}
+              >
                 Configurar Google
                 <ArrowRight className="h-4 w-4" />
               </Button>
             )}
             {!hasSocialLinks && (
-              <Button size="sm" variant={hasReviewLink ? "default" : "outline"} className="w-full gap-2 font-bold cursor-pointer" render={<Link href="/dashboard/page-editor" />}>
+              <Button
+                size="sm"
+                variant={hasReviewLink ? "default" : "outline"}
+                className="w-full gap-2 font-bold cursor-pointer"
+                render={<Link href="/dashboard/page-editor" />}
+                nativeButton={false}
+              >
                 Adicionar Redes
                 <ArrowRight className="h-4 w-4" />
               </Button>
             )}
             {isEligibleForVerification && (
-               <Button size="sm" className="w-full gap-2 font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer" render={<Link href="/dashboard/page-editor" />}>
+               <Button
+                size="sm"
+                className="w-full gap-2 font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+                render={<Link href="/dashboard/page-editor" />}
+                nativeButton={false}
+               >
                   <ShieldCheck className="h-4 w-4" />
                   Solicitar Verificação
                </Button>

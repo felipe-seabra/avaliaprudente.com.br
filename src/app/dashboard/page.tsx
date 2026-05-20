@@ -132,11 +132,20 @@ export default function DashboardPage() {
               </Button>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button className="flex-1 sm:flex-none gap-2 cursor-pointer" render={<Link href={`/r/${currentBusiness.slug}`} target="_blank" />}>
+              <Button
+                className="flex-1 sm:flex-none gap-2 cursor-pointer"
+                render={<Link href={`/r/${currentBusiness.slug}`} target="_blank" />}
+                nativeButton={false}
+              >
                 <ExternalLink className="h-4 w-4" />
                 Abrir
               </Button>
-              <Button variant="outline" className="flex-1 sm:flex-none gap-2 cursor-pointer" render={<Link href="/dashboard/qr-codes" />}>
+              <Button
+                variant="outline"
+                className="flex-1 sm:flex-none gap-2 cursor-pointer"
+                render={<Link href="/dashboard/qr-codes" />}
+                nativeButton={false}
+              >
                 <QrCode className="h-4 w-4" />
                 QR Code
               </Button>

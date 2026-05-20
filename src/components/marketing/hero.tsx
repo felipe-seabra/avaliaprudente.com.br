@@ -16,6 +16,7 @@ export function Hero() {
             alt={APP_CONFIG.name}
             width={160}
             height={160}
+            sizes="160px"
             className="h-32 w-auto object-contain mb-8 mx-auto"
             priority
           />
@@ -34,12 +35,15 @@ export function Hero() {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md animate-in fade-in slide-in-from-bottom-7 duration-700 delay-300">
-          <Link href="/register" className="w-full sm:w-auto">
-            <Button size="lg" className="w-full text-base h-12 px-8 shadow-lg shadow-primary/20 hover:scale-105 transition-transform rounded-xl">
-              Quero minha tag NFC
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          <Button 
+            size="lg" 
+            className="w-full sm:w-auto text-base h-12 px-8 shadow-lg shadow-primary/20 hover:scale-105 transition-transform rounded-xl"
+            render={<Link href="/register" />}
+            nativeButton={false}
+          >
+            Quero minha tag NFC
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </div>
         
         {/* Abstract NFC Mockup */}
@@ -54,7 +58,7 @@ export function Hero() {
                 <div className="w-16 h-1.5 bg-muted rounded-full mb-4" />
                 <div className="flex-1 w-full bg-card px-3 pt-6 space-y-4">
                   <div className="w-12 h-12 rounded-full bg-primary/10 mx-auto flex items-center justify-center border border-primary/20">
-                    <Image src="/branding/logo-vertical.webp" alt="V" width={20} height={20} className="h-4 w-auto" />
+                    <Image src="/branding/logo-vertical.webp" alt="V" width={20} height={20} sizes="20px" className="h-4 w-auto" />
                   </div>
                   <div className="w-20 h-2 bg-muted mx-auto rounded-full" />
                   <div className="space-y-2">
@@ -73,7 +77,7 @@ export function Hero() {
                    <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/20">
                       <SmartphoneNfc size={20} className="text-primary" />
                    </div>
-                   <Image src="/branding/logo-horizontal.webp" alt="Logo" width={80} height={20} className="h-3 w-auto opacity-80" />
+                   <Image src="/branding/logo-horizontal.webp" alt="Logo" width={80} height={20} sizes="80px" className="h-3 w-auto opacity-80" />
                 </div>
                 <div className="flex flex-col items-center gap-4">
                   <div className="h-16 w-16 rounded-full border-2 border-dashed border-primary/40 flex items-center justify-center">

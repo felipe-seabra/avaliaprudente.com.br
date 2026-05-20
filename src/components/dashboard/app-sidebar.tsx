@@ -113,6 +113,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     alt={APP_CONFIG.name}
                     width={140}
                     height={32}
+                    sizes="140px"
                     className="h-6 w-auto object-contain"
                   />
                 </div>
