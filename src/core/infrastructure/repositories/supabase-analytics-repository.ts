@@ -1,9 +1,7 @@
 import { createClient as createBrowserClient } from '@/lib/supabase/client'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { CreateAnalyticsEventDTO } from '@/core/domain/entities'
-import { Json } from '@/types/supabase'
 import { hasConsent } from '@/components/shared/cookie-consent'
-import { getBrowserFingerprint } from '@/lib/utils'
 
 export class AnalyticsRepository {
   private supabase: SupabaseClient
@@ -18,23 +16,23 @@ export class AnalyticsRepository {
       return
     }
 
-    const fingerprint = event.fingerprint || (await getBrowserFingerprint())
-
-    const { error } = await this.supabase
-      .from('analytics_events')
-      .insert({
-        business_id: event.business_id,
-        page_id: event.page_id,
-        link_id: event.link_id,
-        event_type: event.event_type,
-        source: event.source,
-        metadata: (event.metadata || {}) as Json,
-        user_agent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
-        fingerprint,
+    try {
+      await fetch('/api/analytics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          business_id: event.business_id,
+          page_id: event.page_id,
+          link_id: event.link_id,
+          event_type: event.event_type,
+          source: event.source,
+          metadata: event.metadata,
+        }),
       })
-
-    if (error) {
-      console.error('Failed to track event:', error)
+    } catch (err) {
+      console.error('Failed to track event via API:', err)
     }
   }
 
