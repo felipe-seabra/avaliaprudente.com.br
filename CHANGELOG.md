@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.17.0] - 2026-05-20
+
+### Changed
+- **Dashboard Monetization UX Refinement:**
+  - **Redundancy Elimination:** Removed the plan card block from the sidebar to reduce visual clutter and prioritize navigation.
+  - **Consolidated Plan Visibility:** Maintained the compact `PlanBadge` in the dashboard header as the single source of truth for subscription status.
+  - **Contextual Upgrade CTA:** Moved the "Fazer Upgrade" button into the `PlanBadge` component, appearing only for Free plans (disabled) and hidden for Business/Admin accounts.
+  - **Premium Layout Density:** Improved dashboard aesthetics by shifting monetization indicators to a subtle, header-integrated placement.
+
 ## [0.16.0] - 2026-05-20
 
 ### Added

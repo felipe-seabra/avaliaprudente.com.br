@@ -48,8 +48,8 @@
 - [x] **Self-Documenting Repository:** Institutionalized the requirement to evaluate documentation impact before finishing any task.
 
 ## Monetization & Plans (UI/UX Foundation)
-- [x] **Plan Indicators:** Visibility of "Plano Gratuito" / "Free Plan" in Dashboard Header, Overview, and Sidebar.
-- [x] **Future-Ready Upgrade CTA:** "Fazer Upgrade" button integrated into the sidebar with "Coming Soon" tooltip.
+- [x] **Consolidated Plan Indicators:** High-visibility "Plano Gratuito" / "Plano Business" badges in the Dashboard Header.
+- [x] **Contextual Upgrade CTA:** "Fazer Upgrade" button integrated directly into the `PlanBadge` for Free plans, removing sidebar redundancy.
 - [x] **Subscription Schema Readiness:** `plan_type` support in the `businesses` table.
 
 ## Testing & Stability (Phase 4)
