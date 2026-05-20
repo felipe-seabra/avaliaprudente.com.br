@@ -16,7 +16,7 @@ interface BusinessContextType {
   refreshBusinesses: () => Promise<void>
 }
 
-const BusinessContext = createContext<BusinessContextType | undefined>(undefined)
+export const BusinessContext = createContext<BusinessContextType | undefined>(undefined)
 
 export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const [businesses, setBusinesses] = useState<Business[]>([])

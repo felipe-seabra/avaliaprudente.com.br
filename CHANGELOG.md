@@ -10,6 +10,12 @@ All notable changes to this project will be documented in this file.
   - **Upgrade CTA:** Introduced a "Fazer Upgrade" button in the sidebar (disabled with "Coming Soon" tooltip) to prepare for future monetization.
   - **Sidebar Plan Section:** Added a dedicated plan status area in the `AppSidebar`.
 
+### Fixed
+- **Dashboard Stability & Admin Regression:**
+  - **Context-Safe PlanBadge:** Refactored `PlanBadge` to use `useContext` safely, preventing crashes in areas without `BusinessProvider` (e.g., Admin Panel).
+  - **Admin Layout Resilience:** Hidden the plan section in `AppSidebar` when navigating `/admin` routes to maintain a clean administrative experience.
+  - **Role-Aware Sidebar:** Improved sidebar logic to conditionally render monetization features based on the current route context.
+
 ## [0.15.0] - 2026-05-20
 
 ### Added

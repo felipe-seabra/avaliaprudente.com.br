@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useContext } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { useBusiness } from '@/providers/business-provider'
+import { BusinessContext } from '@/providers/business-provider'
 import { Sparkles } from 'lucide-react'
 import {
   Tooltip,
@@ -16,11 +16,23 @@ interface PlanBadgeProps {
   className?: string
 }
 
+/**
+ * PlanBadge component that safely renders the business plan status.
+ * It handles cases where it might be rendered outside of a BusinessProvider
+ * (like in Admin area) by gracefully returning null instead of crashing.
+ */
 export function PlanBadge({ showIcon = true, className }: PlanBadgeProps) {
-  const { currentBusiness } = useBusiness()
+  // Use useContext directly to avoid the "Error: useBusiness must be used within a BusinessProvider"
+  // which is thrown by the useBusiness hook when context is undefined.
+  const context = useContext(BusinessContext);
   
-  const plan = currentBusiness?.plan_type || 'free'
-  
+  // If we're outside the provider (context is undefined) or no business is selected, don't render.
+  if (!context || !context.currentBusiness) {
+    return null;
+  }
+
+  const { currentBusiness } = context;
+  const plan = currentBusiness.plan_type || 'free'
   const isFree = plan === 'free'
   
   return (
