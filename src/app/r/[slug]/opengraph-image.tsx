@@ -100,7 +100,27 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 2000) // Reduced timeout for safety
         
-        const response = await fetch(logoUrl, {
+        // Strategy: If WebP, try to fetch the -og.png derivative first
+        let urlToFetch = logoUrl
+        const isWebP = logoUrl.toLowerCase().endsWith('.webp')
+        
+        if (isWebP) {
+          const ogUrl = logoUrl.replace(/\.webp$/i, '-og.png')
+          try {
+            // We use a separate fetch with a shorter timeout to check for existence
+            const ogResponse = await fetch(ogUrl, { 
+              method: 'HEAD',
+              signal: controller.signal 
+            })
+            if (ogResponse.ok) {
+              urlToFetch = ogUrl
+            }
+          } catch (e) {
+            // Ignore OG fetch failure, fall back to original (which might still be rejected if WebP)
+          }
+        }
+
+        const response = await fetch(urlToFetch, {
           signal: controller.signal,
         })
         

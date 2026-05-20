@@ -2,10 +2,10 @@
  * Utility to optimize images using Canvas API
  */
 
-export const optimizeImage = (file: File): Promise<Blob> => {
+export const optimizeImage = (file: File): Promise<{ webp: Blob; png?: Blob }> => {
   return new Promise((resolve, reject) => {
     if (file.type === 'image/svg+xml') {
-      resolve(file)
+      resolve({ webp: file })
       return
     }
 
@@ -42,10 +42,24 @@ export const optimizeImage = (file: File): Promise<Blob> => {
 
         ctx.drawImage(img, 0, 0, width, height)
         
+        // Generate WebP
         canvas.toBlob(
-          (blob) => {
-            if (blob) resolve(blob)
-            else reject(new Error('Image optimization failed'))
+          (webpBlob) => {
+            if (!webpBlob) {
+              reject(new Error('WebP optimization failed'))
+              return
+            }
+
+            // Also generate PNG for OG compatibility
+            canvas.toBlob(
+              (pngBlob) => {
+                resolve({ 
+                  webp: webpBlob, 
+                  png: pngBlob || undefined 
+                })
+              },
+              'image/png'
+            )
           },
           'image/webp',
           0.8

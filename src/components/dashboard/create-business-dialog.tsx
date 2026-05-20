@@ -112,25 +112,41 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
   const canCreate = userRole === 'admin' || businesses.length < PRICING_PLANS.FREE.maxBusinesses
 
   async function uploadLogo(businessId: string, file: File): Promise<string> {
-    const optimizedBlob = await optimizeImage(file)
+    const { webp, png } = await optimizeImage(file)
     
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) throw new Error('Usuário não autenticado')
 
     const userId = userData.user.id
-    const fileExt = file.type === 'image/svg+xml' ? 'svg' : 'webp'
-    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
+    const isSvg = file.type === 'image/svg+xml'
+    const fileExt = isSvg ? 'svg' : 'webp'
+    const baseName = `${Math.random().toString(36).substring(2)}-${Date.now()}`
+    const fileName = `${baseName}.${fileExt}`
     const filePath = `${userId}/logos/${fileName}`
 
     const { error: uploadError } = await supabase.storage
       .from('business-assets')
-      .upload(filePath, optimizedBlob, {
-        contentType: file.type === 'image/svg+xml' ? 'image/svg+xml' : 'image/webp',
+      .upload(filePath, webp, {
+        contentType: isSvg ? 'image/svg+xml' : 'image/webp',
         cacheControl: '3600',
         upsert: false
       })
 
     if (uploadError) throw uploadError
+
+    // Upload PNG derivative if applicable
+    if (!isSvg && png) {
+      const ogFileName = `${baseName}-og.png`
+      const ogFilePath = `${userId}/logos/${ogFileName}`
+      
+      await supabase.storage
+        .from('business-assets')
+        .upload(ogFilePath, png, {
+          contentType: 'image/png',
+          cacheControl: '3600',
+          upsert: false
+        })
+    }
 
     const { data: { publicUrl } } = supabase.storage
       .from('business-assets')

@@ -74,10 +74,10 @@ export function ImageUpload({
 
     setIsUploading(true)
     try {
-      const optimizedBlob = await optimizeImage(file)
+      const { webp, png } = await optimizeImage(file)
       
       const maxFinalSize = 300 * 1024 // 300KB
-      if (optimizedBlob.size > maxFinalSize) {
+      if (webp.size > maxFinalSize) {
         toast.error('Logo muito grande após otimização. Utilize um arquivo mais leve (máx 300KB).')
         setIsUploading(false)
         return
@@ -87,19 +87,37 @@ export function ImageUpload({
       if (!userData.user) throw new Error('Usuário não autenticado')
 
       const userId = userData.user.id
-      const fileExt = file.type === 'image/svg+xml' ? 'svg' : 'webp'
-      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
+      const isSvg = file.type === 'image/svg+xml'
+      const fileExt = isSvg ? 'svg' : 'webp'
+      const baseName = `${Math.random().toString(36).substring(2)}-${Date.now()}`
+      const fileName = `${baseName}.${fileExt}`
       const filePath = `${userId}/${folder}/${fileName}`
 
+      // Upload main file (WebP or SVG)
       const { error: uploadError } = await supabase.storage
         .from('business-assets')
-        .upload(filePath, optimizedBlob, {
-          contentType: file.type === 'image/svg+xml' ? 'image/svg+xml' : 'image/webp',
+        .upload(filePath, webp, {
+          contentType: isSvg ? 'image/svg+xml' : 'image/webp',
           cacheControl: '3600',
           upsert: false
         })
 
       if (uploadError) throw uploadError
+
+      // If it's not an SVG, upload the PNG derivative for OG compatibility
+      if (!isSvg && png) {
+        const ogFileName = `${baseName}-og.png`
+        const ogFilePath = `${userId}/${folder}/${ogFileName}`
+        
+        await supabase.storage
+          .from('business-assets')
+          .upload(ogFilePath, png, {
+            contentType: 'image/png',
+            cacheControl: '3600',
+            upsert: false
+          })
+          // We don't block on OG upload failure, but it's good to have
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('business-assets')
