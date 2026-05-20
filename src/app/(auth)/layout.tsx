@@ -26,12 +26,22 @@ export default function AuthLayout({
       <div className="w-full max-w-[440px] space-y-6 flex flex-col items-stretch">
         <div className="flex flex-col items-center space-y-4 text-center">
           <Link href="/" className="transition-transform hover:scale-105">
+            {/* Dark Mode Logo (White) */}
             <Image
               src="/branding/logo-vertical.webp"
               alt={APP_CONFIG.name}
               width={140}
               height={140}
-              className="h-20 w-auto object-contain"
+              className="h-20 w-auto object-contain hidden dark:block"
+              priority
+            />
+            {/* Light Mode Logo (Dark) */}
+            <Image
+              src="/branding/logo-vertical-white-mode.webp"
+              alt={APP_CONFIG.name}
+              width={140}
+              height={140}
+              className="h-20 w-auto object-contain block dark:hidden"
               priority
             />
           </Link>

@@ -11,13 +11,24 @@ export function Hero() {
       
       <div className="container relative mx-auto max-w-6xl px-4 md:px-8 flex flex-col items-center text-center">
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
+          {/* Dark Mode Logo (White) */}
           <Image
             src="/branding/logo-vertical.webp"
             alt={APP_CONFIG.name}
             width={160}
             height={160}
             sizes="160px"
-            className="h-32 w-auto object-contain mb-8 mx-auto"
+            className="h-32 w-auto object-contain mb-8 mx-auto hidden dark:block"
+            priority
+          />
+          {/* Light Mode Logo (Dark) */}
+          <Image
+            src="/branding/logo-vertical-white-mode.webp"
+            alt={APP_CONFIG.name}
+            width={160}
+            height={160}
+            sizes="160px"
+            className="h-32 w-auto object-contain mb-8 mx-auto block dark:hidden"
             priority
           />
           <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8">
@@ -57,8 +68,11 @@ export function Hero() {
               <div className="w-40 h-[350px] border-[8px] border-zinc-800 rounded-[2.5rem] bg-background shadow-2xl flex flex-col items-center pt-4 relative z-20 transition-transform duration-700 hover:scale-105">
                 <div className="w-16 h-1.5 bg-muted rounded-full mb-4" />
                 <div className="flex-1 w-full bg-card px-3 pt-6 space-y-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 mx-auto flex items-center justify-center border border-primary/20">
-                    <Image src="/branding/logo-vertical.webp" alt="V" width={20} height={20} sizes="20px" className="h-4 w-auto" />
+                  <div className="w-12 h-12 rounded-full bg-primary/10 mx-auto flex items-center justify-center border border-primary/20 overflow-hidden">
+                    {/* Dark Mode Variant (White) */}
+                    <Image src="/branding/logo-vertical.webp" alt="V" width={20} height={20} sizes="20px" className="h-4 w-auto hidden dark:block" />
+                    {/* Light Mode Variant (Dark) */}
+                    <Image src="/branding/logo-vertical-white-mode.webp" alt="V" width={20} height={20} sizes="20px" className="h-4 w-auto block dark:hidden" />
                   </div>
                   <div className="w-20 h-2 bg-muted mx-auto rounded-full" />
                   <div className="space-y-2">

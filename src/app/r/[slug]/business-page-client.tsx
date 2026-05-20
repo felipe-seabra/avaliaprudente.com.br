@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useEffect } from 'react'
+import { cn } from '@/lib/utils'
 import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase-analytics-repository'
 
 interface BusinessPageClientProps {
@@ -97,13 +98,27 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
               className="relative h-24 w-24 rounded-full overflow-hidden border-2 mb-4 bg-background shadow-lg mx-auto transition-transform hover:scale-105 duration-300"
               style={{ borderColor: `var(--primary)33` }}
             >
+              {/* Default Business Logo */}
               <Image 
                 src={page.businesses.logo_url} 
                 alt={page.businesses.name} 
                 fill 
-                className="object-cover"
+                className={cn(
+                  "object-cover",
+                  page.businesses.logo_url.includes('/branding/logo-vertical.webp') && "hidden dark:block"
+                )}
                 priority
               />
+              {/* Specific handling for global vertical logo in light mode */}
+              {page.businesses.logo_url.includes('/branding/logo-vertical.webp') && (
+                <Image 
+                  src="/branding/logo-vertical-white-mode.webp" 
+                  alt={page.businesses.name} 
+                  fill 
+                  className="object-cover block dark:hidden"
+                  priority
+                />
+              )}
             </div>
           ) : (
             <div 
