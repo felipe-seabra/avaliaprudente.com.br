@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.16.0] - 2026-05-20
+
+### Added
+- **Dashboard Subscription Visibility:**
+  - **Plan Indicator:** Added `PlanBadge` component to display the current business plan ("Plano Gratuito" / "Free Plan") in the dashboard header and overview.
+  - **Upgrade CTA:** Introduced a "Fazer Upgrade" button in the sidebar (disabled with "Coming Soon" tooltip) to prepare for future monetization.
+  - **Sidebar Plan Section:** Added a dedicated plan status area in the `AppSidebar`.
+
 ## [0.15.0] - 2026-05-20
 
 ### Added

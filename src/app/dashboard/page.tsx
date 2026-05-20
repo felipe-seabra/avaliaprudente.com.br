@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { APP_CONFIG } from '@/lib/constants'
 import { BusinessOnboardingAlert } from '@/components/dashboard/business-onboarding-alert'
+import { PlanBadge } from '@/components/dashboard/plan-badge'
 
 export default function DashboardPage() {
   const { currentBusiness, businesses, isLoading: isBusinessLoading } = useBusiness()
@@ -98,11 +99,16 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 pb-12 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gradient">Olá, bem-vindo de volta!</h1>
-        <p className="text-muted-foreground">
-          Aqui está o resumo de <strong>{currentBusiness.name}</strong>.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gradient">Olá, bem-vindo de volta!</h1>
+          <p className="text-muted-foreground">
+            Aqui está o resumo de <strong>{currentBusiness.name}</strong>.
+          </p>
+        </div>
+        <div className="shrink-0">
+          <PlanBadge />
+        </div>
       </div>
 
       <BusinessOnboardingAlert businessId={currentBusiness.id} />

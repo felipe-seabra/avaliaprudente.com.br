@@ -47,6 +47,11 @@
 - [x] **Shared Governance:** Centralized rules in `docs/ai/shared-context.md` covering all documentation types (current-state, architecture, security, onboarding).
 - [x] **Self-Documenting Repository:** Institutionalized the requirement to evaluate documentation impact before finishing any task.
 
+## Monetization & Plans (UI/UX Foundation)
+- [x] **Plan Indicators:** Visibility of "Plano Gratuito" / "Free Plan" in Dashboard Header, Overview, and Sidebar.
+- [x] **Future-Ready Upgrade CTA:** "Fazer Upgrade" button integrated into the sidebar with "Coming Soon" tooltip.
+- [x] **Subscription Schema Readiness:** `plan_type` support in the `businesses` table.
+
 ## Testing & Stability (Phase 4)
 - [x] Automated Testing Infrastructure (Vitest & React Testing Library).
 - [x] Critical E2E and Unit Flow tests (Middleware, Utils, Env Validation).

@@ -11,6 +11,7 @@ import {
   ShieldAlert,
   ExternalLink,
   ShoppingBag,
+  Zap,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -31,6 +32,13 @@ import { UserNav } from './user-nav'
 import { BusinessSwitcher } from './business-switcher'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { PlanBadge } from './plan-badge'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const data = {
   navMain: [
@@ -163,10 +171,41 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <span>Configurações</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
-        </SidebarMenu>
+          </SidebarMenu>
 
-        {/* Growth CTA */}
-        <div className="mt-auto px-4 py-6 group-data-[collapsible=icon]:hidden">
+          {/* Plan Section */}
+          <div className="mt-auto px-4 py-2 group-data-[collapsible=icon]:hidden">
+          <div className="p-4 rounded-2xl bg-muted/50 border border-border/50 space-y-3">
+             <div className="flex items-center justify-between">
+               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Seu Plano</p>
+               <PlanBadge showIcon={false} className="px-2 py-0 h-4" />
+             </div>
+             <TooltipProvider>
+               <Tooltip>
+                 <TooltipTrigger render={
+                   <div className="w-full">
+                     <Button 
+                       size="sm" 
+                       variant="outline"
+                       className="w-full h-8 text-[11px] font-bold gap-2 opacity-60 cursor-not-allowed"
+                       disabled
+                     >
+                        <Zap className="h-3 w-3 fill-primary text-primary" />
+                        Fazer Upgrade
+                     </Button>
+                   </div>
+                 } />
+                 <TooltipContent side="top">
+                   <p className="text-xs font-medium">Planos Pro & Enterprise em breve!</p>
+                 </TooltipContent>
+               </Tooltip>
+             </TooltipProvider>
+          </div>
+          </div>
+
+          {/* Growth CTA */}
+          <div className="px-4 py-4 group-data-[collapsible=icon]:hidden">
+
           <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 space-y-3 relative overflow-hidden">
              <div className="absolute top-0 right-0 p-2 opacity-10 rotate-12 pointer-events-none">
                 <ShoppingBag className="h-12 w-12" />
