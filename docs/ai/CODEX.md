@@ -1,33 +1,37 @@
-# CODEX.md — Avalia Prudente: Codex Operational Guide
+# CODEX.md — Avalia Prudente: Codex CLI Operational Guide
 
-This document is optimized for GitHub Copilot / Codex sessions, focusing on implementation quality, safe refactoring, and inline code generation within IDEs.
+Este documento é o ponto de entrada oficial para os fluxos de trabalho de execução do Codex CLI.
 
-## 1. Repository Architecture
-- **Clean Architecture:** Strict separation between `Domain` (entities), `Application` (use cases), `Infrastructure` (repositories/Supabase), and `UI` (Next.js/React).
-- **TypeScript Strictness:** Strict mode is enabled. No `any` types. Ensure all interfaces and DTOs are properly defined.
+> **Regras Universais:** Todas as ações devem aderir estritamente a `docs/ai/shared-context.md`.
 
-## 2. Implementation Standards
-- **UI Components:** Use Radix primitives via `shadcn/ui`. Apply styles using Tailwind CSS 4 (`globals.css` tokens).
-- **Data Fetching:** Use Server Components for initial load; use custom hooks (`useBusiness`, etc.) for client-side state.
-- **Dependency Mapping:** Before injecting a new repository or service, verify if an abstraction already exists in `src/core/infrastructure/repositories`.
-- **Onboarding Logic:** Ensure any new UI for business creation follows the multi-step onboarding flow and quality enforcement rules.
+## 1. Filosofia de Execução do Workspace
+- **Terminal-Native Workflow:** O Codex CLI opera primariamente via terminal. Utilize ferramentas de busca e manipulação de arquivos com precisão cirúrgica.
+- **Execução Autônoma:** Espera-se que o Codex identifique, analise e resolva problemas de forma independente, seguindo o ciclo: Pesquisa -> Estratégia -> Implementação -> Validação.
+- **Minimalismo Operacional:** Evite leituras extensas e desnecessárias. Foque no contexto relevante para a tarefa imediata.
 
-## 3. Refactor Safety Rules
-- **No Unrelated Changes:** Codex should NOT suggest formatting or structural changes outside the immediate lines being edited.
-- **Preserve RLS & Tenant Context:** When refactoring database queries, ensure `owner_id` filters and RLS compatibility remain intact.
-- **RLS Recursion Alert:** Avoid queries to `profiles` within RLS. Use `is_admin()`.
-- **Public Filtering:** Ensure public queries (rankings, pages, review-links) explicitly check for `is_frozen = false`.
-- **Slug Integrity:** Ensure any business update logic preserves the `is_slug_available` check and lowercase normalization.
+## 2. Fluxo de Trabalho e Validação
+- **Análise Prévia:** Antes de qualquer alteração, mapeie as dependências e o impacto arquitetural.
+- **Ciclo de Validação Contínua:** Após cada modificação, execute `npm run lint`, `npm run test` e `npm run build`. O Codex não deve considerar uma tarefa concluída até que todas as validações passem.
+- **Reprodução de Bugs:** Sempre tente reproduzir falhas localmente antes de aplicar correções.
 
-## 4. Validation Workflow
-- Ensure IDE linters are green before committing.
-- Run `npm run test` and `npm run build` locally to detect TS/SSR issues caused by inline suggestions.
-- **Middleware Safety:** Do not remove or simplify moderation checks in `middleware.ts`.
+## 3. Disciplina de Commit e Git
+- **Commits Atômicos:** Realize commits pequenos e focados. Nunca misture refatorações com correções de bugs em um único commit.
+- **Conventional Commits:** Utilize o padrão `type(scope): description` em inglês.
+- **Project Memory:** Mantenha o `CHANGELOG.md` e os arquivos em `docs/current-state/` atualizados com o progresso real.
 
-## 5. Protected Area Warnings
-- If editing `middleware.ts` or `supabase/migrations/`, trigger a manual review. Do not trust auto-completions that simplify security checks or remove role guards (`admin` vs `customer`).
-- **Admin Bypass:** Verify that refactored logic preserves the Admin Master Bypass.
-- **OG System:** When editing `opengraph-image.tsx`, ensure compatibility with Edge runtime (no Node.js standard libraries).
+## 4. Governança e Segurança (Mandatório)
+- **Shared Context:** O Codex CLI deve herdar todas as regras definidas em `docs/ai/shared-context.md`.
+- **Áreas Protegidas:** Alterações em `src/middleware.ts`, migrações de banco de dados e lógica de RLS exigem cuidado redobrado e verificação contra as regras de segurança estabelecidas.
+- **Segurança do DB:** Utilize sempre `npm run` para comandos do Supabase para garantir a execução do `scripts/db-safety.sh`.
+- **Multi-tenant Isolation:** Respeite rigorosamente o isolamento de inquilinos via `owner_id` e políticas RLS.
 
+## 5. Áreas Críticas de Arquitetura
+- **Recursão RLS:** Use a função `is_admin()` para evitar loops infinitos em políticas de segurança.
+- **Anti-Spam & Analytics:** Respeite os gatilhos de banco de dados e a lógica de deduplicação de eventos.
+- **OG Image System:** Respeite as restrições do Edge Runtime em `src/app/opengraph-image.tsx`.
+- **Bypass de Moderação:** Garanta que administradores sempre tenham acesso total, contornando bloqueios de moderação.
 
-> **Reference:** For universal governance rules, refer to `docs/ai/shared-context.md`.
+## 6. Melhores Práticas Operacionais
+- **Evolução Incremental:** Não realize reescritas amplas sem necessidade. Evolua a base de código de forma estável.
+- **Verificação de Regressão:** Após mudanças em Auth ou Middleware, valide o acesso do Admin ao dashboard.
+- **Eficiência de Contexto:** Utilize ferramentas como `grep_search` para localizar pontos de interesse rapidamente.
