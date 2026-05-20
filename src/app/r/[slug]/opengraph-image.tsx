@@ -4,6 +4,7 @@ import { BusinessPageRepository } from '@/core/infrastructure/repositories/supab
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { ReviewLinkRepository } from '@/core/infrastructure/repositories/supabase-review-link-repository'
 import { Business, BusinessPage } from '@/core/domain/entities'
+import { isValidSafeRemoteUrl } from '@/lib/utils'
 
 // Route segment config
 export const runtime = 'edge'
@@ -92,12 +93,14 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
     // Fetch logo as ArrayBuffer for Satori stability
     let logoBuffer: ArrayBuffer | null = null
-    if (data.businesses.logo_url) {
+    const logoUrl = data.businesses.logo_url
+
+    if (logoUrl && isValidSafeRemoteUrl(logoUrl)) {
       try {
         const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 3000)
+        const timeoutId = setTimeout(() => controller.abort(), 2000) // Reduced timeout for safety
         
-        const response = await fetch(data.businesses.logo_url, {
+        const response = await fetch(logoUrl, {
           signal: controller.signal,
         })
         
@@ -121,6 +124,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       } catch (e) {
         console.error('Failed to fetch business logo for OG:', e)
       }
+    } else if (logoUrl) {
+      console.warn(`[OG Image] Blocked potentially unsafe logo URL: ${logoUrl} for ${slug}`)
     }
 
     return new ImageResponse(

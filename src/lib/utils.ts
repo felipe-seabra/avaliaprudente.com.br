@@ -85,6 +85,53 @@ export function isValidSlug(slug: string): boolean {
 }
 
 /**
+ * Validates if a URL is safe for server-side fetching (SSRF protection).
+ * - Only http/https
+ * - No localhost
+ * - No private IP ranges
+ * - No cloud metadata endpoints
+ */
+export function isValidSafeRemoteUrl(url: string): boolean {
+  if (!url) return false
+  
+  try {
+    const parsedUrl = new URL(url)
+    
+    // 1. Only allow http and https
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return false
+    
+    const hostname = parsedUrl.hostname.toLowerCase()
+    
+    // 2. Block localhost and loopback
+    if (
+      hostname === 'localhost' || 
+      hostname === '127.0.0.1' || 
+      hostname === '[::1]' || 
+      hostname === '0.0.0.0'
+    ) return false
+    
+    // 3. Block private IP ranges (RFC 1918)
+    // 10.0.0.0/8
+    if (hostname.startsWith('10.')) return false
+    // 172.16.0.0/12
+    if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)) return false
+    // 192.168.0.0/16
+    if (hostname.startsWith('192.168.')) return false
+    
+    // 4. Block Cloud Metadata endpoints
+    if (hostname === '169.254.169.254') return false
+    
+    // 5. Block simple hostnames without dots (likely internal services)
+    // unless it's a known safe short domain
+    if (!hostname.includes('.')) return false
+    
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
  * Validates if a URL is a legitimate Google Review link.
  */
 export function isValidGoogleReviewUrl(url: string): boolean {
