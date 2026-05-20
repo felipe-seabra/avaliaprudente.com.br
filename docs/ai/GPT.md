@@ -43,4 +43,4 @@ Este documento é a camada de inteligência primária e memória de longo prazo 
 - **Safe Reset:** `npm run supabase:reset` limpa o estado local de forma segura.
 - **Docker Maintenance:** `npm run docker:audit` e `npm run docker:clean` para evitar estouro de disco.
 - **Production Guard:** Nunca rode comandos `supabase db push` ou `reset` sem ler os avisos do Safety Guard.
-- **Gemini CLI Workflow:** Siga as instruções em `GEMINI.md` para execução autônoma e segura.
+- **Gemini CLI Workflow:** Siga as instruções em `docs/ai/GEMINI.md` para execução autônoma e segura.

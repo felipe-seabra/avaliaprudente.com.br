@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - **Operational Documentation Rollback (AGY -> Gemini CLI):**
-  - **Restored Primary Operational Guide:** Reintroduced `GEMINI.md` in the root as the official entrypoint for Gemini CLI workflows.
+  - **Restored Primary Operational Guide:** Reintroduced `docs/ai/GEMINI.md` as the official entrypoint for Gemini CLI workflows.
   - **Cleaned AGY References:** Removed `docs/ai/AGY.md` and replaced Antigravity-specific assumptions in `docs/ai/GPT.md`, `docs/ai/onboarding/flows.md`, and `docs/ai/shared-context.md`.
   - **Preserved Governance & Architecture:** Maintained all architectural hardening, security workflows, and multi-tenant isolation rules introduced during the AGY phase.
   - **Restored Gemini CLI Context:** Reintroduced `update_topic` and sub-agent usage expectations in operational documentation.
