@@ -11,6 +11,7 @@
 - [x] Standardized production domain consistency.
 - [x] Personalized HTML Email templates (Signup, Reset, Magic Link).
 - [x] Centralized Supabase Auth configuration guide.
+- [x] Context-preserving auth callback redirects with internal-only validation.
 
 ## Moderation System
 - [x] Audit Logs (`moderation_actions`).

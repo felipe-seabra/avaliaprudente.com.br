@@ -9,7 +9,7 @@ No dashboard do Supabase, vá em **Authentication -> URL Configuration** e confi
 - **Site URL:** `https://avaliaprudente.com.br`
 - **Redirect URLs:** 
   - `https://avaliaprudente.com.br/auth/callback`
-  - `https://avaliaprudente.com.br/auth/callback?next=*`
+  - `https://avaliaprudente.com.br/auth/callback**`
   - `https://avaliaprudente.com.br/reset-password`
 
 *Nota: Certifique-se de que não haja `http://localhost:3000` nestes campos em produção.*
@@ -21,6 +21,8 @@ O fluxo público de avaliações exige autenticação antes do envio.
 - **Google OAuth:** Deve permanecer habilitado em **Authentication -> Providers -> Google**. Configure o Client ID/Secret do Google Cloud e mantenha o callback do Supabase autorizado no projeto Google.
 - **Magic Link:** Deve permanecer habilitado como fallback de baixo atrito para consumidores que não queiram usar Google.
 - **Redirecionamento contextual:** O frontend envia o usuário para `/auth/callback?next=/r/{slug}?review=1`, preservando o retorno para a página pública após autenticação.
+- **Validação server-side:** O callback aceita apenas redirects internos iniciados por `/`, bloqueia URLs externas e descarta redirects protocol-relative (`//example.com`).
+- **Fallback de link expirado:** Quando o login de review falha ou expira, o callback retorna para `/r/{slug}?review=1&auth_error=1` para manter o contexto e permitir nova tentativa.
 - **LGPD:** O e-mail autenticado não deve ser exibido em reviews. A identidade pública da avaliação é apenas `display_name`.
 
 ## 3. Templates de E-mail Personalizados

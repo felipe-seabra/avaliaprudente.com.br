@@ -17,6 +17,12 @@ All notable changes to this project will be documented in this file.
   - Review API preserves trusted server-side fingerprinting, browser fingerprint metadata, cooldown triggers, and duplicate-content protection.
   - Review API explicitly blocks unauthenticated, moderated, and frozen-business submissions before using the trusted service-role insert.
 
+### Fixed
+- **Review Auth Redirects:**
+  - Preserved the review page `next` context through Google OAuth and Magic Link callbacks.
+  - Hardened `/auth/callback` with server-side internal redirect validation to prevent open redirects.
+  - Expired or invalid review auth links now return to the original review page with `?review=1&auth_error=1` instead of losing context.
+
 ### Operational
 - **Codex-First Migration:**
   - **Primary Agent Transition:** Officially migrated the repository's primary operational runtime from Gemini CLI to Codex CLI.

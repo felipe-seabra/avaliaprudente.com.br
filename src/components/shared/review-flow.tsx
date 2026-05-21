@@ -69,7 +69,9 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
   }, [rating, step])
 
   const getRedirectUrl = () => {
-    const nextPath = `${window.location.pathname}?review=1`
+    const nextUrl = new URL(window.location.href)
+    nextUrl.searchParams.set('review', '1')
+    const nextPath = `${nextUrl.pathname}${nextUrl.search}`
     return `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
   }
   

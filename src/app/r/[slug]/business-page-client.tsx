@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase-analytics-repository'
+import { toast } from 'sonner'
 
 interface BusinessPageClientProps {
   data: {
@@ -45,6 +46,9 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
     const params = new URLSearchParams(window.location.search)
     if (params.get('review') === '1') {
       setIsReviewing(true)
+    }
+    if (params.get('auth_error') === '1') {
+      toast.error('Não foi possível concluir o login. Solicite um novo link e tente novamente.')
     }
 
     // Track visit

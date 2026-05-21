@@ -12,6 +12,7 @@ This directory details how to start and manage sessions across different AI agen
 ### Public Review Auth Context
 - New review submissions require authenticated Supabase sessions through Google OAuth or Magic Link.
 - Preserve the redirect contract `/auth/callback?next=/r/{slug}?review=1` when changing auth or review flows.
+- Validate callback `next` values server-side and allow only internal redirects.
 - Public review identity must remain limited to `display_name`; do not expose e-mail or provider metadata.
 
 ## 2. Starting a Gemini CLI Session (Secondary)
