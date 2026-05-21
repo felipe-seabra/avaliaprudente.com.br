@@ -1,6 +1,8 @@
-# GEMINI.md — Avalia Prudente: Gemini CLI Operational Guide
+# GEMINI.md — Avalia Prudente: Gemini CLI Operational Guide (Secondary)
 
-Este documento é o ponto de entrada oficial para os fluxos de trabalho de execução do Gemini CLI.
+> **AVISO:** O Codex CLI é agora o agente operacional primário deste repositório. Para o fluxo de trabalho oficial e atualizado, consulte **`docs/ai/CODEX.md`**.
+
+Este documento é mantido para compatibilidade e referência histórica dos fluxos de trabalho do Gemini CLI.
 
 > **Regras Universais:** Todas as ações devem aderir estritamente a `docs/ai/shared-context.md`.
 
@@ -41,7 +43,7 @@ Toda tarefa deve seguir rigorosamente este ciclo de vida:
 Antes de considerar uma tarefa como concluída, verifique:
 - [ ] O Admin ainda consegue acessar `/admin/dashboard` (se houve mudança em auth/middleware)?
 - [ ] `npm run lint`, `npm run build` e `npm run test` passam sem erros?
-- [ ] O `CHANGELOG.md` foi atualizado com as mudanças?
+- [ ] O `CHANGELOG.md` foi updated com as mudanças?
 - [ ] Os documentos em `docs/current-state/` refletem o novo estado (funcionalidades, bugs, dívida)?
 - [ ] Se houve mudança arquitetural, `docs/ARCHITECTURE.md` ou ADRs foram atualizados?
 - [ ] Empresas com `is_frozen` continuam inacessíveis via rotas públicas?

@@ -1,6 +1,6 @@
 # AI Agents Role System
 
-This repository utilizes specialized AI modes to ensure code quality, security, and architectural consistency. Depending on your current task, you MUST adopt the appropriate persona and strictly follow its allowed actions and risk focus.
+This repository utilizes specialized AI modes to ensure code quality, security, and architectural consistency. Depending on your current task, you MUST adopt the appropriate persona and strictly follow its allowed actions and risk focus. **The Codex CLI is the primary execution agent for all roles.**
 
 ## 1. Architect
 - **Responsibilities:** System design, structural planning, and defining abstractions.
@@ -14,7 +14,7 @@ This repository utilizes specialized AI modes to ensure code quality, security, 
 - **Responsibilities:** Executing feature logic and building UI based on the Architect's guidelines.
 - **Allowed Actions:** Writing application code, creating React components, building API routes, consuming hooks.
 - **Forbidden Actions:** Modifying RLS policies, rewriting core middleware, altering database schemas without an approved ADR.
-- **Workflow:** Read architecture -> Build minimal feature -> Run lint/build -> Update features list.
+- **Workflow:** Read architecture -> Build minimal feature -> Follow Codex Lifecycle (Lint/Build/Test) -> Update features list.
 - **Validation Requirements:** Must pass `npm run build` and `npm run lint`. Code must be idiomatic. **Verify public visibility restrictions (frozen businesses).**
 - **Risk Focus:** Code duplication, poor accessibility, performance degradation.
 
@@ -22,7 +22,7 @@ This repository utilizes specialized AI modes to ensure code quality, security, 
 - **Responsibilities:** Investigating failures, performance bottlenecks, and regressions.
 - **Allowed Actions:** Reading logs, inspecting error traces, modifying buggy implementations.
 - **Forbidden Actions:** Refactoring unrelated code, adding new features, changing architectural patterns.
-- **Workflow:** Reproduce issue -> Identify Root Cause -> Explain Root Cause -> Implement minimal fix -> Run validation. **Check middleware logs for auth/moderation issues.**
+- **Workflow:** Reproduce issue -> Identify Root Cause -> Explain Root Cause -> Implement minimal fix -> Run Codex validation pipeline. **Check middleware logs for auth/moderation issues.**
 - **Validation Requirements:** Verify the exact bug is fixed without breaking dependent flows. Add tests if applicable. **Ensure Admin bypass is not broken.**
 - **Risk Focus:** Unintended regressions, masking root causes with temporary hacks.
 
@@ -59,6 +59,6 @@ This repository utilizes specialized AI modes to ensure code quality, security, 
 - **Responsibilities:** Reducing technical debt and improving codebase maintainability.
 - **Allowed Actions:** Restructuring files, optimizing imports, abstracting duplicated logic.
 - **Forbidden Actions:** Changing business behavior, introducing new bugs, adding new libraries.
-- **Workflow:** Identify tech debt -> Propose refactor plan -> Execute -> Run full build/lint suite.
+- **Workflow:** Identify tech debt -> Propose refactor plan -> Execute -> Run full build/lint suite via Codex.
 - **Validation Requirements:** 100% behavioral consistency, successful build/lint.
 - **Risk Focus:** Breaking existing flows, accidental regressions.

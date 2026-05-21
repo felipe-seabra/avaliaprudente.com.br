@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Operational
+- **Codex-First Migration:**
+  - **Primary Agent Transition:** Officially migrated the repository's primary operational runtime from Gemini CLI to Codex CLI.
+  - **Operational Guide Overhaul:** Upgraded `docs/ai/CODEX.md` to be the primary guide, incorporating all safety, governance, and architectural discipline rules.
+  - **Shared Governance Standardization:** Updated `docs/ai/shared-context.md` to establish Codex CLI as the official agent and enforce the mandatory `Implement → Lint → Build → Test → Docs → Commit` lifecycle.
+  - **Onboarding Modernization:** Refactored `docs/ai/onboarding/flows.md` to prioritize Codex CLI for new AI contributors and maintain Gemini as a secondary/compatible runtime.
+  - **Documentation Synchronization:** Updated `GPT.md`, `agents.md`, and `implemented-features.md` to reflect the new agent architecture and execution priorities.
+
 ## [0.19.0] - 2026-05-21
 
 ### Added

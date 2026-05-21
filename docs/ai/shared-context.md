@@ -1,19 +1,27 @@
 # Shared AI Context
 
-This file contains the universal governance rules, shared workflows, and operational standards that apply to ALL AI agents (Gemini CLI, Codex, ChatGPT, etc.) working on the Avalia Prudente repository.
+This file contains the universal governance rules, shared workflows, and operational standards that apply to ALL AI agents (Codex CLI, Gemini, ChatGPT, etc.) working on the Avalia Prudente repository. **Codex CLI is the primary operational agent for this repository.**
 
 ## 1. Universal Repository Rules
+- **Primary Agent:** Codex CLI is the official runtime agent. All documentation and workflows are optimized for Codex-native execution.
 - **Language:** Code, variables, and commits MUST be in English. Terminal responses/explanations MUST be in Brazilian Portuguese.
 - **Frameworks:** Next.js 15 (App Router), Supabase, Tailwind CSS 4, shadcn/ui.
 - **Architecture:** Clean Architecture (`Domain` -> `Application` -> `Infrastructure` -> `UI`).
 - **Dependencies:** Do NOT install new dependencies without explicit permission.
 - **Business Logic:** Do NOT modify core business logic or database schemas unless specifically instructed. Use `npm run supabase:migration` for any schema changes.
 
-## 2. Shared Workflows
+## 2. Shared Workflows (Mandatory Lifecycle)
+Every task MUST follow this sequence:
+1. **Implement:** Perform the technical change.
+2. **Lint:** Run `npm run lint`.
+3. **Build:** Run `npm run build`.
+4. **Test:** Run `npm run test`.
+5. **Update Docs:** Evaluate and update `CHANGELOG.md`, `docs/current-state/*`, and other relevant docs.
+6. **Commit:** Commit ONLY after all previous steps pass.
+
 - **Analyze First:** Always read relevant code and documentation before suggesting or making changes.
 - **Explain Current Flow:** Demonstrate understanding of the current implementation before altering it.
 - **Minimal Change Philosophy:** Apply surgical, minimal modifications. Avoid unnecessary refactoring or "cleanups" outside the task scope.
-- **Validation Requirement:** Always run `npm run lint`, `npm run build`, and `npm run test` after any code modification.
 
 ## 3. Architecture Preservation & Regression Prevention
 - Maintain strict multi-tenant isolation (`owner_id` with RLS).

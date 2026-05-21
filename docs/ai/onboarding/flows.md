@@ -1,20 +1,20 @@
 # AI Onboarding Flow
 
-This directory details how to start and manage sessions across different AI agents.
+This directory details how to start and manage sessions across different AI agents. **Codex CLI is the recommended primary agent for this repository.**
 
-## 1. Starting a Gemini CLI Session
-1. Clone the repository and install dependencies (`npm install`).
-2. Ensure you have read `docs/ai/GEMINI.md`.
-3. Gemini CLI will automatically parse the workspace and its context.
-4. If working on a specific feature, direct the agent to read `docs/current-state/implemented-features.md` to avoid duplicating work.
-5. **Validation Expectation:** Gemini CLI must autonomously run lint, build, and commit changes using Conventional Commits.
-
-## 2. Starting a Codex CLI Session
+## 1. Starting a Codex CLI Session (Primary)
 1. Clone the repository and install dependencies (`npm install`).
 2. Ensure you have read `docs/ai/CODEX.md`.
 3. Codex CLI operates as a terminal-native autonomous agent.
 4. Provide the initial task and ensure the agent performs local analysis before execution.
 5. **Validation Expectation:** Codex CLI must autonomously validate all changes (lint/build/test) and follow the commit discipline defined in `CODEX.md`.
+
+## 2. Starting a Gemini CLI Session (Secondary)
+1. Clone the repository and install dependencies (`npm install`).
+2. Ensure you have read `docs/ai/GEMINI.md`.
+3. Gemini CLI will automatically parse the workspace and its context.
+4. If working on a specific feature, direct the agent to read `docs/current-state/implemented-features.md` to avoid duplicating work.
+5. **Validation Expectation:** Gemini CLI must autonomously run lint, build, and commit changes using Conventional Commits.
 
 ## 3. Starting a Codex / GitHub Copilot Session (IDE)
 1. Codex operates directly within the IDE.
