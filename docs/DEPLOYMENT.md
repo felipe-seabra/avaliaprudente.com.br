@@ -51,8 +51,8 @@ npx supabase db push
 
 ### 3. Configuração de Auth (Dashboard)
 No dashboard do Supabase Cloud, vá em **Authentication -> URL Configuration**:
-- **Site URL:** `https://avaliaprudente.com.br`
-- **Redirect URLs:** Adicione `https://avaliaprudente.com.br/auth/callback`
+- **Site URL:** `https://www.avaliaprudente.com.br`
+- **Redirect URLs:** Adicione `https://www.avaliaprudente.com.br/auth/callback`
 
 ## Checklist de Produção
 
@@ -87,7 +87,7 @@ No dashboard do Supabase Cloud, vá em **Authentication -> URL Configuration**:
 
 | Variável | Descrição |
 |----------|-----------|
-| `NEXT_PUBLIC_APP_URL` | URL base do site (ex: https://avaliaprudente.com.br) |
+| `NEXT_PUBLIC_APP_URL` | URL base do site (ex: https://www.avaliaprudente.com.br) |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL da API do Supabase de produção |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave pública anon do Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Chave secreta de serviço (NUNCA expor no cliente) |

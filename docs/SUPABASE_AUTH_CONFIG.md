@@ -6,11 +6,11 @@ Este guia detalha as configurações necessárias no dashboard do Supabase para 
 
 No dashboard do Supabase, vá em **Authentication -> URL Configuration** e configure os seguintes campos:
 
-- **Site URL:** `https://avaliaprudente.com.br`
+- **Site URL:** `https://www.avaliaprudente.com.br`
 - **Redirect URLs:** 
-  - `https://avaliaprudente.com.br/auth/callback`
-  - `https://avaliaprudente.com.br/auth/callback**`
-  - `https://avaliaprudente.com.br/reset-password`
+  - `https://www.avaliaprudente.com.br/auth/callback`
+  - `https://www.avaliaprudente.com.br/auth/callback**`
+  - `https://www.avaliaprudente.com.br/reset-password`
 
 *Nota: Certifique-se de que não haja `http://localhost:3000` nestes campos em produção.*
 
@@ -37,7 +37,7 @@ Para uma experiência profissional e alinhada à marca **Avalia Prudente**, util
 ```html
 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
   <div style="text-align: center; margin-bottom: 30px;">
-    <img src="https://avaliaprudente.com.br/branding/logo-horizontal.webp" alt="Avalia Prudente" style="max-width: 200px;">
+    <img src="https://www.avaliaprudente.com.br/branding/logo-horizontal.webp" alt="Avalia Prudente" style="max-width: 200px;">
   </div>
   <h2 style="color: #0f172a; text-align: center;">Bem-vindo ao Avalia Prudente!</h2>
   <p style="color: #475569; font-size: 16px; line-height: 1.6;">
@@ -65,7 +65,7 @@ Para uma experiência profissional e alinhada à marca **Avalia Prudente**, util
 ```html
 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
   <div style="text-align: center; margin-bottom: 30px;">
-    <img src="https://avaliaprudente.com.br/branding/logo-horizontal.webp" alt="Avalia Prudente" style="max-width: 200px;">
+    <img src="https://www.avaliaprudente.com.br/branding/logo-horizontal.webp" alt="Avalia Prudente" style="max-width: 200px;">
   </div>
   <h2 style="color: #0f172a; text-align: center;">Redefinição de Senha</h2>
   <p style="color: #475569; font-size: 16px; line-height: 1.6;">
@@ -91,7 +91,7 @@ Para uma experiência profissional e alinhada à marca **Avalia Prudente**, util
 ```html
 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
   <div style="text-align: center; margin-bottom: 30px;">
-    <img src="https://avaliaprudente.com.br/branding/logo-horizontal.webp" alt="Avalia Prudente" style="max-width: 200px;">
+    <img src="https://www.avaliaprudente.com.br/branding/logo-horizontal.webp" alt="Avalia Prudente" style="max-width: 200px;">
   </div>
   <h2 style="color: #0f172a; text-align: center;">Login Rápido</h2>
   <p style="color: #475569; font-size: 16px; line-height: 1.6;">
@@ -109,6 +109,6 @@ Para uma experiência profissional e alinhada à marca **Avalia Prudente**, util
 
 ## 4. Variáveis de Ambiente (Vercel)
 
-Certifique-se de que a variável `NEXT_PUBLIC_APP_URL` esteja configurada na Vercel como `https://avaliaprudente.com.br`.
+Certifique-se de que a variável `NEXT_PUBLIC_APP_URL` esteja configurada na Vercel como `https://www.avaliaprudente.com.br`.
 
-Se esta variável não estiver definida, o sistema usará o fallback configurado em `src/lib/constants.ts`, que agora está apontando corretamente para `https://avaliaprudente.com.br`.
+Se esta variável não estiver definida, o sistema usará o fallback configurado em `src/lib/constants.ts`, que agora está apontando corretamente para `https://www.avaliaprudente.com.br`.

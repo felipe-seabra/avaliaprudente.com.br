@@ -1,7 +1,7 @@
 export const APP_CONFIG = {
   name: 'Avalia Prudente',
   description: 'Plataforma NFC Inteligente para Negócios Locais',
-  url: process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? 'https://avaliaprudente.com.br' : 'http://localhost:3000'),
+  url: process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avaliaprudente.com.br' : 'http://localhost:3000'),
   whatsappOrderNumber: '5518998230188', // Centralized WhatsApp number for orders
   currentTermsVersion: '1.2', // Current version of terms of use
 }

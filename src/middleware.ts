@@ -32,6 +32,15 @@ export async function middleware(request: NextRequest) {
     return new NextResponse('Too Many Requests', { status: 429 })
   }
 
+  // Canonical Domain Normalization (non-www -> www)
+  // This prevents session inconsistencies and auth mismatches in production
+  const host = request.headers.get('host')
+  const isProd = process.env.NODE_ENV === 'production'
+  if (isProd && host === 'avaliaprudente.com.br') {
+    const wwwUrl = new URL(request.nextUrl.pathname + request.nextUrl.search, 'https://www.avaliaprudente.com.br')
+    return NextResponse.redirect(wwwUrl, 301)
+  }
+
   const { supabaseResponse, user, role, isBlocked, isDeleted, accountStatus, suspendedUntil, termsVersion } = await updateSession(request)
 
   const isAuthPage =

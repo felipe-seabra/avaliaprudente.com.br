@@ -19,6 +19,9 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - **Auth Flow & Redirect Persistence:**
+  - Standardized the entire application to the canonical `https://www.avaliaprudente.com.br` domain to resolve session inconsistencies and `otp_expired` issues.
+  - Replaced dynamic `window.location.origin` with `APP_CONFIG.url` (canonical www version) for all auth-related redirects (Google OAuth, Magic Link).
+  - Implemented defensive domain normalization in middleware to automatically redirect non-www traffic to the canonical www subdomain in production.
   - Hardened the Magic Link authentication flow to ensure users are correctly returned to the original review page (e.g., `/r/[slug]?review=1`) after login.
   - Improved the auth callback route to robustly handle both `next` and `redirect_to` parameters using native URL APIs.
   - Enhanced `ReviewFlow` with safer absolute URL construction for redirects, preventing context loss across different browsers and providers.

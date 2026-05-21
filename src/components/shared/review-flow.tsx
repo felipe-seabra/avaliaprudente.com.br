@@ -13,6 +13,7 @@ import { CheckCircle2, ChevronLeft, Loader2, Mail, Send, ShieldCheck, Sparkles }
 import { getBrowserFingerprint } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
+import { APP_CONFIG } from '@/lib/constants'
 
 interface ReviewFlowProps {
   businessId: string
@@ -69,8 +70,9 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
   }, [rating, step])
 
   const getRedirectUrl = () => {
-    // Construct the absolute callback URL with the 'next' parameter properly encoded
-    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    // Construct the absolute callback URL using the canonical APP_CONFIG.url
+    // instead of window.location.origin to ensure consistent session handling
+    const callbackUrl = new URL('/auth/callback', APP_CONFIG.url)
     
     // Ensure we preserve the current path and the review=1 state
     const nextUrl = new URL(window.location.href)
