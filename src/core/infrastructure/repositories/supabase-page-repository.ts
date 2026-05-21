@@ -123,6 +123,42 @@ export class BusinessPageRepository {
     if (error) throw error
     return data
   }
+
+  async getSitemapEntries(): Promise<{ slug: string, updated_at: string }[]> {
+    const { data, error } = await this.supabase
+      .from('businesses')
+      .select(`
+        slug,
+        updated_at,
+        business_pages (
+          is_published
+        )
+      `)
+      .eq('is_frozen', false)
+
+    if (error) {
+      console.error('Error fetching sitemap entries:', error)
+      return []
+    }
+
+    type BusinessWithPage = {
+      slug: string
+      updated_at: string
+      business_pages: { is_published: boolean } | { is_published: boolean }[] | null
+    }
+
+    // Filter businesses that either don't have a page entry (published by default)
+    // or have a page entry that is explicitly published.
+    return (data as unknown as BusinessWithPage[] || [])
+      .filter(b => {
+        const page = Array.isArray(b.business_pages) ? b.business_pages[0] : b.business_pages
+        return !page || page.is_published !== false
+      })
+      .map(b => ({
+        slug: b.slug,
+        updated_at: b.updated_at
+      }))
+  }
 }
 
 export class PageLinkRepository {

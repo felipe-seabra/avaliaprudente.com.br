@@ -1,23 +1,14 @@
 import { MetadataRoute } from 'next'
 import { APP_CONFIG } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/server'
+import { BusinessPageRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
+  const pageRepo = new BusinessPageRepository(supabase)
   
-  // Fetch all businesses to include in sitemap
-  let businesses: { slug: string, updated_at: string }[] = []
-  try {
-    const { data, error } = await supabase
-      .from('businesses')
-      .select('slug, updated_at')
-      .eq('is_frozen', false)
-    
-    if (error) throw error
-    businesses = data || []
-  } catch (err) {
-    console.error('Failed to fetch businesses for sitemap:', err)
-  }
+  // Fetch all businesses to include in sitemap using repository
+  const businesses = await pageRepo.getSitemapEntries()
 
   const businessUrls: MetadataRoute.Sitemap = businesses.map((business) => ({
     url: `${APP_CONFIG.url}/r/${business.slug}`,
@@ -56,6 +47,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,
+    },
+    // Showcase demo pages
+    {
+      url: `${APP_CONFIG.url}/r/demo`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      url: `${APP_CONFIG.url}/r/demonstracao`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
     },
     ...businessUrls
   ]

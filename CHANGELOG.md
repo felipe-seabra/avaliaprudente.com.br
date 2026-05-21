@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.18.0] - 2026-05-21
+
+### Added
+- **Native SEO Infrastructure:**
+  - **Dynamic Sitemap:** Implemented `src/app/sitemap.ts` using Next.js 15 metadata routes, automatically indexing homepage, public business pages, and legal pages.
+  - **Robots Configuration:** Created `src/app/robots.ts` to manage crawler behavior, allowing public routes and blocking private areas (/admin, /dashboard, /api, /auth).
+  - **Showcase Indexing:** Added demo routes (`/r/demo`, `/r/demonstracao`) to the sitemap to improve product discoverability.
+  - **Multi-Tenant SEO Safety:** Integrated `BusinessPageRepository.getSitemapEntries` to ensure only non-frozen and published businesses are indexed.
+
+### Changed
+- **Repository Architecture:** Extended `BusinessPageRepository` with `getSitemapEntries` to centralize public visibility logic and follow Clean Architecture patterns.
+
 ## [0.17.0] - 2026-05-20
 
 ### Changed

@@ -52,6 +52,12 @@
 - [x] **Contextual Upgrade CTA:** "Fazer Upgrade" button integrated directly into the `PlanBadge` for Free plans, removing sidebar redundancy.
 - [x] **Subscription Schema Readiness:** `plan_type` support in the `businesses` table.
 
+## SEO & Discovery
+- [x] **Native Next.js 15 Metadata Routes:** Implemented `robots.ts` and `sitemap.ts`.
+- [x] **Dynamic Sitemap Generation:** Automated indexing of public businesses and legal pages.
+- [x] **Visibility Guardrails:** Explicit filtering of frozen, draft, and private businesses from search engines.
+- [x] **Discovery Showcase:** Inclusion of demo routes in the sitemap for better product indexing.
+
 ## Testing & Stability (Phase 4)
 - [x] Automated Testing Infrastructure (Vitest & React Testing Library).
 - [x] Critical E2E and Unit Flow tests (Middleware, Utils, Env Validation).
