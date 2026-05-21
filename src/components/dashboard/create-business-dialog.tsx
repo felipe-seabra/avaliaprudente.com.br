@@ -27,6 +27,7 @@ import { PRICING_PLANS, APP_CONFIG } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/client'
 import { slugify, isValidSlug } from '@/lib/utils'
 import { optimizeImage } from '@/lib/image-utils'
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
 
 const createBusinessSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -109,7 +110,7 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
     return () => clearTimeout(timer)
   }, [watchedSlug, repository])
 
-  const canCreate = userRole === 'admin' || businesses.length < PRICING_PLANS.FREE.maxBusinesses
+  const canCreate = checkIsAdmin(userRole) || businesses.length < PRICING_PLANS.FREE.maxBusinesses
 
   async function uploadLogo(businessId: string, file: File): Promise<string> {
     const { webp, png } = await optimizeImage(file)

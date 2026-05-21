@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { createClient } from '@/lib/supabase/client'
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
 
 interface PlanBadgeProps {
   showIcon?: boolean
@@ -42,7 +43,7 @@ export function PlanBadge({
           .eq('id', user.id)
           .single();
         
-        if (profile?.role === 'admin') {
+        if (checkIsAdmin(profile?.role)) {
           setIsAdmin(true);
         }
       }

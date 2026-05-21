@@ -5,6 +5,7 @@ import { TopNav } from '@/components/dashboard/top-nav'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AdminGuard } from '@/components/admin/admin-guard'
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
 
 export default async function AdminLayout({
   children,
@@ -24,7 +25,7 @@ export default async function AdminLayout({
     .eq('id', user.id)
     .single()
   
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+  const isAdmin = checkIsAdmin(profile?.role)
 
   if (!isAdmin) {
     console.warn(`AdminLayout [Server]: User ${user.id} is not an admin (role: ${profile?.role}). Redirecting to /dashboard`)

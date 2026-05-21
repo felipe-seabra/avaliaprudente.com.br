@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useEffect, useState, useMemo, useCallback } from 'react'
+import { isAdmin as checkIsAdmin, isSuperAdmin as checkIsSuperAdmin } from '@/lib/auth-utils'
 
 export function UserNav() {
   const router = useRouter()
@@ -93,6 +94,9 @@ export function UserNav() {
     .substring(0, 2)
     .toUpperCase() || 'U'
 
+  const isSuperAdmin = checkIsSuperAdmin(role)
+  const isAdmin = checkIsAdmin(role) && !isSuperAdmin
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="group relative flex h-9 w-9 items-center justify-center rounded-full transition-transform active:scale-95 border-none bg-transparent p-0 outline-none cursor-pointer">
@@ -107,11 +111,11 @@ export function UserNav() {
           <div className="flex flex-col space-y-1">
             <div className="flex items-center gap-2">
               <p className="text-sm font-bold leading-none truncate">{displayName}</p>
-              {role === 'super_admin' ? (
+              {isSuperAdmin ? (
                 <span className="bg-purple-600/10 text-purple-600 text-[9px] uppercase font-black px-1.5 py-0.5 rounded leading-none border border-purple-600/20">
                   Super Admin
                 </span>
-              ) : role === 'admin' ? (
+              ) : isAdmin ? (
                 <span className="bg-destructive/10 text-destructive text-[9px] uppercase font-black px-1.5 py-0.5 rounded leading-none border border-destructive/20">
                   Admin
                 </span>

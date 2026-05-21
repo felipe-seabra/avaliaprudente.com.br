@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Business, BusinessPage, PageLink, Review } from '@/core/domain/entities'
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -49,7 +50,7 @@ async function getBusinessData(slug: string): Promise<BusinessData | null> {
       .select('role')
       .eq('id', user.id)
       .single()
-    isAdmin = profile?.role === 'admin'
+    isAdmin = checkIsAdmin(profile?.role)
     
     // Check if user is owner of this business
     isOwner = page.businesses.owner_id === user.id

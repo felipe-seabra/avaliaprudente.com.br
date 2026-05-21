@@ -55,6 +55,7 @@ import { parseError, logError } from '@/lib/error-handler'
 import { BrandIcons } from '@/components/shared/brand-icons'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
 
 export default function PageEditor() {
   const { currentBusiness, refreshBusinesses } = useBusiness()
@@ -64,7 +65,7 @@ export default function PageEditor() {
   const [isSaving, setIsSaving] = useState(false)
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false)
   const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null)
-  const [userRole, setUserRole] = useState<'admin' | 'customer'>('customer')
+  const [userRole, setUserRole] = useState<string>('customer')
   const [isAdminActionLoading, setIsAdminActionLoading] = useState(false)
 
   const pageRepo = useMemo(() => new BusinessPageRepository(), [])
@@ -82,7 +83,7 @@ export default function PageEditor() {
           .select('role')
           .eq('id', user.id)
           .single()
-        if (profile) setUserRole(profile.role as 'admin' | 'customer')
+        if (profile) setUserRole(profile.role)
       }
     }
     getRole()
@@ -301,7 +302,7 @@ export default function PageEditor() {
   const biz = currentBusiness as Business
   const isVerified = !!biz.is_verified
   const verificationStatus = biz.verification_status
-  const isAdmin = userRole === 'admin'
+  const isAdmin = checkIsAdmin(userRole)
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-20">

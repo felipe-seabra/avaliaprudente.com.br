@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
 
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -34,7 +35,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
       
       console.log(`AdminGuard: User role is ${profile?.role || 'none'}`)
 
-      const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+      const isAdmin = checkIsAdmin(profile?.role)
 
       if (isAdmin) {
         if (isMounted) setStatus('authorized')

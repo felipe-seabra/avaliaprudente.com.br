@@ -31,6 +31,7 @@ import { UserNav } from './user-nav'
 import { BusinessSwitcher } from './business-switcher'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
 
 const data = {
   navMain: [
@@ -87,7 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           .eq('id', user.id)
           .single()
         
-        if (profile?.role === 'admin') {
+        if (checkIsAdmin(profile?.role)) {
           setIsAdmin(true)
         }
       }

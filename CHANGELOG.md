@@ -21,6 +21,14 @@ All notable changes to this project will be documented in this file.
 - **Moderation Master Bypass:** Super Admins now inherit and reinforce the master bypass for all moderation restrictions (suspensions, blocks, frozen businesses).
 - **Security Visibility:** Excluded Super Admins from moderation status badges and other user-facing restriction indicators.
 
+### Fixed
+- **Frontend Authorization Normalization:**
+  - Resolved issue where `super_admin` role was not correctly recognized in the dashboard.
+  - Normalized authorization logic across middleware, guards, components, and server-side layouts.
+  - Implemented centralized `isAdmin` and `isSuperAdmin` helpers in `src/lib/auth-utils.ts`.
+  - Corrected `PlanBadge` logic to treat Super Admins as Business Plan operators.
+  - Fixed `AppSidebar` and `PageEditor` to correctly render admin-only controls for Super Admins.
+
 ## [0.18.1] - 2026-05-21
 
 ### Fixed
