@@ -47,7 +47,7 @@ export function ModerationStatusBadge() {
     getProfile()
   }, [supabase])
 
-  if (!status || status.role === 'admin') return null
+  if (!status || status.role === 'admin' || status.role === 'super_admin') return null
 
   const isSuspended = status.accountStatus === 'suspended' || 
     (status.suspendedUntil && new Date(status.suspendedUntil) > new Date())

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck, RotateCcw, Clock, UserX } from 'lucide-react'
+import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck, RotateCcw, Clock, UserX, Crown } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -36,6 +36,7 @@ export default function AdminCustomersPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentAdminId, setCurrentAdminId] = useState<string | null>(null)
+  const [currentAdminRole, setCurrentAdminRole] = useState<string | null>(null)
   
   // Dialogs State
   const [isWarningDialogOpen, setIsWarningDialogOpen] = useState(false)
@@ -48,13 +49,25 @@ export default function AdminCustomersPage() {
 
   const loadCustomers = useCallback(async () => {
     try {
-      const [data, { data: authData }] = await Promise.all([
+      const supabase = createClient()
+      const [data, { data: { user } }] = await Promise.all([
         repo.getAllCustomers(),
-        createClient().auth.getUser()
+        supabase.auth.getUser()
       ])
       
+      let adminRole = null
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        adminRole = profile?.role || null
+      }
+
       setCustomers(data as ModeratedProfile[] || [])
-      setCurrentAdminId(authData.user?.id || null)
+      setCurrentAdminId(user?.id || null)
+      setCurrentAdminRole(adminRole)
     } catch (err) {
       console.error('Admin Customers: Failed to load', err)
       toast.error('Erro ao carregar clientes')
@@ -86,6 +99,11 @@ export default function AdminCustomersPage() {
   }
 
   const handleSetRole = async (id: string, role: 'admin' | 'customer') => {
+    if (currentAdminRole !== 'super_admin') {
+      toast.error('Apenas Super Administradores podem gerenciar permissões.')
+      return
+    }
+    
     if (!confirm(`Deseja alterar a função deste usuário para ${role}?`)) return
     try {
       await repo.setAdminRole(id, role === 'admin')
@@ -125,6 +143,8 @@ export default function AdminCustomersPage() {
       return '-'
     }
   }
+
+  const isSuperAdmin = currentAdminRole === 'super_admin'
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
@@ -217,7 +237,12 @@ export default function AdminCustomersPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1 items-start">
-                          {customer.role === 'admin' ? (
+                          {customer.role === 'super_admin' ? (
+                            <div className="flex items-center gap-1.5 text-purple-600 font-bold text-xs uppercase bg-purple-500/10 px-2 py-1 rounded-full border border-purple-500/20 w-fit">
+                               <Crown className="h-3 w-3" />
+                               Super Admin
+                            </div>
+                          ) : customer.role === 'admin' ? (
                             <div className="flex items-center gap-1.5 text-blue-600 font-bold text-xs uppercase bg-blue-500/10 px-2 py-1 rounded-full border border-blue-500/20 w-fit">
                                <ShieldAlert className="h-3 w-3" />
                                Admin
@@ -339,22 +364,29 @@ export default function AdminCustomersPage() {
                               </DropdownMenuItem>
                             )}
 
-                            <DropdownMenuSeparator />
-                            
-                            {customer.role === 'admin' ? (
-                              <DropdownMenuItem 
-                                className="cursor-pointer text-orange-600" 
-                                onClick={() => handleSetRole(customer.id, 'customer')}
-                                disabled={customer.id === currentAdminId}
-                              >
-                                <User className="h-4 w-4 mr-2" />
-                                Remover Admin
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem className="cursor-pointer text-blue-600" onClick={() => handleSetRole(customer.id, 'admin')}>
-                                <ShieldAlert className="h-4 w-4 mr-2" />
-                                Promover a Admin
-                              </DropdownMenuItem>
+                            {/* Role Management - Restricted to Super Admin */}
+                            {isSuperAdmin && customer.id !== currentAdminId && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Governança</DropdownMenuLabel>
+                                {customer.role === 'admin' ? (
+                                  <DropdownMenuItem 
+                                    className="cursor-pointer text-orange-600" 
+                                    onClick={() => handleSetRole(customer.id, 'customer')}
+                                  >
+                                    <User className="h-4 w-4 mr-2" />
+                                    Remover Admin
+                                  </DropdownMenuItem>
+                                ) : customer.role === 'customer' ? (
+                                  <DropdownMenuItem 
+                                    className="cursor-pointer text-blue-600" 
+                                    onClick={() => handleSetRole(customer.id, 'admin')}
+                                  >
+                                    <ShieldAlert className="h-4 w-4 mr-2" />
+                                    Promover a Admin
+                                  </DropdownMenuItem>
+                                ) : null}
+                              </>
                             )}
                           </DropdownMenuContent>
                         </DropdownMenu>

@@ -34,7 +34,9 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
       
       console.log(`AdminGuard: User role is ${profile?.role || 'none'}`)
 
-      if (profile?.role === 'admin') {
+      const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+
+      if (isAdmin) {
         if (isMounted) setStatus('authorized')
       } else {
         console.log('AdminGuard: Not an admin. Redirecting to /dashboard')

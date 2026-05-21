@@ -678,6 +678,7 @@ export type Database = {
     Functions: {
       is_admin: { Args: { user_id: string }; Returns: boolean }
       is_business_frozen: { Args: { b_id: string }; Returns: boolean }
+      is_super_admin: { Args: { user_id: string }; Returns: boolean }
       is_suspended: { Args: { u_id: string }; Returns: boolean }
     }
     Enums: {

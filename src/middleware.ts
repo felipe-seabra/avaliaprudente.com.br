@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
   const isBlockedPage = request.nextUrl.pathname.startsWith('/blocked')
   const isTermsPage = request.nextUrl.pathname.startsWith('/terms-reaccept')
 
-  const isAdmin = role === 'admin'
+  const isAdmin = role === 'admin' || role === 'super_admin'
   const isSuspended = !isAdmin && accountStatus === 'suspended' && (!suspendedUntil || new Date(suspendedUntil) > new Date())
   const isBanned = !isAdmin && accountStatus === 'banned'
   const isUserDeleted = !isAdmin && isDeleted
