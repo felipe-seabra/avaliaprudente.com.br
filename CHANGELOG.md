@@ -12,6 +12,10 @@ All notable changes to this project will be documented in this file.
   - **Restricted Access Management:** Secured all role-management endpoints and UI components, hiding escalation tools from regular administrators.
   - **UI/UX Governance:** Added "Super Admin" badges, conditional rendering of governance controls in the Customer Directory, and role-aware Sidebar headers.
   - **Auth & Middleware Hardening:** Updated Next.js middleware and server-side layouts to support the new role hierarchy with authoritative database-level checks.
+- **Database Schema Synchronization:**
+  - **Role Enum Formalization:** Created the `user_role` PostgreSQL enum type (`customer`, `admin`, `super_admin`) to support the new hierarchy.
+  - **Profile Constraints Hardening:** Updated the `profiles` table with a robust check constraint for roles, ensuring strict data integrity.
+  - **Type Safety Update:** Regenerated Supabase TypeScript types to include the new enum and governance functions.
 
 ### Changed
 - **Moderation Master Bypass:** Super Admins now inherit and reinforce the master bypass for all moderation restrictions (suspensions, blocks, frozen businesses).
@@ -123,7 +127,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - **Premium Auth UI/UX Refactor:**
   - **Redundant Container Removal:** Eliminated unnecessary nested card wrappers in `AuthLayout` and individual forms, reducing visual clutter and the "double-wrapped" appearance.
-  - **Spacious Layout:** Increased the maximum width of authentication containers from 440px to 440px to provide more "breathing room" for inputs and buttons.
+  - **Spacious Layout:** Increased the maximum width of authentication containers from 400px to 440px to provide more "breathing room" for inputs and buttons.
   - **Premium Card Styling:** Implemented `rounded-3xl`, `shadow-xl`, and `border-muted/50` across all authentication forms (Login, Register, Forgot Password, Reset Password, Terms Re-accept).
   - **Consistent Hierarchy:** Standardized centered headers with improved typography and spacing for a more professional, SaaS-quality feel.
   - **Improved Interactivity:** Refined hover states, active scaling, and transition animations for buttons and navigation links.

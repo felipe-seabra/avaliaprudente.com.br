@@ -3,7 +3,7 @@
 ## Auth & Security
 - [x] Multi-tenant RLS (owner_id).
 - [x] RBAC (admin/customer).
-- [x] **Super Admin Governance:** Privileged role hierarchy for administrative access management.
+- [x] **Super Admin Governance:** Privileged role hierarchy (`user_role` enum) for authoritative administrative access management.
 - [x] Middleware session hardening & central routing.
 - [x] Blocked user detection (suspended, banned, deleted).
 - [x] Infinite recursion RLS protections (`is_admin` security definer).
