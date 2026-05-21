@@ -124,7 +124,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               if (ogResponse.ok) {
                 urlToFetch = ogUrl
               }
-            } catch (e) {
+            } catch {
               // Ignore OG fetch failure, fall back to original (which might still be rejected if WebP)
             }
           }

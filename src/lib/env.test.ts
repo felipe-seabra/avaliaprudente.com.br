@@ -19,7 +19,7 @@ describe('env validation', () => {
   });
 
   it('should throw if required env vars are missing in production', () => {
-    process.env.NODE_ENV = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     delete process.env.NEXT_PHASE;
     delete process.env.NEXT_PUBLIC_APP_URL;
 
