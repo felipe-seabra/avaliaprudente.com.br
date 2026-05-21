@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.18.1] - 2026-05-21
+
+### Fixed
+- **Dashboard UI:** Fixed a PT-BR typo in the metrics subtitle ("Satiscação média" -> "Satisfação média").
+
 ## [0.18.0] - 2026-05-21
 
 ### Added

@@ -201,7 +201,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{isLoading && reviews.length === 0 ? '...' : avgRating}</div>
-            <p className="text-xs text-muted-foreground">Satiscação média</p>
+            <p className="text-xs text-muted-foreground">Satisfação média</p>
           </CardContent>
         </Card>
       </div>
