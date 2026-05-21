@@ -107,11 +107,15 @@ export function UserNav() {
           <div className="flex flex-col space-y-1">
             <div className="flex items-center gap-2">
               <p className="text-sm font-bold leading-none truncate">{displayName}</p>
-              {role === 'admin' && (
+              {role === 'super_admin' ? (
+                <span className="bg-purple-600/10 text-purple-600 text-[9px] uppercase font-black px-1.5 py-0.5 rounded leading-none border border-purple-600/20">
+                  Super Admin
+                </span>
+              ) : role === 'admin' ? (
                 <span className="bg-destructive/10 text-destructive text-[9px] uppercase font-black px-1.5 py-0.5 rounded leading-none border border-destructive/20">
                   Admin
                 </span>
-              )}
+              ) : null}
             </div>
             <p className="text-xs leading-none text-muted-foreground truncate opacity-70">{email}</p>
           </div>

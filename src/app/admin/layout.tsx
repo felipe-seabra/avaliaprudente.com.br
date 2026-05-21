@@ -24,12 +24,14 @@ export default async function AdminLayout({
     .eq('id', user.id)
     .single()
   
-  if (profile?.role !== 'admin') {
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+
+  if (!isAdmin) {
     console.warn(`AdminLayout [Server]: User ${user.id} is not an admin (role: ${profile?.role}). Redirecting to /dashboard`)
     redirect('/dashboard')
   }
 
-  console.log(`AdminLayout [Server]: Access granted for user ${user.id}`)
+  console.log(`AdminLayout [Server]: Access granted for user ${user.id} (Role: ${profile?.role})`)
 
   return (
     <AdminGuard>

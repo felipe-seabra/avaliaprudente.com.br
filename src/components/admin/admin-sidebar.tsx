@@ -26,6 +26,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { UserNav } from '@/components/dashboard/user-nav'
+import { createClient } from '@/lib/supabase/client'
 
 const data = {
   navMain: [
@@ -64,6 +65,25 @@ const data = {
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+  const [role, setRole] = React.useState<string>('admin')
+
+  React.useEffect(() => {
+    async function getRole() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        if (profile?.role) {
+          setRole(profile.role)
+        }
+      }
+    }
+    getRole()
+  }, [])
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -78,7 +98,9 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                 <span className="truncate font-bold">
                   {APP_CONFIG.name}
                 </span>
-                <span className="truncate text-xs opacity-70 uppercase tracking-widest font-bold">Admin</span>
+                <span className="truncate text-xs opacity-70 uppercase tracking-widest font-bold">
+                  {role === 'super_admin' ? 'Super Admin' : 'Admin'}
+                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

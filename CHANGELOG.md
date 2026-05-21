@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.0] - 2026-05-21
+
+### Added
+- **Super Admin Governance Hierarchy:**
+  - **Super Admin Role:** Introduced a privileged `super_admin` role with exclusive authority over platform governance and administrative access management.
+  - **Database Level Security:** Implemented `is_super_admin()` PostgreSQL function and a robust `tr_enforce_role_management` trigger on the `profiles` table, ensuring that only Super Admins can promote/demote users or manage admin roles.
+  - **Admin Hierarchy Support:** Updated `is_admin()` to automatically include Super Admins, maintaining full operational access while adding a new layer of control.
+  - **Restricted Access Management:** Secured all role-management endpoints and UI components, hiding escalation tools from regular administrators.
+  - **UI/UX Governance:** Added "Super Admin" badges, conditional rendering of governance controls in the Customer Directory, and role-aware Sidebar headers.
+  - **Auth & Middleware Hardening:** Updated Next.js middleware and server-side layouts to support the new role hierarchy with authoritative database-level checks.
+- **Database Schema Synchronization:**
+  - **Role Enum Formalization:** Created the `user_role` PostgreSQL enum type (`customer`, `admin`, `super_admin`) to support the new hierarchy.
+  - **Profile Constraints Hardening:** Updated the `profiles` table with a robust check constraint for roles, ensuring strict data integrity.
+  - **Type Safety Update:** Regenerated Supabase TypeScript types to include the new enum and governance functions.
+
+### Changed
+- **Moderation Master Bypass:** Super Admins now inherit and reinforce the master bypass for all moderation restrictions (suspensions, blocks, frozen businesses).
+- **Security Visibility:** Excluded Super Admins from moderation status badges and other user-facing restriction indicators.
+
 ## [0.18.1] - 2026-05-21
 
 ### Fixed

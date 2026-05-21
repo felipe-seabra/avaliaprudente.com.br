@@ -39,6 +39,7 @@ export type Database = {
           business_id: string | null
           created_at: string
           event_type: string
+          fingerprint: string | null
           id: string
           link_id: string | null
           metadata: Json
@@ -50,6 +51,7 @@ export type Database = {
           business_id?: string | null
           created_at?: string
           event_type: string
+          fingerprint?: string | null
           id?: string
           link_id?: string | null
           metadata?: Json
@@ -61,6 +63,7 @@ export type Database = {
           business_id?: string | null
           created_at?: string
           event_type?: string
+          fingerprint?: string | null
           id?: string
           link_id?: string | null
           metadata?: Json
@@ -676,12 +679,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_review_abuse: {
+        Args: {
+          target_business_id: string
+          target_feedback?: string
+          target_fingerprint: string
+        }
+        Returns: boolean
+      }
       is_admin: { Args: { user_id: string }; Returns: boolean }
       is_business_frozen: { Args: { b_id: string }; Returns: boolean }
+      is_slug_available: {
+        Args: { exclude_business_id?: string; slug_to_check: string }
+        Returns: boolean
+      }
+      is_super_admin: { Args: { user_id: string }; Returns: boolean }
       is_suspended: { Args: { u_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "customer" | "admin" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -811,7 +827,9 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["customer", "admin", "super_admin"],
+    },
   },
 } as const
 
