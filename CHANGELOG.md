@@ -18,6 +18,12 @@ All notable changes to this project will be documented in this file.
   - Review API explicitly blocks unauthenticated, moderated, and frozen-business submissions before using the trusted service-role insert.
 
 ### Fixed
+- **Auth Flow & Redirect Persistence:**
+  - Hardened the Magic Link authentication flow to ensure users are correctly returned to the original review page (e.g., `/r/[slug]?review=1`) after login.
+  - Improved the auth callback route to robustly handle both `next` and `redirect_to` parameters using native URL APIs.
+  - Enhanced `ReviewFlow` with safer absolute URL construction for redirects, preventing context loss across different browsers and providers.
+  - Added specialized error handling in the callback to return users to the review page with a clear error marker (`auth_error=1`) instead of a generic error page.
+
 - **Review Auth Redirects:**
   - Preserved the review page `next` context through Google OAuth and Magic Link callbacks.
   - Hardened `/auth/callback` with server-side internal redirect validation to prevent open redirects.

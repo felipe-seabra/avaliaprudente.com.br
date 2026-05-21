@@ -69,10 +69,17 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
   }, [rating, step])
 
   const getRedirectUrl = () => {
+    // Construct the absolute callback URL with the 'next' parameter properly encoded
+    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    
+    // Ensure we preserve the current path and the review=1 state
     const nextUrl = new URL(window.location.href)
     nextUrl.searchParams.set('review', '1')
     const nextPath = `${nextUrl.pathname}${nextUrl.search}`
-    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+    
+    callbackUrl.searchParams.set('next', nextPath)
+    
+    return callbackUrl.toString()
   }
   
   const handleRatingSelect = (val: number) => {
@@ -87,6 +94,10 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
       provider: 'google',
       options: {
         redirectTo: getRedirectUrl(),
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
     })
 
@@ -110,7 +121,7 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
       email: magicEmail.trim(),
       options: {
         emailRedirectTo: getRedirectUrl(),
-        shouldCreateUser: true,
+        shouldCreateUser: true, // Explicitly allow user creation for passwordless login
       },
     })
 

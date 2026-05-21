@@ -58,4 +58,13 @@ describe('auth callback redirects', () => {
 
     expect(response.headers.get('location')).toBe('https://avaliaprudente.com.br/r/kifol-fertilizantes?review=1&auth_error=1')
   })
+
+  it('supports redirect_to as a fallback for next parameter', async () => {
+    mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: null })
+    const { GET } = await import('./route')
+
+    const response = await GET(new Request('https://avaliaprudente.com.br/auth/callback?code=abc&redirect_to=%2Fr%2Fkifol-fertilizantes%3Freview%3D1'))
+
+    expect(response.headers.get('location')).toBe('https://avaliaprudente.com.br/r/kifol-fertilizantes?review=1')
+  })
 })

@@ -20,6 +20,7 @@ O fluxo público de avaliações exige autenticação antes do envio.
 
 - **Google OAuth:** Deve permanecer habilitado em **Authentication -> Providers -> Google**. Configure o Client ID/Secret do Google Cloud e mantenha o callback do Supabase autorizado no projeto Google.
 - **Magic Link:** Deve permanecer habilitado como fallback de baixo atrito para consumidores que não queiram usar Google.
+- **Configuração Crítica (Instant Login):** Para que novos usuários recebam o template de "Magic Link" em vez de "Confirm Signup", é necessário **DESATIVAR** a opção "Confirm Email" (ou "Enable email confirmations") em **Authentication -> Email Templates -> Settings**. Isso permite que o `signInWithOtp` funcione como um login sem senha instantâneo tanto para novos quanto para usuários existentes.
 - **Redirecionamento contextual:** O frontend envia o usuário para `/auth/callback?next=/r/{slug}?review=1`, preservando o retorno para a página pública após autenticação.
 - **Validação server-side:** O callback aceita apenas redirects internos iniciados por `/`, bloqueia URLs externas e descarta redirects protocol-relative (`//example.com`).
 - **Fallback de link expirado:** Quando o login de review falha ou expira, o callback retorna para `/r/{slug}?review=1&auth_error=1` para manter o contexto e permitir nova tentativa.
