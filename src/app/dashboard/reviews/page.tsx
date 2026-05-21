@@ -98,13 +98,8 @@ export default function ReviewsPage() {
                     <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <User size={12} />
-                        {review.customer_name || 'Anônimo'}
+                        {review.display_name || review.customer_name || 'Cliente Verificado'}
                       </div>
-                      {review.customer_email && (
-                        <div className="flex items-center gap-1">
-                          {review.customer_email}
-                        </div>
-                      )}
                       <div className="flex items-center gap-1">
                         <Calendar size={12} />
                         {new Date(review.created_at).toLocaleDateString('pt-BR', {

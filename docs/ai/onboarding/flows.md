@@ -9,6 +9,11 @@ This directory details how to start and manage sessions across different AI agen
 4. Provide the initial task and ensure the agent performs local analysis before execution.
 5. **Validation Expectation:** Codex CLI must autonomously validate all changes (lint/build/test) and follow the commit discipline defined in `CODEX.md`.
 
+### Public Review Auth Context
+- New review submissions require authenticated Supabase sessions through Google OAuth or Magic Link.
+- Preserve the redirect contract `/auth/callback?next=/r/{slug}?review=1` when changing auth or review flows.
+- Public review identity must remain limited to `display_name`; do not expose e-mail or provider metadata.
+
 ## 2. Starting a Gemini CLI Session (Secondary)
 1. Clone the repository and install dependencies (`npm install`).
 2. Ensure you have read `docs/ai/GEMINI.md`.

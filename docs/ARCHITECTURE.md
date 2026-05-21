@@ -64,7 +64,9 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Caching:** `Cache-Control: public, max-age=31536000, immutable`.
 - **Constraint:** Must not use Node.js-only libraries.
 ### Review Abuse Prevention System
-- **Hybrid Strategy:** Combines anonymous fingerprinting with server-side cooldowns.
+- **Hybrid Strategy:** Combines authenticated reviewer identity with anonymous fingerprinting and server-side cooldowns.
+- **Authenticated Submission:** Public review creation requires Supabase Auth through Google OAuth or Magic Link. The API stores `user_id`, `display_name`, and minimal `auth_provider` attribution for new reviews.
+- **Privacy Boundary:** Public review cards render only `display_name`; raw e-mails and provider metadata are never exposed publicly.
 - **Fingerprinting:** SHA-256 hash of stable client attributes (User Agent, timezone, resolution).
 - **Throttling:** Enforced via `tr_enforce_review_abuse_protection` trigger.
 - **Cooldowns:** 60-minute window per business; 10-minute window for identical content.

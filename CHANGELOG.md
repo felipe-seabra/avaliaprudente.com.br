@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Authenticated Reviews with LGPD-Safe Identity:**
+  - Required Supabase-authenticated sessions before review submission.
+  - Added Google OAuth as the primary public review login path and Magic Link as a fallback.
+  - Added nullable `reviews.user_id`, `reviews.display_name`, and `reviews.auth_provider` fields for backward-compatible lawful attribution.
+  - Preloads reviewer display names from provider metadata while requiring a non-empty public name before submission.
+
+### Changed
+- **Review Privacy & Anti-Abuse:**
+  - Public review cards now render only `display_name` for identity.
+  - Review API preserves trusted server-side fingerprinting, browser fingerprint metadata, cooldown triggers, and duplicate-content protection.
+  - Review API explicitly blocks unauthenticated, moderated, and frozen-business submissions before using the trusted service-role insert.
+
 ### Operational
 - **Codex-First Migration:**
   - **Primary Agent Transition:** Officially migrated the repository's primary operational runtime from Gemini CLI to Codex CLI.

@@ -30,6 +30,9 @@ export interface CreateReviewDTO {
   business_id: string
   rating: number
   feedback?: string
+  display_name?: string
+  user_id?: string
+  auth_provider?: string
   customer_name?: string
   customer_email?: string
   source?: string

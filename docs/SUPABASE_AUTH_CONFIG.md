@@ -9,11 +9,21 @@ No dashboard do Supabase, vá em **Authentication -> URL Configuration** e confi
 - **Site URL:** `https://avaliaprudente.com.br`
 - **Redirect URLs:** 
   - `https://avaliaprudente.com.br/auth/callback`
+  - `https://avaliaprudente.com.br/auth/callback?next=*`
   - `https://avaliaprudente.com.br/reset-password`
 
 *Nota: Certifique-se de que não haja `http://localhost:3000` nestes campos em produção.*
 
-## 2. Templates de E-mail Personalizados
+## 2. Provedores de Autenticação para Avaliações
+
+O fluxo público de avaliações exige autenticação antes do envio.
+
+- **Google OAuth:** Deve permanecer habilitado em **Authentication -> Providers -> Google**. Configure o Client ID/Secret do Google Cloud e mantenha o callback do Supabase autorizado no projeto Google.
+- **Magic Link:** Deve permanecer habilitado como fallback de baixo atrito para consumidores que não queiram usar Google.
+- **Redirecionamento contextual:** O frontend envia o usuário para `/auth/callback?next=/r/{slug}?review=1`, preservando o retorno para a página pública após autenticação.
+- **LGPD:** O e-mail autenticado não deve ser exibido em reviews. A identidade pública da avaliação é apenas `display_name`.
+
+## 3. Templates de E-mail Personalizados
 
 Para uma experiência profissional e alinhada à marca **Avalia Prudente**, utilize os templates HTML abaixo em **Authentication -> Email Templates**.
 
@@ -94,7 +104,7 @@ Para uma experiência profissional e alinhada à marca **Avalia Prudente**, util
 </div>
 ```
 
-## 3. Variáveis de Ambiente (Vercel)
+## 4. Variáveis de Ambiente (Vercel)
 
 Certifique-se de que a variável `NEXT_PUBLIC_APP_URL` esteja configurada na Vercel como `https://avaliaprudente.com.br`.
 

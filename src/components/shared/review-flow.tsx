@@ -1,15 +1,18 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { StarRating } from '@/components/shared/star-rating'
+import { BrandIcons } from '@/components/shared/brand-icons'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { CheckCircle2, ChevronLeft, Send, Sparkles } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, Loader2, Mail, Send, ShieldCheck, Sparkles } from 'lucide-react'
 import { getBrowserFingerprint } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 interface ReviewFlowProps {
   businessId: string
@@ -18,17 +21,105 @@ interface ReviewFlowProps {
   onClose?: () => void
 }
 
+function getInitialDisplayName(user: User | null) {
+  const metadata = user?.user_metadata || {}
+  const name = metadata.full_name || metadata.name || metadata.display_name
+
+  return typeof name === 'string' ? name : ''
+}
+
 export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose }: ReviewFlowProps) {
   const [rating, setRating] = useState(0)
-  const [step, setStep] = useState<'rating' | 'details' | 'success'>('rating')
+  const [step, setStep] = useState<'rating' | 'auth' | 'details' | 'success'>('rating')
   const [isSubmitting, setIsLoading] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [isAuthLoading, setIsAuthLoading] = useState(false)
+  const [magicEmail, setMagicEmail] = useState('')
+  const [magicSent, setMagicSent] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
   const [feedback, setFeedback] = useState('')
-  const [customerName, setCustomerName] = useState('')
-  const [customerEmail, setCustomerEmail] = useState('')
+  const [displayName, setDisplayName] = useState('')
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    const loadUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUser(data.user)
+      setDisplayName((current) => current || getInitialDisplayName(data.user))
+      if (data.user && step === 'auth' && rating > 0) {
+        setStep('details')
+      }
+      setIsCheckingAuth(false)
+    }
+
+    loadUser()
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null)
+      setDisplayName((current) => current || getInitialDisplayName(session?.user || null))
+      if (session?.user && step === 'auth' && rating > 0) {
+        setStep('details')
+      }
+    })
+
+    return () => {
+      subscription.subscription.unsubscribe()
+    }
+  }, [rating, step])
+
+  const getRedirectUrl = () => {
+    const nextPath = `${window.location.pathname}?review=1`
+    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+  }
   
   const handleRatingSelect = (val: number) => {
     setRating(val)
-    setStep('details')
+    setStep(user ? 'details' : 'auth')
+  }
+
+  const handleGoogleAuth = async () => {
+    setIsAuthLoading(true)
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: getRedirectUrl(),
+      },
+    })
+
+    if (error) {
+      toast.error('Não foi possível iniciar o login com Google.')
+      setIsAuthLoading(false)
+    }
+  }
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!magicEmail.trim()) {
+      toast.error('Informe seu e-mail para receber o link de acesso.')
+      return
+    }
+
+    setIsAuthLoading(true)
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithOtp({
+      email: magicEmail.trim(),
+      options: {
+        emailRedirectTo: getRedirectUrl(),
+        shouldCreateUser: true,
+      },
+    })
+
+    if (error) {
+      toast.error('Não foi possível enviar o Magic Link.')
+      setIsAuthLoading(false)
+      return
+    }
+
+    setMagicSent(true)
+    setIsAuthLoading(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,6 +127,17 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
     
     if (rating === 0) {
       toast.error('Por favor, selecione uma nota de 1 a 5 estrelas.')
+      return
+    }
+
+    if (!user) {
+      setStep('auth')
+      return
+    }
+
+    const publicName = displayName.trim()
+    if (!publicName) {
+      toast.error('Informe o nome que será exibido junto da sua avaliação.')
       return
     }
 
@@ -53,8 +155,7 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
           business_id: businessId,
           rating,
           feedback: feedback.trim() || undefined,
-          customer_name: customerName.trim() || undefined,
-          customer_email: customerEmail.trim() || undefined,
+          display_name: publicName,
           is_internal: isInternal,
           source: 'nfc-page',
           browser_fingerprint: fingerprint,
@@ -129,6 +230,70 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
             </div>
           )}
 
+          {step === 'auth' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="space-y-3 text-center">
+                <div className="inline-flex items-center justify-center p-3 rounded-full bg-primary/10 text-primary">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold tracking-tight">
+                    Entre para continuar
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Sua avaliação será vinculada à sua conta, mas apenas seu nome público aparecerá.
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-14 rounded-2xl gap-3 text-base font-bold"
+                onClick={handleGoogleAuth}
+                disabled={isAuthLoading || isCheckingAuth}
+              >
+                {isAuthLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <BrandIcons.Google size={20} />}
+                Continuar com Google
+              </Button>
+
+              <form onSubmit={handleMagicLink} className="space-y-3">
+                <Label htmlFor="magic-email" className="text-sm font-bold">
+                  Acesso por Magic Link
+                </Label>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Input
+                    id="magic-email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    className="h-12 rounded-xl bg-muted/20 border-none"
+                    value={magicEmail}
+                    onChange={(e) => setMagicEmail(e.target.value)}
+                    disabled={isAuthLoading || magicSent}
+                  />
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    className="h-12 rounded-xl gap-2 font-bold sm:w-40"
+                    disabled={isAuthLoading || magicSent}
+                  >
+                    <Mail className="h-4 w-4" />
+                    Enviar
+                  </Button>
+                </div>
+                {magicSent && (
+                  <p className="text-xs text-green-600">
+                    Link enviado. Abra seu e-mail neste dispositivo para continuar a avaliação.
+                  </p>
+                )}
+              </form>
+
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Coletamos somente os dados necessários para autenticar sua autoria, prevenir abuso e permitir moderação. Seu e-mail não será exibido publicamente.
+              </p>
+            </div>
+          )}
+
           {step === 'details' && (
             <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
               <div className="flex flex-col items-center space-y-2 mb-4 bg-muted/30 p-4 rounded-2xl">
@@ -171,31 +336,19 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-bold">Seu nome (opcional)</Label>
+                    <Label htmlFor="display-name" className="text-sm font-bold">Nome público</Label>
                     <Input 
-                      id="name" 
+                      id="display-name"
                       placeholder="Ex: João Silva"
                       className="bg-muted/20 border-none h-12 rounded-xl px-4"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      required
                     />
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      Este é o único dado de identidade exibido junto da sua avaliação.
+                    </p>
                   </div>
-                  {rating < 4 && (
-                    <div className="space-y-2 animate-in fade-in duration-500">
-                      <Label htmlFor="email" className="text-sm font-bold">E-mail para retorno (opcional)</Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        placeholder="Ex: joao@exemplo.com"
-                        className="bg-muted/20 border-none h-12 rounded-xl px-4"
-                        value={customerEmail}
-                        onChange={(e) => setCustomerEmail(e.target.value)}
-                      />
-                      <p className="text-[10px] text-muted-foreground leading-tight">
-                        Seu e-mail será usado apenas para respondermos ao seu feedback.
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
 

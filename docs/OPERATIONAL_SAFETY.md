@@ -52,6 +52,7 @@ Before any change to RLS or Repositories:
 The platform implements a hybrid protection system to prevent rating inflation and spam reviews.
 
 ### Review Cooldown Rules
+- **Authenticated Submission:** New review submissions require Supabase Auth through Google OAuth or Magic Link before the trusted server-side API writes to `reviews`.
 - **Per-Business Throttling:** A single device/browser (identified by an anonymous fingerprint) can only review the same business once every **60 minutes**.
 - **Content Deduplication:** Identical review text from the same fingerprint is blocked across any business for **10 minutes**.
 
@@ -68,6 +69,7 @@ To preserve ranking integrity and metric accuracy, the platform deduplicates ana
 - No personal data or raw IPs are stored in the analytics pipeline.
 
 ### Implementation Details
+- **Authenticated Identity:** New reviews store `user_id`, `display_name`, and minimal `auth_provider` metadata for moderation and lawful attribution. Public UI displays only `display_name`.
 - **Anonymous Fingerprinting:** Uses a SHA-256 hash of stable browser characteristics (User Agent, timezone, screen resolution) combined with anonymized network signals. Raw IPs are NOT stored to preserve user privacy.
 - **Server-side Enforcement:** Protection is enforced via database triggers (`tr_enforce_review_abuse_protection`) on the `reviews` table. Frontend-only checks are never the sole protection.
 - **Shared Network Support:** The system is designed to avoid blocking legitimate users on shared Wi-Fi (offices, homes) by combining multiple heuristics instead of a simple IP lock.

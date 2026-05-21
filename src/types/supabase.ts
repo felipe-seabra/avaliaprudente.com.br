@@ -571,40 +571,49 @@ export type Database = {
           browser_fingerprint: string | null
           business_id: string
           created_at: string
+          auth_provider: string | null
           customer_email: string | null
           customer_name: string | null
+          display_name: string | null
           feedback: string | null
           id: string
           is_internal: boolean
           rating: number
           source: string
           submission_fingerprint: string | null
+          user_id: string | null
         }
         Insert: {
+          auth_provider?: string | null
           browser_fingerprint?: string | null
           business_id: string
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
+          display_name?: string | null
           feedback?: string | null
           id?: string
           is_internal?: boolean
           rating: number
           source?: string
           submission_fingerprint?: string | null
+          user_id?: string | null
         }
         Update: {
+          auth_provider?: string | null
           browser_fingerprint?: string | null
           business_id?: string
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
+          display_name?: string | null
           feedback?: string | null
           id?: string
           is_internal?: boolean
           rating?: number
           source?: string
           submission_fingerprint?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -612,6 +621,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -832,4 +848,3 @@ export const Constants = {
     },
   },
 } as const
-

@@ -24,7 +24,12 @@ export class ReviewRepository {
           created_at: new Date().toISOString(),
           is_internal: true,
           source: 'nfc',
-          customer_email: null
+          customer_email: null,
+          display_name: 'Felipe Amorim',
+          user_id: null,
+          auth_provider: null,
+          browser_fingerprint: null,
+          submission_fingerprint: null
         },
         {
           id: 'demo-review-2',
@@ -35,7 +40,12 @@ export class ReviewRepository {
           created_at: new Date(Date.now() - 86400000).toISOString(),
           is_internal: true,
           source: 'qr_code',
-          customer_email: null
+          customer_email: null,
+          display_name: 'Maria Silva',
+          user_id: null,
+          auth_provider: null,
+          browser_fingerprint: null,
+          submission_fingerprint: null
         },
         {
           id: 'demo-review-3',
@@ -46,7 +56,12 @@ export class ReviewRepository {
           created_at: new Date(Date.now() - 172800000).toISOString(),
           is_internal: true,
           source: 'nfc',
-          customer_email: null
+          customer_email: null,
+          display_name: 'João Pedro',
+          user_id: null,
+          auth_provider: null,
+          browser_fingerprint: null,
+          submission_fingerprint: null
         }
       ] as Review[]
     }

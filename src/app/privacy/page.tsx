@@ -17,7 +17,7 @@ export default function PrivacyPage() {
           
           <div className="prose prose-slate dark:prose-invert max-w-none space-y-8 text-muted-foreground leading-relaxed">
             <section className="space-y-4">
-              <p>Última atualização: 16 de maio de 2026</p>
+              <p>Última atualização: 21 de maio de 2026</p>
               <p>
                 A <strong>Avalia Prudente</strong> valoriza a sua privacidade e está comprometida em proteger seus dados pessoais. Esta Política de Privacidade explica como coletamos, usamos, compartilhamos e protegemos as informações coletadas através da nossa plataforma e produtos NFC.
               </p>
@@ -34,8 +34,9 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-bold">2. Dados que Coletamos</h2>
               <div className="space-y-2 text-muted-foreground">
                 <p><strong>Para Clientes (Empresas):</strong> Coletamos nome completo, e-mail, senha (criptografada), informações do negócio (nome, logo, redes sociais) e dados de uso da plataforma.</p>
-                <p><strong>Para Usuários Finais (Consumidores):</strong> Ao interagir com uma tag NFC ou QR Code, podemos coletar (se fornecido opcionalmente no formulário de feedback) nome, e-mail e a avaliação/comentário deixado para a empresa.</p>
-                <p><strong>Dados Técnicos:</strong> Coletamos automaticamente dados de acesso, como endereço IP (para rate limiting), tipo de dispositivo, navegador e logs de interação (cliques em botões e visitas à página).</p>
+                <p><strong>Para Usuários Finais (Consumidores):</strong> Para enviar uma avaliação, exigimos autenticação por Google ou Magic Link. Coletamos o identificador autenticado da conta, o nome público informado para atribuição da avaliação, a nota e o comentário opcional.</p>
+                <p><strong>Dados de E-mail:</strong> Seu e-mail é utilizado apenas para autenticação e segurança da conta. Ele não é exibido publicamente nas avaliações.</p>
+                <p><strong>Dados Técnicos:</strong> Coletamos automaticamente dados de acesso, como endereço IP temporariamente processado para rate limiting, tipo de dispositivo, navegador e logs de interação (cliques em botões e visitas à página).</p>
               </div>
             </section>
 
@@ -43,6 +44,9 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-bold">3. Uso de Analytics e Rastreamento</h2>
               <p className="text-muted-foreground">
                 Utilizamos um sistema de analytics próprio para fornecer às empresas métricas de engajamento. Rastreamos quando um link é clicado ou uma página é visualizada via NFC/QR. Esses dados são utilizados exclusivamente para fins estatísticos e de melhoria da experiência do usuário.
+              </p>
+              <p className="text-muted-foreground">
+                Para prevenir spam e duplicidade em avaliações, usamos fingerprints técnicos derivados de sinais do navegador e da requisição. Esses fingerprints são hashes e não substituem a autenticação nem expõem e-mails ou metadados de login publicamente.
               </p>
             </section>
 

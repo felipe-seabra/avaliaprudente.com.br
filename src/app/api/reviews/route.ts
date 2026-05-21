@@ -1,7 +1,19 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 import crypto from 'crypto'
+import { z } from 'zod'
+
+const ReviewSubmissionSchema = z.object({
+  business_id: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  feedback: z.string().trim().max(2000).optional().nullable(),
+  display_name: z.string().trim().min(1).max(80),
+  is_internal: z.boolean().optional(),
+  source: z.string().trim().max(50).optional(),
+  browser_fingerprint: z.string().trim().max(128).optional().nullable(),
+})
 
 // Use service role for trusted server-side insertion
 const supabaseAdmin = createClient(
@@ -15,9 +27,49 @@ const supabaseAdmin = createClient(
   }
 )
 
+function getAuthProvider(user: { app_metadata?: Record<string, unknown>, identities?: { provider?: string }[] }) {
+  const provider = user.app_metadata?.provider || user.identities?.[0]?.provider
+
+  if (provider === 'google') return 'google'
+  if (provider === 'email') return 'email'
+
+  return 'unknown'
+}
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    const authSupabase = await createServerClient()
+    const {
+      data: { user },
+      error: userError,
+    } = await authSupabase.auth.getUser()
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'Faça login para enviar sua avaliação.' },
+        { status: 401 }
+      )
+    }
+
+    const body = ReviewSubmissionSchema.safeParse(await request.json())
+
+    if (!body.success) {
+      return NextResponse.json(
+        { error: 'Dados de avaliação inválidos.' },
+        { status: 400 }
+      )
+    }
+
+    const {
+      business_id,
+      rating,
+      feedback,
+      display_name,
+      is_internal,
+      source,
+      browser_fingerprint,
+    } = body.data
+
     const headerList = await headers()
     
     // 1. Extract client IP for trusted fingerprinting
@@ -31,26 +83,54 @@ export async function POST(request: Request) {
       .update(`${clientIp}-${userAgent}`)
       .digest('hex')
 
-    const {
-      business_id,
-      rating,
-      feedback,
-      customer_name,
-      customer_email,
-      is_internal,
-      source,
-      browser_fingerprint // Still accepted as metadata/supporting signal
-    } = body
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('role, is_blocked, is_deleted, account_status, suspended_until')
+      .eq('id', user.id)
+      .single()
 
-    // 3. Basic validation
-    if (!business_id || !rating || rating < 1 || rating > 5) {
+    if (profileError || !profile) {
+      console.error('[API Review] Profile lookup failed:', profileError?.message)
       return NextResponse.json(
-        { error: 'Dados de avaliação inválidos.' },
-        { status: 400 }
+        { error: 'Não foi possível validar sua conta para enviar a avaliação.' },
+        { status: 403 }
       )
     }
 
-    // 4. Perform insertion using the trusted fingerprint
+    const isAdmin = profile.role === 'admin' || profile.role === 'super_admin'
+    const isSuspended = profile.account_status === 'suspended' && (!profile.suspended_until || new Date(profile.suspended_until) > new Date())
+    const isBlocked = profile.is_blocked || profile.is_deleted || profile.account_status === 'banned' || isSuspended
+
+    if (!isAdmin && isBlocked) {
+      return NextResponse.json(
+        { error: 'Sua conta não pode enviar avaliações no momento.' },
+        { status: 403 }
+      )
+    }
+
+    const { data: business, error: businessError } = await supabaseAdmin
+      .from('businesses')
+      .select('id, is_frozen')
+      .eq('id', business_id)
+      .single()
+
+    if (businessError || !business) {
+      return NextResponse.json(
+        { error: 'Empresa não encontrada.' },
+        { status: 404 }
+      )
+    }
+
+    if (!isAdmin && business.is_frozen) {
+      return NextResponse.json(
+        { error: 'Esta empresa está temporariamente indisponível para novas avaliações.' },
+        { status: 403 }
+      )
+    }
+
+    const authProvider = getAuthProvider(user)
+
+    // 4. Perform insertion using authenticated identity and trusted fingerprint
     // This will trigger the database-level anti-spam protection (tr_enforce_review_abuse_protection)
     // using the SERVER-GENERATED fingerprint that the client cannot spoof easily.
     const { data, error } = await supabaseAdmin
@@ -59,8 +139,11 @@ export async function POST(request: Request) {
         business_id,
         rating,
         feedback: feedback?.trim() || null,
-        customer_name: customer_name?.trim() || null,
-        customer_email: customer_email?.trim() || null,
+        display_name,
+        user_id: user.id,
+        auth_provider: authProvider,
+        customer_name: null,
+        customer_email: null,
         is_internal: !!is_internal,
         source: source || 'api',
         submission_fingerprint: serverFingerprint, // TRUSTED SIGNAL

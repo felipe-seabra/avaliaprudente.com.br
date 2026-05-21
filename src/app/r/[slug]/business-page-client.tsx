@@ -42,6 +42,11 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
   const displayLinks = links.filter(l => l.type !== 'google_review')
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('review') === '1') {
+      setIsReviewing(true)
+    }
+
     // Track visit
     const trackVisit = async () => {
       try {
@@ -233,9 +238,9 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
                          className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
                          style={{ backgroundColor: `var(--primary)1a`, color: `var(--primary)` }}
                        >
-                         {(review.customer_name || 'U').substring(0, 1).toUpperCase()}
+                         {(review.display_name || 'C').substring(0, 1).toUpperCase()}
                        </div>
-                       <span className="text-xs font-medium">{review.customer_name || 'Cliente Verificado'}</span>
+                       <span className="text-xs font-medium">{review.display_name || 'Cliente Verificado'}</span>
                     </div>
                   </CardContent>
                 </Card>

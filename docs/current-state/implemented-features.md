@@ -38,6 +38,8 @@
 
 ## Public Flow
 - [x] 1-5 Star Rating system.
+- [x] Authenticated review submission with Google OAuth and Magic Link fallback.
+- [x] LGPD-safe public review attribution via `display_name` only.
 - [x] Conditional Google redirection.
 - [x] Private feedback capture.
 - [x] Logo & branding uploads.
