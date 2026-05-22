@@ -14,6 +14,7 @@ import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 type PageWithBusiness = BusinessPage & { businesses: Business }
@@ -22,17 +23,22 @@ interface BusinessData {
   page: PageWithBusiness
   links: PageLink[]
   reviews: Review[]
+  totalReviews: number
+  currentPage: number
   isAdmin: boolean
   isOwner: boolean
   isReviewLink: boolean
   redirectUrl: string | null
 }
 
-async function getBusinessData(slug: string): Promise<BusinessData | null> {
+async function getBusinessData(slug: string, pageNumber: number = 1): Promise<BusinessData | null> {
   const supabase = await createClient()
   const pageRepo = new BusinessPageRepository(supabase)
   const linkRepo = new PageLinkRepository(supabase)
   const reviewRepo = new ReviewRepository(supabase)
+
+  const limit = 5
+  const offset = (pageNumber - 1) * limit
 
   // Resolve Business Page by slug
   const page = await pageRepo.getBySlug(slug) as PageWithBusiness | null
@@ -56,15 +62,17 @@ async function getBusinessData(slug: string): Promise<BusinessData | null> {
     isOwner = page.businesses.owner_id === user.id
   }
 
-  const [links, reviews] = await Promise.all([
+  const [links, reviewsData] = await Promise.all([
     linkRepo.getByPageId(page.id),
-    reviewRepo.getByBusinessId(page.business_id)
+    reviewRepo.getByBusinessId(page.business_id, limit, offset)
   ])
 
   return { 
     page, 
     links, 
-    reviews, 
+    reviews: reviewsData.reviews,
+    totalReviews: reviewsData.total,
+    currentPage: pageNumber,
     isAdmin, 
     isOwner, 
     isReviewLink: false, 
@@ -72,9 +80,11 @@ async function getBusinessData(slug: string): Promise<BusinessData | null> {
   }
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params
-  const data = await getBusinessData(slug)
+  const sParams = await searchParams
+  const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page) : 1
+  const data = await getBusinessData(slug, pageParam)
 
   if (!data || (data.page.businesses.is_frozen && !data.isAdmin)) {
     return {
@@ -122,9 +132,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function BusinessPublicPage({ params }: Props) {
+export default async function BusinessPublicPage({ params, searchParams }: Props) {
   const { slug } = await params
-  const data = await getBusinessData(slug)
+  const sParams = await searchParams
+  const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page) : 1
+  const data = await getBusinessData(slug, pageParam)
 
   if (!data) {
     notFound()

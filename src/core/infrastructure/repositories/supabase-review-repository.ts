@@ -9,12 +9,10 @@ export class ReviewRepository {
     this.supabase = supabase || createBrowserClient()
   }
 
-  async getByBusinessId(businessId: string): Promise<Review[]> {
+  async getByBusinessId(businessId: string, limit: number = 5, offset: number = 0): Promise<{ reviews: Review[], total: number }> {
     // 💡 VIRTUAL DEMO REVIEWS
-    // These reviews are displayed on the "/r/demo" page.
-    // They are linked to the virtual business ID: 00000000-0000-0000-0000-000000000000
     if (businessId === '00000000-0000-0000-0000-000000000000') {
-      return [
+      const demoReviews = [
         {
           id: 'demo-review-1',
           business_id: businessId,
@@ -64,25 +62,52 @@ export class ReviewRepository {
           submission_fingerprint: null
         }
       ] as Review[]
+      return { reviews: demoReviews.slice(offset, offset + limit), total: demoReviews.length }
     }
 
     const { data, error } = await this.supabase
-      .rpc('get_business_reviews_with_stats', { b_id: businessId })
+      .rpc('get_business_reviews_with_stats', { 
+        b_id: businessId,
+        p_limit: limit,
+        p_offset: offset
+      })
 
     if (error) {
       console.error('Error fetching reviews with stats:', error)
-      // Fallback to standard reviews fetch if RPC fails (e.g., during migration)
-      const { data: fallbackData, error: fallbackError } = await this.supabase
+      // Fallback to standard reviews fetch if RPC fails
+      const { data: fallbackData, count, error: fallbackError } = await this.supabase
         .from('reviews')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('business_id', businessId)
         .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1)
       
       if (fallbackError) throw fallbackError
-      return fallbackData || []
+      return { reviews: (fallbackData || []) as Review[], total: count || 0 }
     }
     
-    return data || []
+    const reviews = (data || []) as (Review & { total_count?: number })[]
+    const total = reviews.length > 0 ? Number(reviews[0].total_count) : 0
+
+    return { reviews, total }
+  }
+
+  async getByUserId(userId: string, limit: number = 5, offset: number = 0): Promise<{ reviews: Review[], total: number }> {
+    const { data, count, error } = await this.supabase
+      .from('reviews')
+      .select(`
+        *,
+        businesses (
+          name,
+          slug
+        )
+      `, { count: 'exact' })
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (error) throw error
+    return { reviews: (data || []) as Review[], total: count || 0 }
   }
 
   async create(review: CreateReviewDTO): Promise<Review> {

@@ -15,6 +15,8 @@ import { cn } from '@/lib/utils'
 import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase-analytics-repository'
 import { toast } from 'sonner'
 
+import { Pagination } from '@/components/shared/pagination'
+
 interface BusinessPageClientProps {
   data: {
     page: BusinessPage & { 
@@ -29,16 +31,20 @@ interface BusinessPageClientProps {
     }
     links: PageLink[]
     reviews: Review[]
+    totalReviews: number
+    currentPage: number
     isAdmin?: boolean
   }
 }
 
 export function BusinessPageClient({ data }: BusinessPageClientProps) {
   const [isReviewing, setIsReviewing] = useState(false)
-  const { page, links, reviews } = data
+  const { page, links, reviews, totalReviews, currentPage } = data
 
   const themeConfig = (page.theme_config || {}) as { primary_color?: string }
   const primaryColor = themeConfig.primary_color || '#7c3aed'
+
+  const totalPages = Math.ceil(totalReviews / 5)
 
   const googleReviewLink = links.find(l => l.type === 'google_review')
   const displayLinks = links.filter(l => l.type !== 'google_review')
@@ -215,9 +221,7 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
             </div>
             
             <div className="space-y-4">
-              {reviews
-                .slice(0, 5)
-                .map((review, idx) => (
+              {reviews.map((review, idx) => (
                 <Card key={review.id} className="border-none shadow-sm bg-background/60 backdrop-blur-sm rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: `${idx * 150}ms` }}>
                   <CardContent className="p-5 space-y-3">
                     <div className="flex items-center justify-between">
@@ -273,6 +277,13 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
                 </Card>
               ))}
             </div>
+
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              baseUrl={`/r/${page.businesses.slug}`}
+              className="mt-4"
+            />
           </div>
         )}
 

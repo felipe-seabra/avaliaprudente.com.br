@@ -30,10 +30,10 @@ export default function DashboardPage() {
       setIsLoading(true)
       try {
         const [reviewsData, statsData] = await Promise.all([
-          reviewRepo.getByBusinessId(currentBusiness.id),
+          reviewRepo.getByBusinessId(currentBusiness.id, 100),
           analyticsRepo.getStatsByBusinessId(currentBusiness.id)
         ])
-        setReviews(reviewsData || [])
+        setReviews(reviewsData.reviews || [])
         setStats((statsData as AnalyticsEvent[]) || [])
       } catch (error: unknown) {
         console.error('Failed to load dashboard data:', error)

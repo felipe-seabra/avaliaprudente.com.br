@@ -80,16 +80,18 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     
     // Stats fetch
     let reviews: { rating: number }[] = []
+    let totalReviewsCount = 0
     try {
-        const fetchedReviews = await reviewRepo.getByBusinessId(data.business_id)
-        reviews = fetchedReviews || []
+        const reviewsData = await reviewRepo.getByBusinessId(data.business_id, 100)
+        reviews = reviewsData.reviews || []
+        totalReviewsCount = reviewsData.total
     } catch (e) {
         console.error('Failed to fetch reviews for OG:', e)
     }
 
-    const reviewCount = reviews.length
-    const avgRating = reviewCount > 0 
-      ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviewCount).toFixed(1)
+    const reviewCount = totalReviewsCount
+    const avgRating = reviews.length > 0 
+      ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviews.length).toFixed(1)
       : '5.0'
 
     // Fetch logo as ArrayBuffer for Satori stability

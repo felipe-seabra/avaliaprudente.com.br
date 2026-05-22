@@ -3,13 +3,23 @@ import { createClient } from '@/lib/supabase/server'
 import { ReviewList } from '@/components/account/review-list'
 import { ReputationBadge } from '@/components/shared/reputation-badge'
 import { UserCircle } from 'lucide-react'
+import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 
 export const metadata = {
   title: 'Minha Conta - Avalia Prudente',
   description: 'Gerencie suas avaliações.',
 }
 
-export default async function AccountPage() {
+interface Props {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function AccountPage({ searchParams }: Props) {
+  const sParams = await searchParams
+  const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page) : 1
+  const limit = 5
+  const offset = (pageParam - 1) * limit
+
   const supabase = await createClient()
   const {
     data: { user },
@@ -19,24 +29,11 @@ export default async function AccountPage() {
     redirect('/login')
   }
 
+  const reviewRepo = new ReviewRepository(supabase)
+
   // Fetch user's reviews and reputation
-  const [reviewsResponse, statsResponse, profileResponse] = await Promise.all([
-    supabase
-      .from('reviews')
-      .select(`
-        id,
-        rating,
-        feedback,
-        created_at,
-        updated_at,
-        business_id,
-        businesses (
-          name,
-          slug
-        )
-      `)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false }),
+  const [reviewsData, statsResponse, profileResponse] = await Promise.all([
+    reviewRepo.getByUserId(user.id, limit, offset),
     supabase
       .from('reviewer_stats')
       .select('approved_reviews_count')
@@ -49,14 +46,9 @@ export default async function AccountPage() {
       .single()
   ])
 
-  const reviews = reviewsResponse.data
-  const error = reviewsResponse.error
+  const { reviews, total: totalReviews } = reviewsData
   const reputationCount = statsResponse.data?.approved_reviews_count || 0
   const userRole = profileResponse.data?.role
-
-  if (error) {
-    console.error('Error fetching reviews:', error)
-  }
 
   return (
     <div className="container mx-auto max-w-4xl py-12 px-4 md:px-8">
@@ -73,8 +65,11 @@ export default async function AccountPage() {
       </div>
 
       <div className="bg-card rounded-2xl border border-border/40 shadow-sm p-6 md:p-8">
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <ReviewList initialReviews={(reviews as any) || []} />
+        <ReviewList 
+          initialReviews={reviews || []} 
+          totalReviews={totalReviews}
+          currentPage={pageParam}
+        />
       </div>
     </div>
   )

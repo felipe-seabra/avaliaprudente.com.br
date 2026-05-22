@@ -11,21 +11,29 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ReviewResponseDialog } from '@/components/dashboard/review-response-dialog'
+import { Pagination } from '@/components/shared/pagination'
 
 export default function ReviewsPage() {
   const { currentBusiness } = useBusiness()
   const [reviews, setReviews] = useState<Review[]>([])
+  const [totalReviews, setTotalReviews] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedReview, setSelectedReview] = useState<Review | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const repository = useMemo(() => new ReviewRepository(), [])
 
-  const fetchReviews = useCallback(async () => {
+  const limit = 5
+
+  const fetchReviews = useCallback(async (page: number = 1) => {
     if (!currentBusiness) return
     setIsLoading(true)
     try {
-      const data = await repository.getByBusinessId(currentBusiness.id)
+      const offset = (page - 1) * limit
+      const { reviews: data, total } = await repository.getByBusinessId(currentBusiness.id, limit, offset)
       setReviews(data)
+      setTotalReviews(total)
+      setCurrentPage(page)
     } catch {
       toast.error('Erro ao carregar avaliações')
     } finally {
@@ -34,13 +42,20 @@ export default function ReviewsPage() {
   }, [currentBusiness, repository])
 
   useEffect(() => {
-    fetchReviews()
+    fetchReviews(1)
   }, [fetchReviews])
+
+  const handlePageChange = (page: number) => {
+    fetchReviews(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const handleRespond = (review: Review) => {
     setSelectedReview(review)
     setIsDialogOpen(true)
   }
+
+  const totalPages = Math.ceil(totalReviews / limit)
 
   if (!currentBusiness) {
     return (
@@ -167,6 +182,14 @@ export default function ReviewsPage() {
         )}
       </div>
 
+      {!isLoading && reviews.length > 0 && (
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
+
       <ReviewResponseDialog 
         isOpen={isDialogOpen}
         onClose={() => {
@@ -174,7 +197,7 @@ export default function ReviewsPage() {
           setSelectedReview(null)
         }}
         review={selectedReview}
-        onSuccess={fetchReviews}
+        onSuccess={() => fetchReviews(currentPage)}
       />
     </div>
   )

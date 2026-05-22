@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Store, Trash2, Edit2, Check, X } from 'lucide-react'
 import Link from 'next/link'
 
+import { Pagination } from '@/components/shared/pagination'
+
 type Review = {
   id: string
   rating: number
@@ -21,12 +23,20 @@ type Review = {
   } | null
 }
 
-export function ReviewList({ initialReviews }: { initialReviews: Review[] }) {
+interface ReviewListProps {
+  initialReviews: Review[]
+  totalReviews: number
+  currentPage: number
+}
+
+export function ReviewList({ initialReviews, totalReviews, currentPage }: ReviewListProps) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editRating, setEditRating] = useState<number>(0)
   const [editFeedback, setEditFeedback] = useState<string>('')
   const [isSaving, setIsSaving] = useState(false)
+
+  const totalPages = Math.ceil(totalReviews / 5)
 
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta avaliação?')) return
@@ -187,6 +197,13 @@ export function ReviewList({ initialReviews }: { initialReviews: Review[] }) {
           </div>
         )
       })}
+
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        baseUrl="/account"
+        className="pt-8 border-t border-border/40"
+      />
     </div>
   )
 }
