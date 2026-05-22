@@ -32,14 +32,27 @@ Every task executed by ANY agent MUST follow this sequence:
 - **Public Visibility:** Filter out `is_frozen = true` items in public lookups.
 - **Review Ownership & Anti-Spam:** Reviews are identity-owned (UNIQUE `user_id` and `business_id`). The API enforces UPSERT behavior. Respect the per-business cooldowns implemented via database triggers. Ensure fingerprints are generated on the client-side for all new reviews.
 
-## 4. Protected Areas
+## 4. Machine-Specific State & Repository Hygiene
+To maintain a clean repository, AI agents must ensure that local session artifacts are NEVER committed.
+- **Tracked AI Files (Shareable):**
+  - Project guides: `docs/ai/*.md` (e.g., `AIDER.md`, `CODEX.md`).
+  - Architecture docs: `docs/ARCHITECTURE.md`, `docs/adr/*.md`.
+  - Current state: `docs/current-state/*.md`.
+  - Operational logic: `docs/ai/rules/*.md`, `docs/ai/workflows/*.md`.
+- **Ignored AI Files (Local-Only):**
+  - Chat/input histories: `.aider.chat.history.md`, `.aider.input.history`, `.cursor/history`.
+  - Cache/indexes: `.aider.tags.cache.v4/`, `.cursor/cache`, `.claude/`.
+  - Temporary artifacts: `.codex/tmp`, `.gemini/tmp`.
+- **Action:** Always verify `git status` before committing to ensure no machine-specific artifacts are leaking into the history.
+
+## 5. Protected Areas
 Any modification to the following areas requires extreme caution and a mandatory security review:
 - `src/middleware.ts` & `src/lib/supabase/*` (Authentication, Sessions, Account Status).
 - `supabase/migrations/*.sql` (RLS & Database Schema).
 - `src/providers/root-provider.tsx` & `src/providers/business-provider.tsx` (Global Contexts).
 - LGPD / Privacy logic (Terms of Use, Cookie consent, data handling, display name usage).
 
-## 5. Synchronization & Documentation Updates (Mandatory)
+## 6. Synchronization & Documentation Updates (Mandatory)
 ALL AI agents MUST keep the documentation up-to-date. Every implementation or change must evaluate if updates are required for:
 - **`CHANGELOG.md`:** Update upon completing any feature, fix, or architectural change.
 - **`docs/current-state/*`:** Keep features, tech debt, and known bugs updated to reflect the reality after the change.
@@ -50,7 +63,7 @@ ALL AI agents MUST keep the documentation up-to-date. Every implementation or ch
 
 **Goal:** The repository must be self-documenting. Never finish implementation without evaluating documentation impact.
 
-## 6. Commit Standards
+## 7. Commit Standards
 - Use Conventional Commits (`type(scope): description`) in English.
 - Provide atomic commits. Never create generic or broken commits.
 - Commit messages should be short and assertive.
