@@ -10,7 +10,7 @@ SaaS platform for Google review acquisition via NFC/QR Codes. Multi-tenant (RLS-
 - **Isolation:** Strict RLS via `owner_id`. Admin roles for moderation.
 
 ## Critical Business Rules
-- **Intelligent Redirect:** Rating >= 4 -> Google; < 4 -> Internal Feedback.
+- **Intelligent Google Flow:** Rating >= 4 -> Optional Google CTA (New Tab); < 4 -> Internal Feedback.
 - **Authenticated Reviews:** New review submissions require Supabase Auth through Google OAuth or Magic Link, with public attribution limited to `display_name`.
 - **Anti-Abuse Preservation:** Authenticated reviews still use trusted server-side fingerprints and database cooldown triggers.
 - **Bayesian Ranking:** Weighted score based on volume, average rating, and verification status.

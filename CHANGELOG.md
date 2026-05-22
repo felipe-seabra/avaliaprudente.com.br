@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
+### Improved
+- **Google Review Redirection UX:** 
+  - **Retention-First Flow:** Replaced the automatic redirect for positive reviews (4-5 stars) with a lightweight, optional CTA to preserve platform continuity.
+  - **New Tab Navigation:** Google Reviews now open in a new tab, preventing users from losing their session on Avalia Prudente.
+  - **Premium UI Experience:** Implemented an elegant success state with a clear "Avaliar no Google" button and a subtle "Agora não" option.
+  - **Engagement-Centric Design:** Improved reviewer retention by making the transition to external platforms feel like a premium, user-controlled action rather than a forced redirect.
+
 ### Added
 - **Reviewer Account Settings:**
   - **Identity Management:** Authenticated reviewers can now update their public display name, with changes automatically propagating to all their historical reviews.

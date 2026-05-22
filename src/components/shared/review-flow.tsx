@@ -183,13 +183,6 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
       }
 
       setStep('success')
-
-      // If positive rating, redirect after showing success
-      if (!isInternal) {
-        setTimeout(() => {
-          window.location.href = googleReviewUrl
-        }, 2500)
-      }
     } catch (err: unknown) {
       console.error('Review submission error:', err)
       
@@ -414,23 +407,53 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
           )}
 
           {step === 'success' && (
-            <div className="flex flex-col items-center py-12 text-center space-y-6 animate-in zoom-in-95 duration-500">
-              <div className="h-24 w-24 rounded-full bg-green-500/10 flex items-center justify-center mb-2 shadow-inner border border-green-500/20">
-                <CheckCircle2 className="h-12 w-12 text-green-500" />
+            <div className="flex flex-col items-center py-8 text-center space-y-6 animate-in zoom-in-95 duration-500">
+              <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center mb-2 shadow-inner border border-green-500/20">
+                <CheckCircle2 className="h-10 w-10 text-green-500" />
               </div>
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">Sucesso!</h2>
-                <p className="text-muted-foreground max-w-[300px] mx-auto leading-relaxed">
+              
+              <div className="space-y-3">
+                <h2 className="text-2xl font-bold tracking-tight">
+                  {rating >= 4 ? 'Obrigado pela sua avaliação 😄' : 'Sucesso!'}
+                </h2>
+                <p className="text-muted-foreground max-w-[320px] mx-auto leading-relaxed text-sm">
                   {rating >= 4 
-                    ? 'Recebemos sua nota! Agora estamos te levando para o Google para finalizar sua recomendação pública.' 
+                    ? 'Sua opinião ajuda outras pessoas a tomarem melhores decisões. Você também gostaria de compartilhar sua experiência no Google?' 
                     : 'Agradecemos sua sinceridade! Seu feedback foi enviado diretamente à gerência para análise imediata.'}
                 </p>
               </div>
-              {rating < 4 && (
-                <Button variant="outline" className="mt-4 h-12 px-8 rounded-xl cursor-pointer hover:bg-muted" onClick={onClose}>
-                  Voltar para o início
-                </Button>
-              )}
+
+              <div className="flex flex-col gap-3 w-full pt-2">
+                {rating >= 4 ? (
+                  <>
+                    <Button 
+                      className="h-14 rounded-2xl gap-3 text-base font-bold shadow-lg shadow-primary/20 cursor-pointer"
+                      onClick={() => {
+                        window.open(googleReviewUrl, "_blank", "noopener,noreferrer")
+                        if (onClose) onClose()
+                      }}
+                    >
+                      <BrandIcons.Google size={20} />
+                      Avaliar no Google
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="h-12 rounded-xl opacity-70 hover:opacity-100 cursor-pointer font-medium" 
+                      onClick={onClose}
+                    >
+                      Agora não
+                    </Button>
+                  </>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="h-12 rounded-xl cursor-pointer hover:bg-muted font-bold" 
+                    onClick={onClose}
+                  >
+                    Voltar para o início
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </CardContent>

@@ -54,7 +54,7 @@
 - [x] LGPD-safe public review attribution via `display_name` only.
 - [x] **Reviewer Reputation & Badges:** Multi-tier dynamic reputation system (Recurrent, Active, Specialist, Elite, Reference) based on verified review counts.
 - [x] **Admin Reputation Badge:** Automatic "Equipe Avalia Prudente" trusted badge for platform administrators.
-- [x] Conditional Google redirection.
+- [x] **Premium Google Review Flow:** Non-invasive, optional CTA in a new tab for positive reviews to maximize retention (Improved from automatic redirect).
 - [x] Private feedback capture.
 - [x] Logo & branding uploads.
 
