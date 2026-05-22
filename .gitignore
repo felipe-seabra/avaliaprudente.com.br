@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI tooling
+.aider*
+.cursor*
+.claude*
+.codex/tmp
+.gemini/tmp
+.aider.tags.cache.v4/

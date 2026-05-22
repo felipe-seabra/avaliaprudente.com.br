@@ -46,6 +46,7 @@ All notable changes to this project will be documented in this file.
   - **Standardized Discipline:** Updated `docs/ai/shared-context.md` to establish a unified commit, validation, and documentation discipline for all agents.
   - **Onboarding Updates:** Refactored `docs/ai/onboarding/flows.md` and `docs/ai/agents.md` to map Aider to the Architect, Refactor, and Security-Reviewer roles, and provide clear startup instructions.
   - **Deprecated Gemini CLI (Execution):** Further downgraded Gemini CLI to a secondary research and documentation role, updating `docs/ai/GEMINI.md`.
+  - **Repository Hygiene & Artifact Isolation:** Hardened `.gitignore` to professionally exclude local AI artifacts (`.aider*`, `.cursor*`, `.claude*`, etc.) while preserving shareable project-level AI context. Updated `shared-context.md` with explicit machine-specific state isolation rules.
 
 - **Codex-First Migration:**
   - **Primary Agent Transition:** Officially migrated the repository's primary operational runtime from Gemini CLI to Codex CLI.
