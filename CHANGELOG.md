@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- **Controlled Role Management:** Implemented a secure role management system allowing authorized administrators to manage user roles (`reviewer`, `customer`, `admin`, `super_admin`).
+- **Reviewer Reputation & Badge System:**
+  - **Dynamic Progression:** Introduced a multi-tier reputation system based on approved review counts (Recurrent, Active, Specialist, Elite, Reference).
+  - **Admin Reputation Override:** Dedicated "Equipe Avalia Prudente" badge for administrators and super admins to ensure highest-tier trust.
+  - **Reputation Stats View:** Implemented a performant database view `reviewer_stats` to track approved reviews while respecting moderation/frozen rules.
+  - **Optimized Data Fetching:** Created a specialized RPC function `get_business_reviews_with_stats` to fetch reviews with reviewer stats in a single network call.
+  - **Premium UI Components:** Created an elegant, rounded `ReputationBadge` component with subtle gradients, tiny icons, and interactive tooltips.
+  - **Dashboard Integration:** Added reputation visualization to the Public Business Page, Reviewer Account page, and Business Owner Dashboard.
+  - **Reputation Service:** Centralized badge logic in `src/lib/reputation.ts` for consistent labeling, coloring, and role-aware overrides.
+
+### Added
+- **Controlled Role Management:** 
+ Implemented a secure role management system allowing authorized administrators to manage user roles (`reviewer`, `customer`, `admin`, `super_admin`).
 - **Governance Hierarchy:** Enforced strict role transition rules at both API and database levels (e.g., admins can only manage reviewer/customer roles; super_admins have full authority).
 - **Role Audit System:** Created `role_change_logs` table and triggers to automatically audit all role transitions across the platform.
 - **Role Management UI:** Added a secure governance dialog in the Admin Users directory for streamlined role updates with built-in validation.

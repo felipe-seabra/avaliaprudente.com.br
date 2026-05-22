@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useBusiness } from '@/providers/business-provider'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { Review } from '@/core/domain/entities'
+import { ReputationBadge } from '@/components/shared/reputation-badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Star, MessageSquare, Calendar, User } from 'lucide-react'
 import { toast } from 'sonner'
@@ -95,11 +96,17 @@ export default function ReviewsPage() {
                       </p>
                     )}
 
-                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground items-center">
                       <div className="flex items-center gap-1">
                         <User size={12} />
                         {review.display_name || review.customer_name || 'Cliente Verificado'}
                       </div>
+
+                      <ReputationBadge 
+                        count={Number(review.author_review_count || 0)} 
+                        role={review.author_role} 
+                      />
+
                       <div className="flex items-center gap-1">
                         <Calendar size={12} />
                         {new Date(review.created_at).toLocaleDateString('pt-BR', {

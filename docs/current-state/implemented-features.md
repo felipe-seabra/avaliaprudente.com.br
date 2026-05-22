@@ -52,6 +52,8 @@
 - [x] 1-5 Star Rating system.
 - [x] Authenticated review submission with Google OAuth and Magic Link fallback.
 - [x] LGPD-safe public review attribution via `display_name` only.
+- [x] **Reviewer Reputation & Badges:** Multi-tier dynamic reputation system (Recurrent, Active, Specialist, Elite, Reference) based on verified review counts.
+- [x] **Admin Reputation Badge:** Automatic "Equipe Avalia Prudente" trusted badge for platform administrators.
 - [x] Conditional Google redirection.
 - [x] Private feedback capture.
 - [x] Logo & branding uploads.
