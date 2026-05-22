@@ -1,8 +1,8 @@
 # GEMINI.md — Avalia Prudente: Gemini CLI Operational Guide (Secondary)
 
-> **AVISO:** O Codex CLI é agora o agente operacional primário deste repositório. Para o fluxo de trabalho oficial e atualizado, consulte **`docs/ai/CODEX.md`**.
+> **AVISO:** O Codex CLI e o Aider são agora os agentes operacionais primários deste repositório. Para o fluxo de trabalho oficial e atualizado, consulte **`docs/ai/AI_WORKFLOWS.md`**, **`docs/ai/CODEX.md`** e **`docs/ai/AIDER.md`**.
 
-Este documento é mantido para compatibilidade e referência histórica dos fluxos de trabalho do Gemini CLI.
+Este documento é mantido para compatibilidade e referência histórica dos fluxos de trabalho do Gemini CLI, que agora atua primariamente como ferramenta de pesquisa e documentação.
 
 > **Regras Universais:** Todas as ações devem aderir estritamente a `docs/ai/shared-context.md`.
 
@@ -11,7 +11,7 @@ Toda tarefa deve seguir rigorosamente este ciclo de vida:
 1. **Implement:** Realizar a alteração técnica.
 2. **Lint:** Executar `npm run lint`.
 3. **Build:** Executar `npm run build`.
-4. **Test:** Executar `npm run test`.
+4. **Test:** Executar `npm run test -- --run`.
 5. **Update Docs:** Avaliar e atualizar `CHANGELOG.md`, `docs/current-state/*` e outros documentos relevantes (ver Seção 5 de `shared-context.md`).
 6. **Commit:** Realizar o commit apenas após todos os passos acima passarem.
 
@@ -33,7 +33,7 @@ Toda tarefa deve seguir rigorosamente este ciclo de vida:
 ## 4. Áreas Protegidas e Restrições Arquiteturais
 - **Modificadores de Banco de Dados:** Não execute scripts bash arbitrários que modifiquem esquemas de banco de dados sem verificar `docs/ai/rules/database-rules.md`. Use `npm run supabase:migration`.
 - **Guarda de Segurança do DB:** SEMPRE use os comandos prefixados com `npm run` para Supabase (ex: `npm run supabase:reset`) para disparar o script de proteção (`scripts/db-safety.sh`).
-- **Recursão RLS:** NUNCA escreva políticas RLS que consultem `profiles` diretamente. SEMPRE use a função security definer `is_admin()` para evitar loops infinitos (Erro 500).
+- **Recursão RLS:** NUNCA escreva políticas RLS que consultem `profiles` diretamente. SEMPRE use a função security definer `is_admin()` ou `is_super_admin()` para evitar loops infinitos (Erro 500).
 - **Bypass de Moderação:** Admins (`role = 'admin'`) DEVEM ignorar todos os bloqueios de moderação. Esta lógica está centralizada em `src/middleware.ts` e na camada de banco de dados.
 - **Visibilidade Pública:** SEMPRE filtre itens com `is_frozen = true` em consultas públicas e políticas RLS públicas.
 - **Integridade de Slugs:** Qualquer atualização de slug deve ser validada via `is_slug_available` e verificar rotas reservadas do sistema. Slugs devem ser normalizados para minúsculas.
@@ -43,7 +43,7 @@ Toda tarefa deve seguir rigorosamente este ciclo de vida:
 Antes de considerar uma tarefa como concluída, verifique:
 - [ ] O Admin ainda consegue acessar `/admin/dashboard` (se houve mudança em auth/middleware)?
 - [ ] `npm run lint`, `npm run build` e `npm run test` passam sem erros?
-- [ ] O `CHANGELOG.md` foi updated com as mudanças?
+- [ ] O `CHANGELOG.md` foi atualizado com as mudanças?
 - [ ] Os documentos em `docs/current-state/` refletem o novo estado (funcionalidades, bugs, dívida)?
 - [ ] Se houve mudança arquitetural, `docs/ARCHITECTURE.md` ou ADRs foram atualizados?
 - [ ] Empresas com `is_frozen` continuam inacessíveis via rotas públicas?
