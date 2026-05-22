@@ -214,6 +214,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- E. Review Feed & Stats (Hardening)
+DROP FUNCTION IF EXISTS public.get_business_reviews_with_stats(uuid, integer, integer);
 CREATE OR REPLACE FUNCTION public.get_business_reviews_with_stats(
     b_id uuid,
     p_limit integer DEFAULT 5,
@@ -271,6 +272,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
+DROP FUNCTION IF EXISTS public.get_business_reviews_with_stats(uuid);
 CREATE OR REPLACE FUNCTION public.get_business_reviews_with_stats(b_id uuid)
 RETURNS TABLE (
     id uuid,
