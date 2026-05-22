@@ -58,9 +58,24 @@ export async function POST() {
     .eq('id', user.id)
 
   if (updateError) {
-    console.error('Upgrade API: Failed to update role', updateError)
+    console.error('Upgrade API: Failed to update role. User ID:', user.id, 'Error:', updateError)
+    
+    // Check for specific trigger exceptions
+    if (updateError.message?.includes('Not authorized') || updateError.message?.includes('Permissão negada')) {
+      return NextResponse.json(
+        { 
+          error: 'Transição de papel negada pela governança de segurança.',
+          details: updateError.message 
+        },
+        { status: 403 }
+      )
+    }
+
     return NextResponse.json(
-      { error: 'Erro ao atualizar perfil' },
+      { 
+        error: 'Erro ao atualizar perfil empresarial',
+        details: process.env.NODE_ENV === 'development' ? updateError.message : undefined
+      },
       { status: 500 }
     )
   }
