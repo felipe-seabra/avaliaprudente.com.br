@@ -41,18 +41,32 @@ export async function PATCH(
       .eq('id', id)
 
     if (updateError) {
+      // Log full error for server-side debugging
+      console.error('[Role Management Update Error]:', {
+        code: updateError.code,
+        message: updateError.message,
+        details: updateError.details,
+        hint: updateError.hint,
+        target_user: id,
+        actor: user.id
+      })
+
       // Check if it's a trigger exception (Governance violation)
       // code 'P0001' is for RAISE EXCEPTION in PostgreSQL
       const isGovernanceError = updateError.code === 'P0001'
       
       return NextResponse.json({ 
-        error: isGovernanceError ? updateError.message : 'Erro ao atualizar função' 
+        error: isGovernanceError ? updateError.message : 'Erro ao atualizar função',
+        code: updateError.code
       }, { status: isGovernanceError ? 403 : 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[Role Management API Error]:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Erro interno do servidor',
+      message: error instanceof Error ? error.message : 'Erro desconhecido'
+    }, { status: 500 })
   }
 }
