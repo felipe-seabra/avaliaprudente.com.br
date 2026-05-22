@@ -3,15 +3,16 @@
 -- It also safely migrates existing customers without businesses to the reviewer role.
 
 -- 1. Update the user_role enum type
--- Note: We cannot easily update Enums in PostgreSQL within a transaction if they are used by tables.
--- However, we can update the check constraint on the profiles table.
+-- Note: ALTER TYPE ... ADD VALUE cannot be executed inside a transaction block in some environments.
+-- We use a separate DO block or just try-catch if possible, but for migrations, 
+-- we often have to rely on the check constraint for the immediate fix.
+-- However, we'll try to add it here.
 DO $$
 BEGIN
-    -- We keep the enum type as a reference if it exists, but we mainly rely on the check constraint.
-    -- If we want to update the enum type:
-    -- ALTER TYPE public.user_role ADD VALUE IF NOT EXISTS 'reviewer';
-    -- But since some environments might not support ADD VALUE inside a DO block or transaction:
-    NULL;
+    ALTER TYPE public.user_role ADD VALUE IF NOT EXISTS 'reviewer';
+EXCEPTION
+    WHEN others THEN
+        RAISE NOTICE 'Could not add reviewer to user_role enum. This is expected if running inside a transaction.';
 END
 $$;
 
@@ -24,7 +25,10 @@ ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check
 ALTER TABLE public.profiles ALTER COLUMN role SET DEFAULT 'reviewer';
 
 -- 3. Safely migrate existing customers without businesses to the reviewer role
--- We use NOT EXISTS for better robustness as requested.
+-- We temporarily disable the protection triggers to allow this administrative update.
+ALTER TABLE public.profiles DISABLE TRIGGER ensure_profile_protection;
+ALTER TABLE public.profiles DISABLE TRIGGER tr_enforce_role_management;
+
 UPDATE public.profiles p
 SET role = 'reviewer'
 WHERE role = 'customer'
@@ -33,6 +37,9 @@ WHERE role = 'customer'
     FROM public.businesses b
     WHERE b.owner_id = p.id
   );
+
+ALTER TABLE public.profiles ENABLE TRIGGER ensure_profile_protection;
+ALTER TABLE public.profiles ENABLE TRIGGER tr_enforce_role_management;
 
 -- 4. Update the handle_new_user function if it was hardcoded (it wasn't, but let's be sure)
 -- The profiles.role column now has a default of 'reviewer', so new inserts will use it automatically.
