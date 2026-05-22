@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Authenticated Review Ownership:**
+  - Enforced a `UNIQUE(user_id, business_id)` database constraint for authenticated reviewers.
+  - Implemented UPSERT behavior in the API. Successive submissions from the same user to the same business now update the existing review.
+  - Created a dedicated Reviewer Dashboard (`/account`) where authenticated users can view, edit, and delete their own reviews.
+  - Replaced the generic "Entrar" login CTA with "Meu Painel" for authenticated users in the main navigation.
+  - Introduced RLS policies allowing users to `UPDATE` and `DELETE` their own reviews.
 - **Authenticated Reviews with LGPD-Safe Identity:**
   - Required Supabase-authenticated sessions before review submission.
   - Added Google OAuth as the primary public review login path and Magic Link as a fallback.

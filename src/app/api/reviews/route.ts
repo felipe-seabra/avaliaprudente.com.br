@@ -130,33 +130,75 @@ export async function POST(request: Request) {
 
     const authProvider = getAuthProvider(user)
 
-    // 4. Perform insertion using authenticated identity and trusted fingerprint
-    // This will trigger the database-level anti-spam protection (tr_enforce_review_abuse_protection)
-    // using the SERVER-GENERATED fingerprint that the client cannot spoof easily.
-    const { data, error } = await supabaseAdmin
+    // 4. Check if the user already has a review for this business
+    const { data: existingReview, error: existingReviewError } = await supabaseAdmin
       .from('reviews')
-      .insert({
-        business_id,
-        rating,
-        feedback: feedback?.trim() || null,
-        display_name,
-        user_id: user.id,
-        auth_provider: authProvider,
-        customer_name: null,
-        customer_email: null,
-        is_internal: !!is_internal,
-        source: source || 'api',
-        submission_fingerprint: serverFingerprint, // TRUSTED SIGNAL
-        browser_fingerprint: browser_fingerprint || null // SUPPORTING SIGNAL
-      })
-      .select()
-      .single()
+      .select('id')
+      .eq('business_id', business_id)
+      .eq('user_id', user.id)
+      .maybeSingle()
 
-    if (error) {
-      console.error('[API Review] Database error:', error.message)
+    if (existingReviewError) {
+      console.error('[API Review] Existing review check failed:', existingReviewError.message)
+      return NextResponse.json(
+        { error: 'Não foi possível validar sua avaliação no momento.' },
+        { status: 500 }
+      )
+    }
+
+    let resultData;
+    let resultError;
+
+    if (existingReview) {
+      // 5. Update existing review
+      const { data, error } = await supabaseAdmin
+        .from('reviews')
+        .update({
+          rating,
+          feedback: feedback?.trim() || null,
+          display_name,
+          auth_provider: authProvider,
+          is_internal: !!is_internal,
+          source: source || 'api',
+          submission_fingerprint: serverFingerprint,
+          browser_fingerprint: browser_fingerprint || null
+        })
+        .eq('id', existingReview.id)
+        .select()
+        .single()
+
+      resultData = data;
+      resultError = error;
+    } else {
+      // 5. Insert new review
+      const { data, error } = await supabaseAdmin
+        .from('reviews')
+        .insert({
+          business_id,
+          rating,
+          feedback: feedback?.trim() || null,
+          display_name,
+          user_id: user.id,
+          auth_provider: authProvider,
+          customer_name: null,
+          customer_email: null,
+          is_internal: !!is_internal,
+          source: source || 'api',
+          submission_fingerprint: serverFingerprint, // TRUSTED SIGNAL
+          browser_fingerprint: browser_fingerprint || null // SUPPORTING SIGNAL
+        })
+        .select()
+        .single()
+        
+      resultData = data;
+      resultError = error;
+    }
+
+    if (resultError) {
+      console.error('[API Review] Database error:', resultError.message)
       
       // Handle specific database exceptions from the trigger
-      if (error.message.includes('recentemente') || error.code === 'P0001') {
+      if (resultError.message.includes('recentemente') || resultError.code === 'P0001') {
         return NextResponse.json(
           { error: 'Você já enviou uma avaliação recentemente para esta empresa. Tente novamente em alguns minutos.' },
           { status: 429 }
@@ -169,7 +211,7 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json(resultData)
   } catch (err) {
     console.error('[API Review] Unexpected error:', err)
     return NextResponse.json(
