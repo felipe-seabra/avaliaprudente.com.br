@@ -2,9 +2,26 @@ import { Tables } from '@/types/supabase'
 
 export type Business = Tables<'businesses'>
 export type ReviewLink = Tables<'review_links'>
+export type ReviewResponse = {
+  id: string;
+  review_id: string;
+  business_id: string;
+  author_id: string | null;
+  author_role: 'customer' | 'admin' | 'super_admin';
+  content: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
 export type Review = Tables<'reviews'> & {
   author_role?: string;
   author_review_count?: number;
+  response?: ReviewResponse | null;
+  // Fields from the updated RPC
+  response_id?: string | null;
+  response_content?: string | null;
+  response_author_role?: 'customer' | 'admin' | 'super_admin' | null;
+  response_created_at?: string | null;
 }
 export type Profile = Tables<'profiles'>
 export type BusinessPage = Tables<'business_pages'>
