@@ -9,28 +9,18 @@ import { Store, Trash2, Edit2, Check, X } from 'lucide-react'
 import Link from 'next/link'
 
 import { Pagination } from '@/components/shared/pagination'
-
-type Review = {
-  id: string
-  rating: number
-  feedback: string | null
-  created_at: string
-  updated_at: string
-  business_id: string
-  businesses: {
-    name: string
-    slug: string
-  } | null
-}
+import { Review } from '@/core/domain/entities'
 
 interface ReviewListProps {
-  initialReviews: Review[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  initialReviews: any[]
   totalReviews: number
   currentPage: number
 }
 
 export function ReviewList({ initialReviews, totalReviews, currentPage }: ReviewListProps) {
-  const [reviews, setReviews] = useState<Review[]>(initialReviews)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [reviews, setReviews] = useState<any[]>(initialReviews)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editRating, setEditRating] = useState<number>(0)
   const [editFeedback, setEditFeedback] = useState<string>('')
