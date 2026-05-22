@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Reviewer Account Settings:**
+  - **Identity Management:** Authenticated reviewers can now update their public display name, with changes automatically propagating to all their historical reviews.
+  - **Notification Preferences:** Introduced persistence for email notification settings (official responses and platform updates) via the new `notification_preferences` field.
+  - **Unified Settings UI:** Created a premium, mobile-first `/account/settings` experience with a clean layout and sectioned navigation.
+  - **Privacy & LGPD:** Added a dedicated Privacy section with a simulated data export flow and clear information on data usage.
+  - **Safe Account Deactivation:** Implemented a self-service "Soft Delete" flow with a secure confirmation dialog. Deactivated accounts are immediately blocked while preserving audit integrity.
+  - **Server-Side Security:** Hardened profile updates with a new `protect_profile_fields` database trigger to prevent unauthorized status or role manipulation.
+  - **Auth Metadata Sync:** Ensuring consistency between the `profiles` table and Supabase Auth metadata for seamless UI updates.
+
+### Added
 - **Official Review Responses:** Businesses and admins can now respond officially to reviews.
   - **One-Response Limit:** Enforced "one official response per review" to maintain reputation integrity and avoid forum-like threads.
   - **Role-Based Identity:** "Resposta oficial" label for businesses and "Equipe Avalia Prudente" for platform administrators.

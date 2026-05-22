@@ -178,7 +178,7 @@ export function UserMenu({ user }: UserMenuProps) {
         
         <DropdownMenuItem 
           render={
-            <Link href={isBusinessAdmin || isSuperAdmin ? "/dashboard/settings" : "/account"} className="cursor-pointer flex items-center w-full">
+            <Link href={isBusinessAdmin || isSuperAdmin ? "/dashboard/settings" : "/account/settings"} className="cursor-pointer flex items-center w-full">
               <Settings className="mr-2 h-4 w-4 opacity-60" />
               <span className="font-medium text-sm">Configurações</span>
             </Link>
