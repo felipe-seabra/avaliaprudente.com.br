@@ -99,6 +99,17 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
   - **Business Owners:** Guided to `/dashboard`.
   - **Super Admins:** Granted access to the specialized `/admin` governance portal.
 
+### Account Management & Privacy (LGPD)
+- **Reviewer Settings:** Authenticated reviewers manage identity and preferences at `/account/settings`.
+- **Identity Sync:** Updating `profiles.full_name` automatically synchronizes the `display_name` across all historical reviews via the `tr_sync_profile_to_reviews` trigger, ensuring consistency.
+- **Notification Preferences:** Users can toggle email notifications for official business responses and platform updates.
+- **Safe Deactivation (Soft Delete):** 
+  - Users can self-deactivate their accounts, setting `is_deleted = true`.
+  - The `protect_profile_fields` trigger prevents unauthorized reactivation or status manipulation.
+  - Deactivated accounts are immediately blocked via `middleware.ts`.
+  - Referential integrity is preserved for historical reviews and moderation logs.
+- **LGPD Compliance:** Support for data portability (Export) and the right to be forgotten (Soft Delete with retention policy).
+
 - **Isolation:** Multi-tenant strictness via `owner_id`.
 - **RLS Safety:** Use `is_admin()` security definer to avoid infinite recursion. NEVER query `profiles` directly in RLS.
 - **Public Access:** Anonymous access is strictly restricted to `is_frozen = false`.
