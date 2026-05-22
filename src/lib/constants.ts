@@ -4,6 +4,7 @@ export const APP_CONFIG = {
   url: process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avaliaprudente.com.br' : 'http://localhost:3000'),
   whatsappOrderNumber: '5518998230188', // Centralized WhatsApp number for orders
   currentTermsVersion: '1.2', // Current version of terms of use
+  version: '0.20.0', // Application version
 }
 
 export const PRICING_PLANS = {

@@ -1,6 +1,8 @@
 # Implemented Features
 
 ## UI/UX & Navigation
+- [x] **Google OAuth Business Onboarding:** Integrated multi-step onboarding flow for new business customers.
+- [x] **Contextual Onboarding (mode=business):** Automated redirection and tailored UI for users starting from a business CTA.
 - [x] **Unified Authenticated Navigation:** Comprehensive, role-aware `UserMenu` component for all authenticated states.
 - [x] **Responsive Mobile Navbar:** Full mobile-first navigation with interactive `Sheet` menu for marketing and public pages.
 - [x] **Dynamic Role visualization:** Clear visual badges for Super Admin, Business, and Reviewer roles in the user menu.

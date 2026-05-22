@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -21,11 +21,15 @@ import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
 import { parseError, logError } from '@/lib/error-handler'
 import { APP_CONFIG } from '@/lib/constants'
-
 import { Checkbox } from '@/components/ui/checkbox'
+import { SocialAuth } from '@/components/shared/social-auth'
 
 export function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const mode = searchParams.get('mode')
+  const isBusinessMode = mode === 'business'
+  
   const [isLoading, setIsLoading] = React.useState(false)
   const supabase = createClient()
 
@@ -48,7 +52,7 @@ export function RegisterForm() {
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: `${APP_CONFIG.url}/auth/callback`,
+          emailRedirectTo: `${APP_CONFIG.url}/auth/callback${isBusinessMode ? '?next=/onboarding' : ''}`,
           data: {
             full_name: data.fullName,
             terms_accepted_at: new Date().toISOString(),
@@ -79,9 +83,13 @@ export function RegisterForm() {
   return (
     <Card className="border-muted/50 shadow-xl rounded-3xl overflow-hidden">
       <CardHeader className="space-y-1 pb-8 text-center">
-        <CardTitle className="text-2xl font-bold tracking-tight">Criar conta</CardTitle>
+        <CardTitle className="text-2xl font-bold tracking-tight">
+          {isBusinessMode ? 'Começar como Empresa' : 'Criar conta'}
+        </CardTitle>
         <CardDescription>
-          Preencha os campos abaixo para começar sua jornada.
+          {isBusinessMode 
+            ? 'Use o Google para acelerar seu cadastro empresarial. Você ainda criará uma senha segura depois.'
+            : 'Preencha os campos abaixo para começar sua jornada.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -153,6 +161,11 @@ export function RegisterForm() {
             </Button>
           </form>
         </Form>
+        <SocialAuth 
+          isLoading={isLoading} 
+          next={isBusinessMode ? '/onboarding' : '/dashboard'} 
+          text={isBusinessMode ? 'Continuar com Google' : 'Cadastrar com Google'}
+        />
       </CardContent>
       <CardFooter className="flex justify-center pb-8 pt-2">
         <Link

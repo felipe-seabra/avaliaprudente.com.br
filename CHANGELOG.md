@@ -1,10 +1,22 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
 ## [Unreleased]
+
+### Added
+- **Google OAuth Business Onboarding:** Implemented a new premium onboarding flow for business customers.
+  - Added "Continuar com Google" to Login and Register forms.
+  - New multi-step `/onboarding` flow for business configuration.
+  - Mandatory password setup during onboarding to preserve traditional account security.
+  - Integrated role upgrade (reviewer -> customer) into the onboarding process.
+  - Reusable `SocialAuth` component for Supabase OAuth integration.
+- **Unified Upgrade UX:** Redirected `/account/upgrade` to the new `/onboarding` flow for a consistent experience.
+- **Contextual Onboarding:** Added `mode=business` query parameter to registration to trigger business-specific UI and redirects.
 
 ### Improved
 - **Google Review Redirection UX:** 
+ 
   - **Retention-First Flow:** Replaced the automatic redirect for positive reviews (4-5 stars) with a lightweight, optional CTA to preserve platform continuity.
   - **New Tab Navigation:** Google Reviews now open in a new tab, preventing users from losing their session on Avalia Prudente.
   - **Premium UI Experience:** Implemented an elegant success state with a clear "Avaliar no Google" button and a subtle "Agora não" option.

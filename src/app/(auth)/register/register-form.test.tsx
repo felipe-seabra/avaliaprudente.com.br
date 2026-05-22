@@ -2,11 +2,14 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { RegisterForm } from './register-form'
 
-// Mock the useRouter hook
+// Mock the useRouter and useSearchParams hooks
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
     refresh: vi.fn(),
+  }),
+  useSearchParams: () => ({
+    get: vi.fn().mockReturnValue(null),
   }),
 }))
 
@@ -28,6 +31,10 @@ describe('RegisterForm', () => {
     expect(screen.getByLabelText('E-mail')).toBeInTheDocument()
     expect(screen.getByLabelText('Senha')).toBeInTheDocument()
     expect(screen.getByLabelText('Confirmar Senha')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Cadastrar/i })).toBeInTheDocument()
+    
+    // We have both "Cadastrar" (submit) and "Cadastrar com Google"
+    const submitButton = screen.getByRole('button', { name: /^Cadastrar$/i })
+    expect(submitButton).toBeInTheDocument()
+    expect(screen.getByText(/Cadastrar com Google/i)).toBeInTheDocument()
   })
 })

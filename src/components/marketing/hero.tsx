@@ -48,8 +48,8 @@ export function Hero() {
         <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md animate-in fade-in slide-in-from-bottom-7 duration-700 delay-300">
           <Button 
             size="lg" 
-            className="w-full sm:w-auto text-base h-12 px-8 shadow-lg shadow-primary/20 hover:scale-105 transition-transform rounded-xl"
-            render={<Link href="/register" />}
+            className="w-full sm:w-auto text-base h-12 px-8 shadow-lg shadow-primary/20 hover:scale-105 transition-transform rounded-xl font-bold"
+            render={<Link href="/register?mode=business" />}
             nativeButton={false}
           >
             Quero minha tag NFC
