@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Authenticated Review Ownership:**
+  - Enforced a `UNIQUE(user_id, business_id)` database constraint for authenticated reviewers.
+  - Implemented UPSERT behavior in the API. Successive submissions from the same user to the same business now update the existing review.
+  - Created a dedicated Reviewer Dashboard (`/account`) where authenticated users can view, edit, and delete their own reviews.
+  - Replaced the generic "Entrar" login CTA with "Meu Painel" for authenticated users in the main navigation.
+  - Introduced RLS policies allowing users to `UPDATE` and `DELETE` their own reviews.
 - **Authenticated Reviews with LGPD-Safe Identity:**
   - Required Supabase-authenticated sessions before review submission.
   - Added Google OAuth as the primary public review login path and Magic Link as a fallback.
@@ -33,6 +39,14 @@ All notable changes to this project will be documented in this file.
   - Expired or invalid review auth links now return to the original review page with `?review=1&auth_error=1` instead of losing context.
 
 ### Operational
+- **Aider Integration & Unified AI Workflows:**
+  - **Aider as Primary Agent:** Officially integrated Aider as a primary operational agent alongside Codex CLI, specifically for large-context refactoring, architectural overhauls, and deep debugging.
+  - **New Context Files:** Created `docs/ai/AIDER.md` to define Aider's operational scope, project constraints, and specific expectations for the Next.js/Supabase architecture.
+  - **Unified Workflows:** Created `docs/ai/AI_WORKFLOWS.md` to clarify the specialized roles and collaboration flow between Aider, Codex CLI, and Gemini CLI.
+  - **Standardized Discipline:** Updated `docs/ai/shared-context.md` to establish a unified commit, validation, and documentation discipline for all agents.
+  - **Onboarding Updates:** Refactored `docs/ai/onboarding/flows.md` and `docs/ai/agents.md` to map Aider to the Architect, Refactor, and Security-Reviewer roles, and provide clear startup instructions.
+  - **Deprecated Gemini CLI (Execution):** Further downgraded Gemini CLI to a secondary research and documentation role, updating `docs/ai/GEMINI.md`.
+
 - **Codex-First Migration:**
   - **Primary Agent Transition:** Officially migrated the repository's primary operational runtime from Gemini CLI to Codex CLI.
   - **Operational Guide Overhaul:** Upgraded `docs/ai/CODEX.md` to be the primary guide, incorporating all safety, governance, and architectural discipline rules.

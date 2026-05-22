@@ -1,11 +1,12 @@
 # CODEX.md — Avalia Prudente: Codex CLI Operational Guide
 
-Este documento é o ponto de entrada oficial para os fluxos de trabalho de execução do Codex CLI, o agente primário deste repositório.
+Este documento é o ponto de entrada oficial para os fluxos de trabalho de execução do Codex CLI, que atua em conjunto com o Aider como agente primário deste repositório.
 
 > **Regras Universais:** Todas as ações devem aderir estritamente a `docs/ai/shared-context.md`.
+> **Estratégia de Agentes:** Para saber quando usar o Codex vs. Aider, consulte **`docs/ai/AI_WORKFLOWS.md`**. O Codex é preferido para implementações focadas de features e integração direta na IDE.
 
 ## 1. Filosofia de Execução do Workspace
-- **Codex-First:** O Codex CLI é o runtime oficial. Toda automação e scripts são otimizados para este ambiente.
+- **Codex-First:** O Codex CLI é o runtime oficial para tarefas focadas. Toda automação e scripts são otimizados para este ambiente.
 - **Terminal-Native Workflow:** Operação primária via terminal. Utilize ferramentas de busca (`grep_search`, `glob`) e manipulação de arquivos com precisão cirúrgica.
 - **Execução Autônoma:** Espera-se que o Codex identifique, analise e resolva problemas de forma independente, seguindo o ciclo: Pesquisa -> Estratégia -> Implementação -> Validação.
 - **Minimalismo Operacional:** Evite leituras extensas e desnecessárias. Foque no contexto relevante para a tarefa imediata.
@@ -15,7 +16,7 @@ Toda tarefa deve seguir rigorosamente este ciclo de vida:
 1. **Implement:** Realizar a alteração técnica.
 2. **Lint:** Executar `npm run lint`.
 3. **Build:** Executar `npm run build`.
-4. **Test:** Executar `npm run test`.
+4. **Test:** Executar `npm run test -- --run`.
 5. **Update Docs:** Avaliar e atualizar `CHANGELOG.md`, `docs/current-state/*` e outros documentos relevantes (ver Seção 5 de `shared-context.md`).
 6. **Commit:** Realizar o commit apenas após todos os passos acima passarem.
 
@@ -33,25 +34,26 @@ Toda tarefa deve seguir rigorosamente este ciclo de vida:
 - **Áreas Protegidas:** Alterações em `src/middleware.ts`, migrações de banco de dados e lógica de RLS exigem cuidado redobrado e verificação contra as regras de segurança estabelecidas em `docs/ai/rules/`.
 - **Segurança do DB:** Utilize sempre `npm run` para comandos do Supabase (ex: `npm run supabase:reset`) para garantir a execução do `scripts/db-safety.sh`.
 - **Multi-tenant Isolation:** Respeite rigorosamente o isolamento de inquilinos via `owner_id` e políticas RLS.
-- **RLS Recursion:** NUNCA escreva políticas RLS que consultem `profiles` diretamente. SEMPRE use a função security definer `is_admin()`.
+- **RLS Recursion:** NUNCA escreva políticas RLS que consultem `profiles` diretamente. SEMPRE use a função security definer `is_admin()` ou `is_super_admin()`.
 
 ## 5. Áreas Críticas de Arquitetura
-- **Bypass de Moderação:** Admins (`role = 'admin'`) DEVEM ignorar todos os bloqueios de moderação. Esta lógica está centralizada em `src/middleware.ts` e na camada de banco de dados.
+- **Bypass de Moderação:** Admins (`role = 'admin'` ou `super_admin`) DEVEM ignorar todos os bloqueios de moderação. Esta lógica está centralizada em `src/middleware.ts` e na camada de banco de dados.
 - **Visibilidade Pública:** SEMPRE filtre itens com `is_frozen = true` em consultas públicas e políticas RLS públicas.
+- **Propriedade de Avaliações:** Avaliações (`reviews`) são atreladas a `user_id` e `business_id` (UNIQUE). Respeite as validações anti-spam do lado do servidor e o RLS de gerenciamento de dados do usuário.
 - **Integridade de Slugs:** Qualquer atualização de slug deve ser validada via `is_slug_available` e verificar rotas reservadas do sistema.
 - **Renderização OG:** Tenha cuidado ao editar `src/app/opengraph-image.tsx`. Ele roda no runtime Edge e possui limitações estritas.
 
 ## 6. Verificação e Sincronização Final (Checklist)
 Antes de considerar uma tarefa como concluída, verifique:
 - [ ] O Admin ainda consegue acessar `/admin/dashboard` (se houve mudança em auth/middleware)?
-- [ ] `npm run lint`, `npm run build` e `npm run test` passam sem erros?
+- [ ] `npm run lint`, `npm run build` e `npm run test -- --run` passam sem erros?
 - [ ] O `CHANGELOG.md` foi atualizado com as mudanças?
 - [ ] Os documentos em `docs/current-state/` refletem o novo estado (funcionalidades, bugs, dívida)?
 - [ ] Se houve mudança arquitetural, `docs/ARCHITECTURE.md` ou ADRs foram atualizados?
 - [ ] Eficiência de Contexto: As mudanças foram aplicadas com o mínimo de ruído e máxima precisão?
 
 ## 7. Melhores Práticas Operacionais
-- **Evolução Incremental:** Não realize reescritas amplas. Evolua a arquitetura incrementalmente.
+- **Evolução Incremental:** Não realize reescritas amplas. Evolua a arquitetura incrementalmente e use branches de feature.
 - **Verificação de Regressão:** Após mudanças em Auth ou Middleware, valide o acesso do Admin ao dashboard.
 - **Safe Reset:** Use `npm run supabase:reset` para estabilizar o ambiente local.
 - **Node.js LTS:** Garanta compatibilidade com Node 20 LTS.
