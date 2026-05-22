@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { CheckCircle2, ChevronLeft, Loader2, Mail, Send, ShieldCheck, Sparkles } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, Info, Loader2, Mail, Send, ShieldCheck, Sparkles } from 'lucide-react'
 import { getBrowserFingerprint } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
@@ -297,9 +297,27 @@ export function ReviewFlow({ businessId, businessName, googleReviewUrl, onClose 
                   </Button>
                 </div>
                 {magicSent && (
-                  <p className="text-xs text-green-600">
-                    Link enviado. Abra seu e-mail neste dispositivo para continuar a avaliação.
-                  </p>
+                  <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-500">
+                    <p className="text-xs text-green-600 font-medium">
+                      Link enviado. Abra seu e-mail neste dispositivo para continuar a avaliação.
+                    </p>
+                    
+                    <div className="bg-muted/40 border border-muted-foreground/10 rounded-xl p-3 text-[11px] text-muted-foreground/90 leading-relaxed shadow-sm flex gap-2.5">
+                      <Info className="h-4 w-4 text-muted-foreground/60 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-foreground/80 mb-1">
+                          Enviamos um link de acesso para seu e-mail.
+                        </p>
+                        <p>
+                          Caso não encontre na caixa de entrada, verifique também: 
+                          <span className="font-medium text-foreground/70"> • Spam • Promoções • Lixo eletrônico</span>
+                        </p>
+                        <p className="mt-1 opacity-70">
+                          O envio pode levar alguns segundos.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </form>
 
