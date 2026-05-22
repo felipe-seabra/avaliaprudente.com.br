@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Controlled Role Management:** Implemented a secure role management system allowing authorized administrators to manage user roles (`reviewer`, `customer`, `admin`, `super_admin`).
+- **Governance Hierarchy:** Enforced strict role transition rules at both API and database levels (e.g., admins can only manage reviewer/customer roles; super_admins have full authority).
+- **Role Audit System:** Created `role_change_logs` table and triggers to automatically audit all role transitions across the platform.
+- **Role Management UI:** Added a secure governance dialog in the Admin Users directory for streamlined role updates with built-in validation.
+- **Reviewer Role Visibility:** Integrated the `reviewer` role into the administrative interface, including visual badges and specific management options.
+
+### Changed
+- **Hardened Governance Trigger:** Updated `enforce_role_management` database trigger to support multi-level administrative authority.
+- **Admin Dashboard UI:** Refactored the Customer Directory to use the new server-side Role Management API.
+
+### Fixed
+- **Super Admin Restrictions:** Resolved the limitation where only super admins could manage any role, enabling regular admins to manage non-privileged roles safely.
+
+### Added
 - **Unified Authenticated Navigation:**
   - Replaced the simple "Meu Painel" button with a comprehensive, role-aware `UserMenu` component for both marketing navbar and dashboard sidebar.
   - Implemented dynamic role-based badges ("Super Admin", "Empresa", "Avaliador") for clear identity visualization.

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck, RotateCcw, Clock, UserX, Crown } from 'lucide-react'
+import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck, RotateCcw, Clock, UserX, Crown, UserCheck, Shield } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -19,6 +19,7 @@ import { ModerationWarningDialog } from '@/components/admin/moderation/moderatio
 import { ModerationSuspensionDialog } from '@/components/admin/moderation/moderation-suspension-dialog'
 import { ModerationBanDialog } from '@/components/admin/moderation/moderation-ban-dialog'
 import { ModerationDeactivationDialog } from '@/components/admin/moderation/moderation-deactivation-dialog'
+import { RoleManagementDialog } from '@/components/admin/governance/role-management-dialog'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 
@@ -43,6 +44,8 @@ export default function AdminCustomersPage() {
   const [isSuspensionDialogOpen, setIsSuspensionDialogOpen] = useState(false)
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false)
   const [isDeactivationDialogOpen, setIsDeactivationDialogOpen] = useState(false)
+  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false)
+  const [selectedUserRole, setSelectedUserRole] = useState<string>('')
   const [selectedUser, setSelectedUser] = useState<{ id: string, name: string } | null>(null)
   
   const [repo] = useState(() => new AdminRepository())
@@ -98,21 +101,10 @@ export default function AdminCustomersPage() {
     }
   }
 
-  const handleSetRole = async (id: string, role: 'admin' | 'customer') => {
-    if (currentAdminRole !== 'super_admin') {
-      toast.error('Apenas Super Administradores podem gerenciar permissões.')
-      return
-    }
-    
-    if (!confirm(`Deseja alterar a função deste usuário para ${role}?`)) return
-    try {
-      await repo.setAdminRole(id, role === 'admin')
-      toast.success('Função atualizada com sucesso.')
-      loadCustomers()
-    } catch (error) {
-      console.error('Error updating role', error)
-      toast.error('Erro ao alterar a função.')
-    }
+  const handleOpenRoleDialog = (id: string, name: string, role: string) => {
+    setSelectedUser({ id, name })
+    setSelectedUserRole(role)
+    setIsRoleDialogOpen(true)
   }
 
   const handleOpenWarningDialog = (id: string, name: string) => {
@@ -247,10 +239,15 @@ export default function AdminCustomersPage() {
                                <ShieldAlert className="h-3 w-3" />
                                Admin
                             </div>
+                          ) : customer.role === 'customer' ? (
+                            <div className="flex items-center gap-1.5 text-green-600 font-bold text-xs uppercase bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20 w-fit">
+                               <UserCheck className="h-3 w-3" />
+                               Empresa
+                            </div>
                           ) : (
                             <div className="flex items-center gap-1.5 text-muted-foreground font-medium text-xs uppercase bg-muted px-2 py-1 rounded-full border border-border w-fit">
                                <User className="h-3 w-3" />
-                               Cliente
+                               Avaliador
                             </div>
                           )}
                         </div>
@@ -364,28 +361,18 @@ export default function AdminCustomersPage() {
                               </DropdownMenuItem>
                             )}
 
-                            {/* Role Management - Restricted to Super Admin */}
-                            {isSuperAdmin && customer.id !== currentAdminId && (
+                            {/* Role Management - Restricted to Admins & Super Admins */}
+                            {(isSuperAdmin || currentAdminRole === 'admin') && customer.id !== currentAdminId && (
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuLabel>Governança</DropdownMenuLabel>
-                                {customer.role === 'admin' ? (
-                                  <DropdownMenuItem 
-                                    className="cursor-pointer text-orange-600" 
-                                    onClick={() => handleSetRole(customer.id, 'customer')}
-                                  >
-                                    <User className="h-4 w-4 mr-2" />
-                                    Remover Admin
-                                  </DropdownMenuItem>
-                                ) : customer.role === 'customer' ? (
-                                  <DropdownMenuItem 
-                                    className="cursor-pointer text-blue-600" 
-                                    onClick={() => handleSetRole(customer.id, 'admin')}
-                                  >
-                                    <ShieldAlert className="h-4 w-4 mr-2" />
-                                    Promover a Admin
-                                  </DropdownMenuItem>
-                                ) : null}
+                                <DropdownMenuItem 
+                                  className="cursor-pointer text-blue-600 font-medium" 
+                                  onClick={() => handleOpenRoleDialog(customer.id, customer.full_name || customer.email || 'Usuário', customer.role)}
+                                >
+                                  <Shield className="h-4 w-4 mr-2" />
+                                  Gerenciar Papel
+                                </DropdownMenuItem>
                               </>
                             )}
                           </DropdownMenuContent>
@@ -429,6 +416,15 @@ export default function AdminCustomersPage() {
             onOpenChange={setIsDeactivationDialogOpen}
             userId={selectedUser.id}
             userName={selectedUser.name}
+            onSuccess={loadCustomers}
+          />
+          <RoleManagementDialog
+            open={isRoleDialogOpen}
+            onOpenChange={setIsRoleDialogOpen}
+            userId={selectedUser.id}
+            userName={selectedUser.name}
+            currentRole={selectedUserRole}
+            adminRole={currentAdminRole || ''}
             onSuccess={loadCustomers}
           />
         </>
