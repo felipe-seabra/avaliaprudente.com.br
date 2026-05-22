@@ -32,7 +32,7 @@ export default async function AccountPage({ searchParams }: Props) {
   const reviewRepo = new ReviewRepository(supabase)
 
   // Fetch user's reviews and reputation
-  const [reviewsData, statsResponse, profileResponse] = await Promise.all([
+  const [reviewsResponse, statsResponse, profileResponse] = await Promise.all([
     reviewRepo.getByUserId(user.id, limit, offset),
     supabase
       .from('reviewer_stats')
@@ -46,7 +46,7 @@ export default async function AccountPage({ searchParams }: Props) {
       .single()
   ])
 
-  const { reviews, total: totalReviews } = reviewsData
+  const { data: reviews, total: totalReviews } = reviewsResponse
   const reputationCount = statsResponse.data?.approved_reviews_count || 0
   const userRole = profileResponse.data?.role
 

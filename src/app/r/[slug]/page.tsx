@@ -62,7 +62,7 @@ async function getBusinessData(slug: string, pageNumber: number = 1): Promise<Bu
     isOwner = page.businesses.owner_id === user.id
   }
 
-  const [links, reviewsData] = await Promise.all([
+  const [links, reviewsResponse] = await Promise.all([
     linkRepo.getByPageId(page.id),
     reviewRepo.getByBusinessId(page.business_id, limit, offset)
   ])
@@ -70,8 +70,8 @@ async function getBusinessData(slug: string, pageNumber: number = 1): Promise<Bu
   return { 
     page, 
     links, 
-    reviews: reviewsData.reviews,
-    totalReviews: reviewsData.total,
+    reviews: reviewsResponse.data,
+    totalReviews: reviewsResponse.total,
     currentPage: pageNumber,
     isAdmin, 
     isOwner, 

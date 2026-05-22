@@ -30,7 +30,7 @@ export default function ReviewsPage() {
     setIsLoading(true)
     try {
       const offset = (page - 1) * limit
-      const { reviews: data, total } = await repository.getByBusinessId(currentBusiness.id, limit, offset)
+      const { data, total } = await repository.getByBusinessId(currentBusiness.id, limit, offset)
       setReviews(data)
       setTotalReviews(total)
       setCurrentPage(page)

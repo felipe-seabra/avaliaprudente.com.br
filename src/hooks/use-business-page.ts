@@ -35,12 +35,12 @@ export function useBusinessPage(slug: string) {
 
         console.log(`✅ Business resolved: ${page.businesses.name} (${page.business_id})`)
 
-        const [links, reviewsData] = await Promise.all([
+        const [links, reviewsResponse] = await Promise.all([
           linkRepo.getByPageId(page.id),
           reviewRepo.getByBusinessId(page.business_id, 100)
         ])
 
-        setData({ page, links, reviews: reviewsData.reviews })
+        setData({ page, links, reviews: reviewsResponse.data })
 
         // Track visit (silently to not break the page if analytics fails)
         try {

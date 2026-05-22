@@ -14,6 +14,7 @@ export type ReviewResponse = {
   deleted_at: string | null;
 }
 export type Review = Tables<'reviews'> & {
+  updated_at: string;
   author_role?: string;
   author_review_count?: number;
   response?: ReviewResponse | null;
@@ -22,6 +23,18 @@ export type Review = Tables<'reviews'> & {
   response_content?: string | null;
   response_author_role?: 'customer' | 'admin' | 'super_admin' | null;
   response_created_at?: string | null;
+}
+
+export type ExtendedReview = Review & {
+  businesses: {
+    name: string;
+    slug: string;
+  } | null;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
 }
 export type Profile = Tables<'profiles'>
 export type BusinessPage = Tables<'business_pages'>

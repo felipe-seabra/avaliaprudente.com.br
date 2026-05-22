@@ -9,18 +9,16 @@ import { Store, Trash2, Edit2, Check, X } from 'lucide-react'
 import Link from 'next/link'
 
 import { Pagination } from '@/components/shared/pagination'
-import { Review } from '@/core/domain/entities'
+import { ExtendedReview } from '@/core/domain/entities'
 
 interface ReviewListProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initialReviews: any[]
+  initialReviews: ExtendedReview[]
   totalReviews: number
   currentPage: number
 }
 
 export function ReviewList({ initialReviews, totalReviews, currentPage }: ReviewListProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [reviews, setReviews] = useState<any[]>(initialReviews)
+  const [reviews, setReviews] = useState<ExtendedReview[]>(initialReviews)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editRating, setEditRating] = useState<number>(0)
   const [editFeedback, setEditFeedback] = useState<string>('')
@@ -48,7 +46,7 @@ export function ReviewList({ initialReviews, totalReviews, currentPage }: Review
     }
   }
 
-  const handleEdit = (review: Review) => {
+  const handleEdit = (review: ExtendedReview) => {
     setEditingId(review.id)
     setEditRating(review.rating)
     setEditFeedback(review.feedback || '')

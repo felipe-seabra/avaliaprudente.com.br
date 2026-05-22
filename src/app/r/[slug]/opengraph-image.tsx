@@ -82,9 +82,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     let reviews: { rating: number }[] = []
     let totalReviewsCount = 0
     try {
-        const reviewsData = await reviewRepo.getByBusinessId(data.business_id, 100)
-        reviews = reviewsData.reviews || []
-        totalReviewsCount = reviewsData.total
+        const reviewsResponse = await reviewRepo.getByBusinessId(data.business_id, 100)
+        reviews = reviewsResponse.data || []
+        totalReviewsCount = reviewsResponse.total
     } catch (e) {
         console.error('Failed to fetch reviews for OG:', e)
     }
