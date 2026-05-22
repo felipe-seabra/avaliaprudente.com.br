@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Official Review Responses:** Businesses and admins can now respond officially to reviews.
+  - **One-Response Limit:** Enforced "one official response per review" to maintain reputation integrity and avoid forum-like threads.
+  - **Role-Based Identity:** "Resposta oficial" label for businesses and "Equipe Avalia Prudente" for platform administrators.
+  - **Notification Engine:** Integrated with the notification system to alert reviewers via in-app (and future email) when their feedback receives a response.
+  - **Management UX:** Added a real-time response editor in the Customer Dashboard with support for creation, editing, and soft-deletion.
+  - **SEO & Performance:** Updated the `get_business_reviews_with_stats` RPC to fetch reviews and their responses in a single call, ensuring fast SSR and indexable content.
+  - **Security & RLS:** Hardened RLS policies to ensure only business owners or admins can manage responses, with server-side validation.
+
+### Added
 - **Reviewer Reputation & Badge System:**
   - **Dynamic Progression:** Introduced a multi-tier reputation system based on approved review counts (Recurrent, Active, Specialist, Elite, Reference).
   - **Admin Reputation Override:** Dedicated "Equipe Avalia Prudente" badge for administrators and super admins to ensure highest-tier trust.

@@ -1,37 +1,46 @@
 'use client'
 
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { useBusiness } from '@/providers/business-provider'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { Review } from '@/core/domain/entities'
 import { ReputationBadge } from '@/components/shared/reputation-badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Star, MessageSquare, Calendar, User } from 'lucide-react'
+import { Star, MessageSquare, Calendar, User, Reply, Edit3 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { ReviewResponseDialog } from '@/components/dashboard/review-response-dialog'
 
 export default function ReviewsPage() {
   const { currentBusiness } = useBusiness()
   const [reviews, setReviews] = useState<Review[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const repository = useMemo(() => new ReviewRepository(), [])
 
-  useEffect(() => {
-    const fetchReviews = async () => {
-      if (!currentBusiness) return
-      setIsLoading(true)
-      try {
-        const data = await repository.getByBusinessId(currentBusiness.id)
-        setReviews(data)
-      } catch {
-        toast.error('Erro ao carregar avaliações')
-      } finally {
-        setIsLoading(false)
-      }
+  const fetchReviews = useCallback(async () => {
+    if (!currentBusiness) return
+    setIsLoading(true)
+    try {
+      const data = await repository.getByBusinessId(currentBusiness.id)
+      setReviews(data)
+    } catch {
+      toast.error('Erro ao carregar avaliações')
+    } finally {
+      setIsLoading(false)
     }
-
-    fetchReviews()
   }, [currentBusiness, repository])
+
+  useEffect(() => {
+    fetchReviews()
+  }, [fetchReviews])
+
+  const handleRespond = (review: Review) => {
+    setSelectedReview(review)
+    setIsDialogOpen(true)
+  }
 
   if (!currentBusiness) {
     return (
@@ -67,8 +76,8 @@ export default function ReviewsPage() {
               review.rating >= 4 ? "border-l-green-500" : "border-l-yellow-500"
             )}>
               <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div className="space-y-3">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                  <div className="space-y-3 flex-1">
                     <div className="flex items-center gap-2">
                       <div className="flex text-yellow-400">
                         {[1, 2, 3, 4, 5].map((s) => (
@@ -116,6 +125,40 @@ export default function ReviewsPage() {
                         })}
                       </div>
                     </div>
+
+                    {/* Dashboard Response View */}
+                    {review.response_content && (
+                      <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/10 space-y-2">
+                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary">
+                          <Reply size={12} />
+                          {review.response_author_role === 'customer' ? 'Sua resposta oficial' : 'Resposta da Equipe Avalia Prudente'}
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed italic pl-2 border-l-2 border-primary/20">
+                          &quot;{review.response_content}&quot;
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="shrink-0">
+                    <Button 
+                      variant={review.response_content ? "outline" : "default"}
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => handleRespond(review)}
+                    >
+                      {review.response_content ? (
+                        <>
+                          <Edit3 size={14} />
+                          Editar Resposta
+                        </>
+                      ) : (
+                        <>
+                          <Reply size={14} />
+                          Responder
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -123,6 +166,16 @@ export default function ReviewsPage() {
           ))
         )}
       </div>
+
+      <ReviewResponseDialog 
+        isOpen={isDialogOpen}
+        onClose={() => {
+          setIsDialogOpen(false)
+          setSelectedReview(null)
+        }}
+        review={selectedReview}
+        onSuccess={fetchReviews}
+      />
     </div>
   )
 }

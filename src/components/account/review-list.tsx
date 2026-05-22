@@ -119,7 +119,7 @@ export function ReviewList({ initialReviews }: { initialReviews: Review[] }) {
           <div key={review.id} className="border-b border-border/40 pb-6 last:border-0 last:pb-0">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <Link href={`/${business?.slug || ''}`} className="text-lg font-bold hover:underline">
+                <Link href={`/r/${business?.slug || ''}`} className="text-lg font-bold hover:underline">
                   {business?.name || 'Empresa desconhecida'}
                 </Link>
                 <div className="text-xs text-muted-foreground mt-1">

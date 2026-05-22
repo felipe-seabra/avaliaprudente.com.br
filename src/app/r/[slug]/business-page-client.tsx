@@ -251,6 +251,24 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
                          role={review.author_role} 
                        />
                     </div>
+
+                    {/* Official Response */}
+                    {review.response_content && (
+                      <div className="mt-4 pt-4 border-t border-dashed space-y-2 animate-in fade-in slide-in-from-top-1 duration-500">
+                        <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                            {review.response_author_role === 'customer' ? 'Resposta oficial' : 'Equipe Avalia Prudente'}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground ml-auto opacity-70">
+                            {new Date(review.response_created_at!).toLocaleDateString('pt-BR')}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed pl-4 border-l-2 border-primary/20 italic">
+                          {review.response_content}
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
