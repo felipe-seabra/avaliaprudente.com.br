@@ -88,6 +88,12 @@ The project follows a **Clean Architecture** approach to ensure long-term mainta
 
 ## 🔐 Authentication & Security
 
+### Hybrid Onboarding & Auth
+Avalia Prudente implements a dual-mode authentication strategy designed for both convenience and high-security SaaS ownership:
+
+- **Reviewers:** Lightweight onboarding via Google OAuth or Magic Links. No password required for casual feedback submission.
+- **Businesses:** Premium, multi-step onboarding flow (`/onboarding`) that leverages Google OAuth to prefill identity while mandating the creation of a traditional secure password. This ensures business accounts support multi-channel login and are "billing-ready" for long-term operational ownership.
+
 ### SSR-Safe Auth
 We leverage `@supabase/ssr` to handle authentication entirely via secure cookies. This allows:
 - Seamless route protection in `middleware.ts`.

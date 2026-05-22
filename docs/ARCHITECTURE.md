@@ -89,7 +89,12 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Normalization:** Forced lowercase and accent removal.
 - **Route Protection:** Prevents slugs from matching internal routes (`admin`, `dashboard`, `login`, `register`, etc.).
 
-### Unified Navigation System
+### Business Onboarding & Social Auth
+- **Hybrid Auth Strategy:** Supports both Google OAuth for friction-less onboarding and traditional Email/Password for long-term account ownership and recovery.
+- **Onboarding Convergence:** Unified flow (`/onboarding`) for new business customers, whether they sign up via Social Auth or standard registration.
+- **Password Mandate:** Even when using Google for onboarding, business customers are required to set a traditional password. This ensures the account is "billing-ready" and supports multi-channel login.
+- **Role Progression:** Users initially receive the `reviewer` role. Completing the business onboarding triggers a transition to the `customer` role via the `/api/auth/upgrade` endpoint.
+- **Contextual Redirects:** Utilizes the `mode=business` parameter during registration to guide users into the premium onboarding experience instead of the lightweight reviewer dashboard.
 - **Context-Aware Navbar:** The main `Navbar` (`src/components/marketing/navbar.tsx`) dynamically adapts based on the Supabase auth state.
 - **Unified UserMenu:** A shared `UserMenu` component (`src/components/shared/user-menu.tsx`) centralizes identity management, role badges, and navigation links for both the marketing site and the internal dashboard.
 - **Mobile-First Responsive Design:** Marketing navigation uses a Radix UI `Sheet` for small screens, while authenticated actions remain accessible via the persistent `UserMenu`.

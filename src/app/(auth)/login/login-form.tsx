@@ -20,6 +20,7 @@ import {
 import { Form } from '@/components/ui/form'
 import { InputField } from '@/components/shared/input-field'
 import { parseError, logError } from '@/lib/error-handler'
+import { SocialAuth } from '@/components/shared/social-auth'
 
 export function LoginForm() {
   const router = useRouter()
@@ -95,6 +96,7 @@ export function LoginForm() {
             </Button>
           </form>
         </Form>
+        <SocialAuth isLoading={isLoading} />
       </CardContent>
       <CardFooter className="flex flex-col space-y-4 pt-2 pb-8 px-6">
         <div className="flex flex-wrap items-center justify-between w-full gap-2">
