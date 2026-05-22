@@ -67,12 +67,21 @@ export class ReviewRepository {
     }
 
     const { data, error } = await this.supabase
-      .from('reviews')
-      .select('*')
-      .eq('business_id', businessId)
-      .order('created_at', { ascending: false })
+      .rpc('get_business_reviews_with_stats', { b_id: businessId })
 
-    if (error) throw error
+    if (error) {
+      console.error('Error fetching reviews with stats:', error)
+      // Fallback to standard reviews fetch if RPC fails (e.g., during migration)
+      const { data: fallbackData, error: fallbackError } = await this.supabase
+        .from('reviews')
+        .select('*')
+        .eq('business_id', businessId)
+        .order('created_at', { ascending: false })
+      
+      if (fallbackError) throw fallbackError
+      return fallbackData || []
+    }
+    
     return data || []
   }
 

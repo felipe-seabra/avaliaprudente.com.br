@@ -57,6 +57,13 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
   - `C`: Platform-wide average.
 - **Multipliers:** Verified businesses (`is_verified`) and Featured businesses receive visibility boosts in the final score.
 
+### Reviewer Reputation & Badge System
+- **Goal:** Encourage high-quality reviews and recognize trustworthy contributors through dynamic badges.
+- **Tiers:** Progression-based system (Recurrent, Active, Specialist, Elite, Reference) derived from total approved review counts.
+- **Calculated Stats:** Reputation is based on the `reviewer_stats` database view, which filters out reviews from frozen businesses or moderated content.
+- **Admin Privilege:** Administrators and Super Admins automatically display the "Equipe Avalia Prudente" badge to distinguish official feedback.
+- **Performance:** Optimized data fetching via `get_business_reviews_with_stats` RPC to avoid N+1 queries during page rendering.
+
 ### OG Image Architecture (Dynamic Branding)
 - **Tech:** `next/og` running on **Vercel Edge Runtime**.
 - **Rendering:** JSX-to-SVG via Satori.

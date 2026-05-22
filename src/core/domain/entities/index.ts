@@ -2,7 +2,10 @@ import { Tables } from '@/types/supabase'
 
 export type Business = Tables<'businesses'>
 export type ReviewLink = Tables<'review_links'>
-export type Review = Tables<'reviews'>
+export type Review = Tables<'reviews'> & {
+  author_role?: string;
+  author_review_count?: number;
+}
 export type Profile = Tables<'profiles'>
 export type BusinessPage = Tables<'business_pages'>
 export type PageLink = Tables<'page_links'>

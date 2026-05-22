@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { CTAButton } from '@/components/shared/cta-button'
 import { ReviewFlow } from '@/components/shared/review-flow'
+import { ReputationBadge } from '@/components/shared/reputation-badge'
 import { Star, ShieldCheck, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
 import { PageLink, BusinessPage, Review } from '@/core/domain/entities'
@@ -245,6 +246,10 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
                          {(review.display_name || 'C').substring(0, 1).toUpperCase()}
                        </div>
                        <span className="text-xs font-medium">{review.display_name || 'Cliente Verificado'}</span>
+                       <ReputationBadge 
+                         count={Number(review.author_review_count || 0)} 
+                         role={review.author_role} 
+                       />
                     </div>
                   </CardContent>
                 </Card>
