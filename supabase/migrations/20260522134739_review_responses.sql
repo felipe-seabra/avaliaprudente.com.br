@@ -98,6 +98,7 @@ CREATE INDEX idx_review_responses_deleted_at ON public.review_responses(deleted_
 
 -- 6. Update get_business_reviews_with_stats RPC
 -- This allows fetching reviews and their official responses in a single call.
+DROP FUNCTION IF EXISTS public.get_business_reviews_with_stats(uuid);
 CREATE OR REPLACE FUNCTION public.get_business_reviews_with_stats(b_id uuid)
 RETURNS TABLE (
     id uuid,
