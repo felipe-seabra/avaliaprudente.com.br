@@ -2,6 +2,11 @@
 
 ## Marcos Recentes
 
+### Premium UX Retention Flow (2026-05-22)
+- Replaced automatic Google redirect with an optional, high-retention CTA.
+- Implemented new-tab navigation for external reviews.
+- Commit: `eef5619`
+
 ### v0.2.1 - Estabilização do Sistema de Verificação (2026-05-17)
 - Consolidação do esquema de banco de dados para verificação.
 - Implementação de botões de controle direto para administradores.
