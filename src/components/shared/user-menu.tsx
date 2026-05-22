@@ -97,6 +97,7 @@ export function UserMenu({ user }: UserMenuProps) {
 
   const isSuperAdmin = checkIsSuperAdmin(role)
   const isBusinessAdmin = checkIsAdmin(role) && !isSuperAdmin
+  const isReviewer = role === 'reviewer'
 
   return (
     <DropdownMenu>
@@ -139,6 +140,17 @@ export function UserMenu({ user }: UserMenuProps) {
             </Link>
           }
         />
+
+        {isReviewer && (
+          <DropdownMenuItem 
+            render={
+              <Link href="/account/upgrade" className="cursor-pointer flex items-center w-full text-primary focus:text-primary focus:bg-primary/5">
+                <LayoutDashboard className="mr-2 h-4 w-4 opacity-70" />
+                <span className="font-bold text-sm">Cadastrar Empresa</span>
+              </Link>
+            }
+          />
+        )}
 
         {(isBusinessAdmin || isSuperAdmin) && (
           <DropdownMenuItem 

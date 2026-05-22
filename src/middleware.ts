@@ -55,6 +55,7 @@ export async function middleware(request: NextRequest) {
   const isTermsPage = request.nextUrl.pathname.startsWith('/terms-reaccept')
 
   const isAdmin = role === 'admin' || role === 'super_admin'
+  const isReviewer = role === 'reviewer'
   const isSuspended = !isAdmin && accountStatus === 'suspended' && (!suspendedUntil || new Date(suspendedUntil) > new Date())
   const isBanned = !isAdmin && accountStatus === 'banned'
   const isUserDeleted = !isAdmin && isDeleted
@@ -64,7 +65,7 @@ export async function middleware(request: NextRequest) {
 
   // DEBUG LOGS
   if (isAdminPage || isDashboardPage || isBlockedPage || isAuthPage || isTermsPage) {
-    console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}, Status: ${accountStatus}, Deleted: ${isDeleted}, NeedsTerms: ${needsTermsReacceptance}`)
+    console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}, isReviewer: ${isReviewer}, Status: ${accountStatus}, Deleted: ${isDeleted}, NeedsTerms: ${needsTermsReacceptance}`)
   }
 
   // 1. Admin Master Bypass: If admin is logged in, they bypass all moderation blocks
@@ -98,20 +99,29 @@ export async function middleware(request: NextRequest) {
 
   // 5. Redirect away from /blocked if not actually blocked
   if (user && !isUserBlocked && !isSuspended && isBlockedPage) {
-    console.log('Middleware: Not Blocked User at /blocked -> Redirecting to /dashboard')
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const target = isReviewer ? '/account' : '/dashboard'
+    console.log(`Middleware: Not Blocked User at /blocked -> Redirecting to ${target}`)
+    return NextResponse.redirect(new URL(target, request.url))
   }
 
   // 6. Redirect logged in users away from auth pages
   if (user && isAuthPage) {
-    console.log('Middleware: Logged in User at Auth Page -> Redirecting to /dashboard')
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const target = isReviewer ? '/account' : '/dashboard'
+    console.log(`Middleware: Logged in User at Auth Page -> Redirecting to ${target}`)
+    return NextResponse.redirect(new URL(target, request.url))
   }
 
-  // 7. Protect dashboard
-  if (!user && isDashboardPage) {
-    console.log('Middleware: Anonymous User at Dashboard -> Redirecting to /login')
-    return NextResponse.redirect(new URL('/login', request.url))
+  // 7. Protect dashboard and enforce reviewer restrictions
+  if (isDashboardPage) {
+    if (!user) {
+      console.log('Middleware: Anonymous User at Dashboard -> Redirecting to /login')
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    if (isReviewer) {
+      console.warn(`Middleware: Reviewer user ${user.id} attempted to access dashboard -> Redirecting to /account`)
+      return NextResponse.redirect(new URL('/account', request.url))
+    }
   }
 
   // 8. Protect admin routes (Double check for security)

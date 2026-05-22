@@ -713,7 +713,7 @@ export type Database = {
       is_suspended: { Args: { u_id: string }; Returns: boolean }
     }
     Enums: {
-      user_role: "customer" | "admin" | "super_admin"
+      user_role: "reviewer" | "customer" | "admin" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -844,7 +844,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      user_role: ["customer", "admin", "super_admin"],
+      user_role: ["reviewer", "customer", "admin", "super_admin"],
     },
   },
 } as const

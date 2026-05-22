@@ -13,6 +13,8 @@
 - [x] Multi-tenant RLS (owner_id).
 - [x] RBAC (admin/customer).
 - [x] **Super Admin Governance:** Privileged role hierarchy (`user_role` enum) for authoritative administrative access management.
+- [x] **Secure Role Management API:** Server-side role transition logic with explicit hierarchy validation and audit logging.
+- [x] **Role Transition Auditing:** Detailed logging of all role changes in `role_change_logs`.
 - [x] Middleware session hardening & central routing.
 - [x] Blocked user detection (suspended, banned, deleted).
 - [x] Infinite recursion RLS protections (`is_admin` security definer).
