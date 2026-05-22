@@ -27,11 +27,12 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { UserNav } from './user-nav'
+import { UserMenu } from '@/components/shared/user-menu'
 import { BusinessSwitcher } from './business-switcher'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
+import type { User } from '@supabase/supabase-js'
 
 const data = {
   navMain: [
@@ -76,12 +77,14 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const [isAdmin, setIsAdmin] = React.useState(false)
+  const [user, setUser] = React.useState<User | null>(null)
   const supabase = React.useMemo(() => createClient(), [])
 
   React.useEffect(() => {
     async function checkRole() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        setUser(user)
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
@@ -191,7 +194,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <div className="p-2 flex justify-center w-full">
-          <UserNav />
+          {user && <UserMenu user={user} />}
         </div>
       </SidebarFooter>
       <SidebarRail />

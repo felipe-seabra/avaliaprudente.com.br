@@ -1,5 +1,14 @@
 # Implemented Features
 
+## UI/UX & Navigation
+- [x] **Unified Authenticated Navigation:** Comprehensive, role-aware `UserMenu` component for all authenticated states.
+- [x] **Responsive Mobile Navbar:** Full mobile-first navigation with interactive `Sheet` menu for marketing and public pages.
+- [x] **Dynamic Role visualization:** Clear visual badges for Super Admin, Business, and Reviewer roles in the user menu.
+- [x] **Standardized Logout Flow:** Unified session termination across landing page, dashboard, and account pages.
+- [x] **Landing Page foundation:** Premium Hero, Features, Pricing, and FAQ sections.
+- [x] **Dashboard Shell:** Sidebar-based administration with breadcrumbs and top-nav alerts.
+- [x] **Dark/Light Mode:** Full theme support with system preference detection.
+
 ## Auth & Security
 - [x] Multi-tenant RLS (owner_id).
 - [x] RBAC (admin/customer).

@@ -82,11 +82,15 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Normalization:** Forced lowercase and accent removal.
 - **Route Protection:** Prevents slugs from matching internal routes (`admin`, `dashboard`, `login`, `register`, etc.).
 
-### Onboarding & Quality Enforcement
-- **Multi-step Flow:** Guided process for profile creation, business details, and branding.
-- **Quality Gates:** Prevents public activation of businesses with missing critical data (logo, description, valid links).
-
-## Security (RLS & Tenancy)
+### Unified Navigation System
+- **Context-Aware Navbar:** The main `Navbar` (`src/components/marketing/navbar.tsx`) dynamically adapts based on the Supabase auth state.
+- **Unified UserMenu:** A shared `UserMenu` component (`src/components/shared/user-menu.tsx`) centralizes identity management, role badges, and navigation links for both the marketing site and the internal dashboard.
+- **Mobile-First Responsive Design:** Marketing navigation uses a Radix UI `Sheet` for small screens, while authenticated actions remain accessible via the persistent `UserMenu`.
+- **Reactive Auth State:** Leverages Supabase's `onAuthStateChange` to ensure real-time UI updates during login, logout, or session expiry, avoiding stale rendering or hydration mismatches.
+- **Role-Based Navigation:**
+  - **Reviewers:** Focused on `/account` (My Reviews).
+  - **Business Owners:** Guided to `/dashboard`.
+  - **Super Admins:** Granted access to the specialized `/admin` governance portal.
 
 - **Isolation:** Multi-tenant strictness via `owner_id`.
 - **RLS Safety:** Use `is_admin()` security definer to avoid infinite recursion. NEVER query `profiles` directly in RLS.

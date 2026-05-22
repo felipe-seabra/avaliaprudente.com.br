@@ -1,17 +1,18 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-
 ## [Unreleased]
 
 ### Added
-- **Authenticated Review Ownership:**
-  - Enforced a `UNIQUE(user_id, business_id)` database constraint for authenticated reviewers.
-  - Implemented UPSERT behavior in the API. Successive submissions from the same user to the same business now update the existing review.
-  - Created a dedicated Reviewer Dashboard (`/account`) where authenticated users can view, edit, and delete their own reviews.
-  - Replaced the generic "Entrar" login CTA with "Meu Painel" for authenticated users in the main navigation.
-  - Introduced RLS policies allowing users to `UPDATE` and `DELETE` their own reviews.
-- **Authenticated Reviews with LGPD-Safe Identity:**
+- **Unified Authenticated Navigation:**
+  - Replaced the simple "Meu Painel" button with a comprehensive, role-aware `UserMenu` component for both marketing navbar and dashboard sidebar.
+  - Implemented dynamic role-based badges ("Super Admin", "Empresa", "Avaliador") for clear identity visualization.
+  - Added a full mobile menu for the landing page using Radix UI `Sheet` to handle both public and authenticated states.
+  - Standardized logout flow with automated session invalidation, local storage cleanup (selected business ID), and application-wide state refresh.
+  - Contextual navigation links: "Minhas Avaliações" (all users), "Dashboard Empresa" (business owners/admins), "Painel Admin" (super admins), and unified "Configurações".
+- **Authenticated Reviewer Flow:**
+...
+
   - Required Supabase-authenticated sessions before review submission.
   - Added Google OAuth as the primary public review login path and Magic Link as a fallback.
   - Added nullable `reviews.user_id`, `reviews.display_name`, and `reviews.auth_provider` fields for backward-compatible lawful attribution.
