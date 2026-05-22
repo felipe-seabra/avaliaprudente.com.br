@@ -46,9 +46,9 @@ export async function updateSession(request: NextRequest) {
     console.log(`Middleware [Session]: User ${user.id} found. Metadata role: ${user.app_metadata?.role || 'none'}`)
     
     // 1. Initial assignment from JWT (fast path)
-    if (user.app_metadata?.role === 'admin' || user.user_metadata?.role === 'admin' || 
-        user.app_metadata?.role === 'super_admin' || user.user_metadata?.role === 'super_admin') {
-       role = user.app_metadata?.role || user.user_metadata?.role || 'admin'
+    // IMPORTANT: DO NOT TRUST user_metadata for roles! Users can modify it via auth.updateUser().
+    if (user.app_metadata?.role === 'admin' || user.app_metadata?.role === 'super_admin') {
+       role = user.app_metadata?.role || 'admin'
     }
 
     // 2. Authoritative check from DB (always try to refresh)
