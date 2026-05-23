@@ -11,7 +11,7 @@ export function CrawlerComplianceSection() {
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Sobre o Avalia Prudente</h2>
             <p className="text-muted-foreground leading-relaxed">
-              O <strong>Avalia Prudente</strong> é uma plataforma de reputação empresarial e avaliações online que permite que consumidores compartilhem experiências reais e que empresas gerenciem e respondam aos feedbacks de clientes de forma transparente e segura.
+              Avalia Prudente é uma plataforma de reputação empresarial e avaliações online que ajuda consumidores a compartilhar experiências reais enquanto permite que empresas gerenciem e respondam aos feedbacks de clientes.
             </p>
           </div>
         </div>

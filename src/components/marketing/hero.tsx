@@ -31,10 +31,14 @@ export function Hero() {
             className="h-32 w-auto object-contain mb-8 mx-auto block dark:hidden"
             priority
           />
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8">
+          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
             <Zap className="mr-2 h-4 w-4 fill-primary" />
             <span>Plataforma de Reputação: Aproximou, avaliou.</span>
           </div>
+
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60 font-semibold mb-8 max-w-xl mx-auto leading-relaxed">
+            Avalia Prudente é uma plataforma de reputação empresarial e avaliações online que ajuda consumidores a compartilhar experiências reais enquanto permite que empresas gerenciem e respondam aos feedbacks de clientes.
+          </p>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-4xl mb-6 leading-[1.1]">
             A tag inteligente que <span className="text-gradient">conecta seu balcão</span> ao mundo digital

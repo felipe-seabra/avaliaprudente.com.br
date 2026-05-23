@@ -1,4 +1,5 @@
 import { Navbar } from '@/components/marketing/navbar'
+import { ComplianceBar } from '@/components/marketing/compliance-bar'
 import { Hero } from '@/components/marketing/hero'
 import { Features } from '@/components/marketing/features'
 import { HowItWorks } from '@/components/marketing/how-it-works'
@@ -16,6 +17,7 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <ComplianceBar />
       <Navbar />
       <main className="flex-1">
         <Hero />
