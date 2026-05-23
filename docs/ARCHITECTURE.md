@@ -198,6 +198,13 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **RLS Safety:** Use `is_admin()` security definer to avoid infinite recursion. NEVER query `profiles` directly in RLS.
 - **Public Access:** Anonymous access is strictly restricted to `is_frozen = false`.
 
+### Marketing & Hero UX
+- **Narrative Animation:** The homepage features a high-fidelity NFC interaction simulation (`src/components/marketing/nfc-hero-animation.tsx`) that establishes the project's value proposition through a "Phone + Tag" narrative.
+- **Premium Aesthetics:** 
+  - **NFC Tag:** Designed as a vertical premium card with a matte finish, glossy reflections, and "Avalia Prudente" branding.
+  - **Visual Realism:** Uses advanced CSS techniques (shadow casting, depth-of-field blur, haptic vibration simulation) to bridge the gap between digital and physical interaction.
+  - **Interactive Replay:** Animations are state-synced to trigger on viewport entry and user hover, ensuring accessibility and engagement.
+
 ## Maintainability & Folder Structure
 
 ### Important Routes

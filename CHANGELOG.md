@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Final Premium NFC Tag Design:**
+  - **Vertical Card Orientation:** Reimagined the NFC tag as a portrait-oriented premium card for a modern business aesthetic.
+  - **Enhanced Visibility:** Adjusted the smartphone overlap to reveal 40–45% of the tag, making the "AVALIA PRUDENTE" branding and "TAP TO REVIEW" instruction clearly visible.
+  - **Professional Branding:** Added minimal typography, a contactless wave simulation, and a matte dark finish with premium glossy reflections.
+  - **Physical Realism:** Implemented a physical shadow cast from the phone onto the tag and added a subtle blur to the tag to simulate depth of field during interaction.
 - **Final NFC Hero Refinement (Positioning & Realism):**
   - **Asymmetric Composition:** Shifted the NFC tag slightly left to create a more natural "tap" angle.
   - **Improved Interaction Realism:** Adjusted phone landing coordinates to overlap approximately 1/3 of the tag, simulating actual NFC sensor proximity.

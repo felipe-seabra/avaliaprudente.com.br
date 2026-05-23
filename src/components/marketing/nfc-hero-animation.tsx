@@ -66,22 +66,27 @@ export function NfcHeroAnimation() {
         }
 
         @keyframes phone-approach {
-          0% { transform: translate(120px, 160px) rotate(10deg); opacity: 0; }
-          100% { transform: translate(24px, 60px) rotate(-4deg); opacity: 1; }
+          0% { transform: translate(140px, 180px) rotate(15deg); opacity: 0; }
+          100% { transform: translate(32px, 64px) rotate(-4deg); opacity: 1; }
         }
 
         @keyframes nfc-pulse-ring {
           0% { transform: scale(1); opacity: 0; }
-          50% { transform: scale(1.8); opacity: 0.5; }
-          100% { transform: scale(2.4); opacity: 0; }
+          50% { transform: scale(1.6); opacity: 0.4; }
+          100% { transform: scale(2.2); opacity: 0; }
         }
 
         @keyframes device-vibrate {
-          0%, 100% { transform: translate(24px, 60px) rotate(-4deg); }
-          20% { transform: translate(26px, 58px) rotate(-3.5deg); }
-          40% { transform: translate(22px, 62px) rotate(-4.5deg); }
-          60% { transform: translate(25px, 59px) rotate(-3.8deg); }
-          80% { transform: translate(23px, 61px) rotate(-4.2deg); }
+          0%, 100% { transform: translate(32px, 64px) rotate(-4deg); }
+          20% { transform: translate(34px, 62px) rotate(-3.5deg); }
+          40% { transform: translate(30px, 66px) rotate(-4.5deg); }
+          60% { transform: translate(33px, 63px) rotate(-3.8deg); }
+          80% { transform: translate(31px, 65px) rotate(-4.2deg); }
+        }
+
+        @keyframes tag-shimmer {
+          0% { transform: translateX(-100%) skewX(-20deg); }
+          100% { transform: translateX(200%) skewX(-20deg); }
         }
 
         @keyframes content-reveal {
@@ -127,39 +132,54 @@ export function NfcHeroAnimation() {
         }
       `}</style>
 
-      {/* 1. THE ANCHOR: HORIZONTAL NFC TAG (Always Visible) */}
+      {/* 1. THE ANCHOR: VERTICAL PREMIUM NFC TAG (Always Visible) */}
       <div className={cn(
-        "absolute z-10 w-48 h-32 md:w-56 md:h-36 rounded-3xl bg-zinc-950 border border-white/10 shadow-[0_15px_40px_-12px_rgba(0,0,0,0.9)] flex flex-col items-center justify-center transform-gpu overflow-hidden transition-all duration-500",
-        inView ? "opacity-100 -translate-x-10 md:-translate-x-12" : "opacity-0"
+        "absolute z-10 w-[130px] h-[200px] md:w-[150px] md:h-[230px] rounded-[2.5rem] bg-zinc-950 border border-white/10 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] flex flex-col items-center justify-between py-10 md:py-12 transform-gpu overflow-hidden transition-all duration-700",
+        inView ? "opacity-100 -translate-x-28 md:-translate-x-36 -translate-y-4 blur-[0.4px]" : "opacity-0"
       )}>
         {/* Card Material Effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/50 pointer-events-none" />
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.05),transparent)] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/60 pointer-events-none" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.08),transparent)] pointer-events-none" />
         
-        {/* NFC Zone */}
-        <div className="relative flex flex-col items-center gap-3">
+        {/* Branding Detail (Top) */}
+        <div className="relative z-10 flex flex-col items-center gap-1.5 opacity-60">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+          <span className="text-[7px] md:text-[8px] uppercase font-black tracking-[0.4em] text-white/90">Avalia Prudente</span>
+        </div>
+
+        {/* NFC Zone (Center) */}
+        <div className="relative z-10 flex flex-col items-center gap-6">
           <div className="relative" key={`pulse-${animationKey}`}>
             {/* NFC Pulse Ring */}
             {inView && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-16 h-16 md:w-20 md:h-20 border-2 border-primary/30 rounded-full animate-pulse-fix" />
+                <div className="w-20 h-20 md:w-24 md:h-24 border-2 border-primary/20 rounded-full animate-pulse-fix" />
               </div>
             )}
-            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center shadow-inner relative z-10">
+            
+            {/* Contactless Icon Simulation */}
+            <div className="flex flex-col items-center gap-1 mb-4 opacity-20">
+              <div className="w-10 h-[1.5px] rounded-full bg-white" style={{ clipPath: 'ellipse(50% 100% at 50% 100%)' }} />
+              <div className="w-14 h-[1.5px] rounded-full bg-white" style={{ clipPath: 'ellipse(50% 100% at 50% 100%)' }} />
+              <div className="w-18 h-[1.5px] rounded-full bg-white" style={{ clipPath: 'ellipse(50% 100% at 50% 100%)' }} />
+            </div>
+
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-3xl bg-zinc-900/50 border border-white/5 flex items-center justify-center shadow-inner relative z-10 backdrop-blur-sm">
               <Zap className="w-7 h-7 md:w-8 md:h-8 text-primary fill-primary/10" />
             </div>
           </div>
-          <div className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.6em] text-zinc-500">NFC Target</div>
+          <div className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.5em] text-zinc-400 opacity-80">Tap to Review</div>
         </div>
 
-        {/* Branding Badge */}
-        <div className="absolute bottom-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/5">
-          <div className="w-1 h-1 rounded-full bg-primary" />
-          <span className="text-[7px] md:text-[8px] uppercase font-bold text-zinc-400 tracking-wider">Avalia Prudente</span>
+        {/* Bottom Detail */}
+        <div className="relative z-10 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/5 backdrop-blur-md">
+          <span className="text-[6px] md:text-[7px] uppercase font-bold text-zinc-500 tracking-[0.2em]">Premium Access</span>
         </div>
 
-        {/* Glossy Reflection */}
-        <div className="absolute -inset-x-full top-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-20deg] group-hover:animate-[shimmer_1s_infinite] pointer-events-none" />
+        {/* Premium Glossy Reflection */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -inset-x-full top-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/[0.03] to-transparent skew-x-[-20deg] animate-[tag-shimmer_4s_infinite_linear]" />
+        </div>
       </div>
 
       {/* 2. THE ACTOR: SMARTPHONE (Animated with Key Replay) */}
@@ -171,8 +191,11 @@ export function NfcHeroAnimation() {
         )}
       >
         {/* Device Frame */}
-        <div className="w-full h-full rounded-[1.8rem] md:rounded-[2.4rem] bg-zinc-900 border-[5px] md:border-[6px] border-zinc-800 shadow-2xl relative overflow-hidden ring-1 ring-white/10">
+        <div className="w-full h-full rounded-[2.2rem] md:rounded-[2.8rem] bg-zinc-900 border-[6px] md:border-[8px] border-zinc-800 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)] relative overflow-hidden ring-1 ring-white/10">
           
+          {/* Casting a shadow onto the tag */}
+          <div className="absolute -left-16 top-0 w-24 h-full bg-black/60 blur-3xl rounded-full pointer-events-none z-0" />
+
           {/* Dynamic Island */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 md:w-18 h-4 md:h-5 bg-zinc-800 rounded-b-xl z-50" />
 
@@ -243,8 +266,8 @@ export function NfcHeroAnimation() {
 
       {/* Floor Shadow for Tag */}
       <div className={cn(
-        "absolute bottom-[20%] left-1/2 w-48 h-6 bg-black/80 blur-3xl rounded-full -z-10 transition-all duration-500",
-        inView ? "-translate-x-[calc(50%+40px)] md:-translate-x-[calc(50%+48px)]" : "-translate-x-1/2"
+        "absolute bottom-[15%] left-1/2 w-32 h-6 bg-black/80 blur-3xl rounded-full -z-10 transition-all duration-700",
+        inView ? "-translate-x-[calc(50%+112px)] md:-translate-x-[calc(50%+144px)]" : "-translate-x-1/2"
       )} />
 
       {/* Global Background Glow */}
