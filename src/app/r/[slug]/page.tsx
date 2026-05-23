@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { createClient as createAnonymousClient } from '@/lib/supabase/client'
 import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { BusinessPageClient } from './business-page-client'
@@ -33,10 +34,11 @@ interface BusinessData {
 }
 
 /**
- * Internal function to fetch business data.
+ * Pure function to fetch public business data using an anonymous client.
+ * This is safe to be used inside unstable_cache.
  */
-async function fetchBusinessData(slug: string, pageNumber: number = 1): Promise<BusinessData | null> {
-  const supabase = await createClient()
+async function fetchPublicBusinessData(slug: string, pageNumber: number = 1) {
+  const supabase = createAnonymousClient()
   const pageRepo = new BusinessPageRepository(supabase)
   const linkRepo = new PageLinkRepository(supabase)
   const reviewRepo = new ReviewRepository(supabase)
@@ -49,23 +51,6 @@ async function fetchBusinessData(slug: string, pageNumber: number = 1): Promise<
 
   if (!page) return null
 
-  // Check auth status
-  const { data: { user } } = await supabase.auth.getUser()
-  let isAdmin = false
-  let isOwner = false
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    isAdmin = checkIsAdmin(profile?.role)
-    
-    // Check if user is owner of this business
-    isOwner = page.businesses.owner_id === user.id
-  }
-
   const [links, reviewsResponse] = await Promise.all([
     linkRepo.getByPageId(page.id),
     reviewRepo.getByBusinessId(page.business_id, limit, offset)
@@ -76,21 +61,44 @@ async function fetchBusinessData(slug: string, pageNumber: number = 1): Promise<
     links, 
     reviews: reviewsResponse.data,
     totalReviews: reviewsResponse.total,
-    currentPage: pageNumber,
-    isAdmin, 
-    isOwner, 
-    isReviewLink: false, 
-    redirectUrl: null 
+    currentPage: pageNumber
   }
 }
 
 /**
- * Cached version of fetchBusinessData using Next.js unstable_cache.
+ * Check authentication status and administrative privileges.
+ * This MUST NOT be cached by unstable_cache as it depends on cookies.
+ */
+async function getAuthStatus(ownerId?: string): Promise<{ isAdmin: boolean; isOwner: boolean }> {
+  try {
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) return { isAdmin: false, isOwner: false }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    return {
+      isAdmin: checkIsAdmin(profile?.role),
+      isOwner: ownerId === user.id
+    }
+  } catch (error) {
+    console.error('[Auth] Error checking auth status:', error)
+    return { isAdmin: false, isOwner: false }
+  }
+}
+
+/**
+ * Cached version of fetchPublicBusinessData using Next.js unstable_cache.
  * Supports targeted invalidation using the slug-specific tag.
  */
 const getBusinessData = (slug: string, pageNumber: number = 1) => 
   unstable_cache(
-    async () => fetchBusinessData(slug, pageNumber),
+    async () => fetchPublicBusinessData(slug, pageNumber),
     [`business-page-${slug}`, `page-${pageNumber}`],
     {
       revalidate: 3600,
@@ -102,16 +110,28 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const { slug } = await params
   const sParams = await searchParams
   const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page) : 1
+  
+  // Fetch public data (cached)
   const data = await getBusinessData(slug, pageParam)
 
-  if (!data || (data.page.businesses.is_frozen && !data.isAdmin)) {
+  if (!data) {
+    return {
+      title: 'Página Indisponível | Avalia Prudente',
+    }
+  }
+
+  // Check auth status (dynamic, not cached)
+  const { isAdmin, isOwner } = await getAuthStatus(data.page.businesses.owner_id)
+
+  // Handle Frozen Business
+  if (data.page.businesses.is_frozen && !isAdmin) {
     return {
       title: 'Página Indisponível | Avalia Prudente',
     }
   }
 
   // Handle unpublished pages
-  if (!data.page.is_published && !data.isAdmin && !data.isOwner) {
+  if (!data.page.is_published && !isAdmin && !isOwner) {
     return {
       title: 'Página em Configuração | Avalia Prudente',
     }
@@ -154,14 +174,28 @@ export default async function BusinessPublicPage({ params, searchParams }: Props
   const { slug } = await params
   const sParams = await searchParams
   const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page) : 1
-  const data = await getBusinessData(slug, pageParam)
+  
+  // 1. Fetch public data (cached)
+  const publicData = await getBusinessData(slug, pageParam)
 
-  if (!data) {
+  if (!publicData) {
     notFound()
   }
 
+  // 2. Fetch auth status (dynamic, depends on cookies)
+  const { isAdmin, isOwner } = await getAuthStatus(publicData.page.businesses.owner_id)
+
+  // 3. Combine data for the client component
+  const data: BusinessData = {
+    ...publicData,
+    isAdmin,
+    isOwner,
+    isReviewLink: false,
+    redirectUrl: null
+  }
+
   // Handle Frozen Business for non-admins
-  if (data.page.businesses.is_frozen && !data.isAdmin) {
+  if (data.page.businesses.is_frozen && !isAdmin) {
     return (
       <div className="min-h-screen bg-muted/30 flex flex-col items-center justify-center p-6 text-center">
         <div className="w-full max-w-md bg-background rounded-[2.5rem] p-10 shadow-xl border-2 border-destructive/10 animate-in zoom-in-95 duration-500">
@@ -193,7 +227,7 @@ export default async function BusinessPublicPage({ params, searchParams }: Props
   }
 
   // Handle unpublished pages for non-owners and non-admins
-  if (!data.page.is_published && !data.isAdmin && !data.isOwner) {
+  if (!data.page.is_published && !isAdmin && !isOwner) {
     return (
       <div className="min-h-screen bg-muted/30 flex flex-col items-center justify-center p-6 text-center">
         <div className="w-full max-w-md bg-background rounded-[2.5rem] p-10 shadow-xl border-2 border-primary/10 animate-in zoom-in-95 duration-500">
