@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Final NFC Hero Refinement (Positioning & Realism):**
+  - **Asymmetric Composition:** Shifted the NFC tag slightly left to create a more natural "tap" angle.
+  - **Improved Interaction Realism:** Adjusted phone landing coordinates to overlap approximately 1/3 of the tag, simulating actual NFC sensor proximity.
+  - **Premium Layering:** Refined tag and phone shadows for better depth separation without overwhelming glow effects.
+  - **Animation Stability:** Ensured flawless animation replay on hover/focus across different devices.
 - **Interactive NFC Hero Experience (Major Composition Fix):** Rebuilt the hero animation to be fully interactive and visually descriptive.
   - **Visible Anchor Card:** Reintroduced the NFC tag as a horizontal physical card (always visible) to establish the "Phone + Tag" interaction context.
   - **State-Based Replay System:** Implemented a `key`-driven animation restart that triggers on viewport entry, mouse hover, and keyboard focus.

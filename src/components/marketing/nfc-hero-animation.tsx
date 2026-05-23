@@ -66,8 +66,8 @@ export function NfcHeroAnimation() {
         }
 
         @keyframes phone-approach {
-          0% { transform: translate(100px, 140px) rotate(10deg); opacity: 0; }
-          100% { transform: translate(0, 90px) rotate(-4deg); opacity: 1; }
+          0% { transform: translate(120px, 160px) rotate(10deg); opacity: 0; }
+          100% { transform: translate(24px, 60px) rotate(-4deg); opacity: 1; }
         }
 
         @keyframes nfc-pulse-ring {
@@ -77,11 +77,11 @@ export function NfcHeroAnimation() {
         }
 
         @keyframes device-vibrate {
-          0%, 100% { transform: translate(0, 90px) rotate(-4deg); }
-          20% { transform: translate(2px, 88px) rotate(-3.5deg); }
-          40% { transform: translate(-2px, 92px) rotate(-4.5deg); }
-          60% { transform: translate(1px, 89px) rotate(-3.8deg); }
-          80% { transform: translate(-1px, 91px) rotate(-4.2deg); }
+          0%, 100% { transform: translate(24px, 60px) rotate(-4deg); }
+          20% { transform: translate(26px, 58px) rotate(-3.5deg); }
+          40% { transform: translate(22px, 62px) rotate(-4.5deg); }
+          60% { transform: translate(25px, 59px) rotate(-3.8deg); }
+          80% { transform: translate(23px, 61px) rotate(-4.2deg); }
         }
 
         @keyframes content-reveal {
@@ -129,8 +129,8 @@ export function NfcHeroAnimation() {
 
       {/* 1. THE ANCHOR: HORIZONTAL NFC TAG (Always Visible) */}
       <div className={cn(
-        "absolute z-10 w-48 h-32 md:w-56 md:h-36 rounded-3xl bg-zinc-950 border border-white/10 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center transform-gpu overflow-hidden transition-opacity duration-500",
-        inView ? "opacity-100" : "opacity-0"
+        "absolute z-10 w-48 h-32 md:w-56 md:h-36 rounded-3xl bg-zinc-950 border border-white/10 shadow-[0_15px_40px_-12px_rgba(0,0,0,0.9)] flex flex-col items-center justify-center transform-gpu overflow-hidden transition-all duration-500",
+        inView ? "opacity-100 -translate-x-10 md:-translate-x-12" : "opacity-0"
       )}>
         {/* Card Material Effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/50 pointer-events-none" />
@@ -142,7 +142,7 @@ export function NfcHeroAnimation() {
             {/* NFC Pulse Ring */}
             {inView && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-16 h-16 md:w-20 md:h-20 border-2 border-primary/40 rounded-full animate-pulse-fix" />
+                <div className="w-16 h-16 md:w-20 md:h-20 border-2 border-primary/30 rounded-full animate-pulse-fix" />
               </div>
             )}
             <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center shadow-inner relative z-10">
@@ -238,14 +238,17 @@ export function NfcHeroAnimation() {
         </div>
 
         {/* Floating Phone Shadow */}
-        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-full h-8 bg-black/40 blur-2xl rounded-full -z-10" />
+        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-full h-8 bg-black/30 blur-2xl rounded-full -z-10" />
       </div>
 
       {/* Floor Shadow for Tag */}
-      <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 w-48 h-6 bg-black/60 blur-3xl rounded-full -z-10" />
+      <div className={cn(
+        "absolute bottom-[20%] left-1/2 w-48 h-6 bg-black/80 blur-3xl rounded-full -z-10 transition-all duration-500",
+        inView ? "-translate-x-[calc(50%+40px)] md:-translate-x-[calc(50%+48px)]" : "-translate-x-1/2"
+      )} />
 
       {/* Global Background Glow */}
-      <div className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full -z-20 pointer-events-none" />
+      <div className="absolute inset-0 bg-primary/[0.03] blur-[80px] rounded-full -z-20 pointer-events-none" />
     </div>
   )
 }
