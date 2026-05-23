@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { SmartphoneNfc, Zap, Star, ShieldCheck } from 'lucide-react'
 import { BrandIcons } from '@/components/shared/brand-icons'
 import { cn } from '@/lib/utils'
@@ -19,26 +19,48 @@ export function NfcHeroAnimation() {
   const [hasPlayed, setHasPlayed] = useState(false)
   const [animationKey, setAnimationKey] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
+  const observerRef = useRef<IntersectionObserver | null>(null)
+
+  const triggerAnimation = useCallback(() => {
+    if (!hasPlayed) {
+      setHasPlayed(true)
+      setAnimationKey(prev => prev + 1)
+    }
+  }, [hasPlayed])
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    // 1. Safety Fallback: Force start after 1.5s if observer fails or element is partially off-screen
+    const fallbackTimer = setTimeout(() => {
+      if (!hasPlayed) triggerAnimation()
+    }, 1500)
+
+    // 2. IntersectionObserver for standard scroll trigger
+    observerRef.current = new IntersectionObserver(
       ([entry]) => {
+        // Use threshold 0 and rootMargin for maximum reliability on small viewports
         if (entry.isIntersecting && !hasPlayed) {
-          setHasPlayed(true)
-          setAnimationKey(prev => prev + 1)
+          triggerAnimation()
+          if (observerRef.current) observerRef.current.disconnect()
         }
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0,
+        rootMargin: '0px 0px -10% 0px' // Trigger slightly before it's fully in view
+      }
     )
 
     if (containerRef.current) {
-      observer.observe(containerRef.current)
+      observerRef.current.observe(containerRef.current)
     }
 
-    return () => observer.disconnect()
-  }, [hasPlayed])
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect()
+      clearTimeout(fallbackTimer)
+    }
+  }, [hasPlayed, triggerAnimation])
 
   const handleInteraction = () => {
+    // Only replay if it has already played once (to avoid interfering with initial autoplay)
     if (hasPlayed) {
       setAnimationKey(prev => prev + 1)
     }

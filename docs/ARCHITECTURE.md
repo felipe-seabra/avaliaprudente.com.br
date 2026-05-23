@@ -112,8 +112,9 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 
   - **Progressive UI Reveal:** Smartphone screen loads in a staggered sequence (`header-reveal`, `content-reveal`, `cta-reveal`) to simulate a natural mobile OS experience.
 - **Trigger Logic:** 
-  - **Viewport Activation:** Plays automatically when entering the viewport (threshold 0.3) using `IntersectionObserver`.
-  - **Interaction Replay:** Replays the entire 3.5s sequence on hover or focus.
+  - **Viewport Activation:** Plays automatically when entering the viewport using `IntersectionObserver`. Optimized for mobile with `threshold: 0` and `rootMargin: '0px 0px -10% 0px'`.
+  - **Safety Fallback:** Implements a 1.5s `setTimeout` fallback to force the animation start if the observer fails or is delayed (critical for mobile Safari/Chrome consistency).
+  - **Interaction Replay:** Replays the entire 3.5s sequence on hover or focus. Initial autoplay is decoupled from interaction logic to ensure reliable execution on touch devices.
   - **Confidence over Reactivity:** Slower, more deliberate timing to match a luxury product aesthetic.
 - **Performance & Accessibility:** 
   - **GPU Acceleration:** Exclusively uses `translate3d`, `rotate3d`, and `opacity` for smooth 60fps performance.
