@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Review Pagination:** Implemented server-side pagination for business reviews, reviewer account history, and customer dashboard.
+  - Added reusable `Pagination` component with mobile-friendly navigation.
+  - Updated `get_business_reviews_with_stats` RPC to support `limit` and `offset` for high-performance data fetching.
+- **Compliance & Trust Bar:** Added a global `ComplianceBar` for important platform announcements and trust signals.
+- **Crawler Visibility Infrastructure:** Introduced `CrawlerComplianceSection` and SSR-specific content wrappers to ensure critical ranking data is visible to search engines even before hydration.
+
+### Improved
+- **Governance & Security Hardening:**
+  - **SECURITY DEFINER Stabilization:** Audit and refactoring of all database functions to use safe security definers, preventing RLS recursion.
+  - **Middleware Auth Resilience:** Hardened authentication checks in middleware to handle session edge cases and provide clearer debug logging.
+  - **Reviewer → Customer Onboarding Fix:** Resolved edge cases in the role transition during business onboarding, ensuring metadata and database roles are perfectly synchronized.
+  - **Audit Logging Refinement:** Improved the structure and verbosity of moderation and role change logs for better administrative oversight.
+- **OAuth & Branding Compliance:**
+  - **Google Branding Alignment:** Updated all Google OAuth buttons and assets to strictly follow the latest brand guidelines (spacing, colors, and naming).
+  - **SSR Branding Visibility:** Ensured brand assets and logos are served with optimal cache headers and correctly metadata-tagged for social previews.
+- **Moderation & SEO Synchronization:**
+  - **Frozen Business ISR Fix:** Updated Incremental Static Regeneration logic to automatically purge and exclude frozen or banned businesses from public rankings and sitemap.
+  - **Sitemap Moderation Sync:** Integrated real-time moderation status into the sitemap generator to prevent indexing of restricted content.
+- **UX & Performance:**
+  - **Localization Cleanup:** Replaced generic "Discovery" terminology with the more idiomatic "Explorar" in rankings and public discovery sections.
+  - **Reduced Reload Behavior:** Optimized client-side navigation to minimize full-page reloads during dashboard transitions and auth state changes.
+  - **Console Log Cleanup:** Systematic removal of non-essential production logs to improve performance and privacy.
+  - **Dashboard Pagination:** Added pagination to all data-heavy tables in the customer and admin dashboards.
+  - **SSR Visibility Improvements:** Optimized initial HTML payload to ensure critical above-the-fold content is readable by crawlers and users with slow connections.
+
+### Added
 - **Google OAuth Business Onboarding:** Implemented a new premium onboarding flow for business customers.
   - Added "Continuar com Google" to Login and Register forms.
   - New multi-step `/onboarding` flow for business configuration.

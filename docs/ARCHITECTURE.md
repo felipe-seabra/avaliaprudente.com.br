@@ -6,6 +6,23 @@
 2. **Dependency Inversion:** High-level modules should not depend on low-level modules. Both should depend on abstractions.
 3. **Single Source of Truth:** Data should have one authoritative source.
 
+## Hybrid Rendering Strategy
+
+The platform employs a hybrid architecture to balance SEO, performance, and interactive user experience:
+
+1. **Public SSR (Server-Side Rendering):** 
+   - **Routes:** Homepage, Business Pages (`/[slug]`), Review Flow (`/r/[slug]`), Rankings, and Legal pages.
+   - **Why:** Maximum SEO visibility, instant "Time to Content", and reliable crawler indexing. Critical ranking data and business identities must be available in the initial HTML payload.
+   - **ISR (Incremental Static Regeneration):** Used for rankings and sitemaps with background revalidation to ensure data freshness without sacrificing speed.
+
+2. **Authenticated Query-based UX:**
+   - **Routes:** `/dashboard/*`, `/admin/*`, `/account/*`.
+   - **Why:** These areas prioritize high interactivity, real-time feedback, and complex state management. Leveraging **React Query** (TanStack Query) allows for:
+     - Optimistic UI updates (e.g., responding to a review).
+     - Seamless pagination and filtering without full-page reloads.
+     - Background data synchronization and intelligent caching.
+     - Reduced server load by offloading state management to the client after the initial secure shell is loaded.
+
 ## Layers
 
 ### 1. Domain (`src/core/domain`)
@@ -21,13 +38,13 @@
 - **Mappers:** Transform data between DB schema and Domain entities.
 
 ### 4. UI Layer (`src/components`, `src/app`)
-- **Server Components:** Default for data fetching and initial rendering.
-- **Client Components:** Used for interactivity (forms, modals, real-time feedback).
+- **Server Components:** Default for data fetching in public routes and initial layout shells.
+- **Client Components:** Used for interactivity (forms, modals, real-time feedback) and all authenticated dashboard features.
 - **Hooks:** Domain-specific hooks (`useBusiness`, `useReviews`, `useModeration`).
 
 ## State Management & Auth Flow
 
-- **Server State:** Handled by Next.js Server Components.
+- **Server State:** Handled by Next.js Server Components and React Query for authenticated views.
 - **Client State:** React `useState`, `useActionState` (React 19), and Context Providers (`RootProvider`, `BusinessProvider`).
 - **Middleware:** `src/middleware.ts` intercepts all requests to:
   1. Refresh Supabase session (ensures fresh account status).
@@ -35,9 +52,17 @@
   3. Enforce Moderation Blocks (Banned, Suspended, Deleted).
   4. Enforce Terms of Use Re-acceptance.
   5. Enforce Onboarding Quality (redirects to finish setup if incomplete).
-  6. **Admin Master Bypass:** Guarantee that `role = 'admin'` users bypass all moderation blocks.
+  6. **Admin Master Bypass:** Guarantee that `role = 'admin'` or `'super_admin'` users bypass all moderation blocks.
 
 ## Core Systems
+
+### Business Onboarding Lifecycle
+1. **Trigger:** User registers with `mode=business` or clicks "Create Business".
+2. **Identity Prefill:** Google OAuth metadata is used to pre-populate name and email.
+3. **Password Mandate:** Business owners must set a secure password for account recovery and multi-device access.
+4. **Configuration:** Mandatory Google Review link and basic branding (logo/colors).
+5. **Activation:** Page defaults to `is_published = false` (Draft) until minimum quality criteria are met.
+6. **Role Upgrade:** Upon completion, user is upgraded from `reviewer` to `customer`.
 
 ### Moderation & Appeals Lifecycle
 1. **Sanctions:** Warnings (soft), Suspensions (temp block), Bans (perm block), Soft Delete (deactivation).
@@ -46,7 +71,12 @@
    - User submits an appeal via `ModerationAppealModal`.
    - Admin reviews and decides in `/admin/appeals`.
    - Approval triggers automated reversal of the sanction and notifies the user.
-4. **Business Freezing:** `is_frozen = true` disables public visibility, slugs, and review links.
+4. **Business Freezing:** `is_frozen = true` disables public visibility, slugs, and review links. Integrated with ISR to purge stale public content.
+
+### Review Response Architecture
+- **Official Identity:** Verified businesses can respond once per review.
+- **Admin Oversight:** Platform admins can moderate responses or provide "Avalia Prudente Official" feedback.
+- **Data Fetching:** RPC-driven to include responses in the initial review payload, ensuring SEO indexing of business engagement.
 
 ### Ranking System (Bayesian Average)
 Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair rankings:

@@ -13,6 +13,7 @@
     <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-DB%20%2F%20Auth-green?logo=supabase" alt="Supabase" /></a>
     <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css" alt="Tailwind CSS" /></a>
     <a href="https://vercel.com"><img src="https://img.shields.io/badge/Vercel-Deployment-black?logo=vercel" alt="Vercel" /></a>
+    <a href="https://vitest.dev"><img src="https://img.shields.io/badge/Vitest-Testing-FCC72B?logo=vitest" alt="Vitest" /></a>
   </p>
 </div>
 
@@ -33,24 +34,25 @@ Built with a focus on **security**, **governance**, and **performance**, Avalia 
 
 ## 🚀 Core Features
 
-### 👤 For Reviewers
-- **Magic Link & Social Auth:** Seamless onboarding via Google OAuth or secure Magic Links.
-- **Reputation System:** Dynamic tiers (Recurrent to Elite) based on contribution quality.
-- **Review Ownership:** Full control over your history and profile visibility.
-- **Identity Consistency:** LGPD-conscious data synchronization across the platform.
-
-### 🏢 For Businesses
+### 🏢 For Businesses (SaaS)
 - **Dynamic Branding:** Personalized public pages with custom logos, colors, and social CTAs.
 - **Official Responses:** Engage directly with customers through verified response threads.
-- **Google Review Gate:** Smart filtering that promotes high-rating reviews to Google Business.
-- **Verified Status:** Official verification workflow to build trust with the community.
+- **Onboarding Excellence:** Google-aligned multi-step onboarding flow for friction-less setup.
+- **Google Review Gate:** Smart filtering that promotes high-rating reviews to Google Business in a non-invasive new-tab flow.
+- **Verified Status:** Official verification workflow with visual trust seals.
 - **Analytics Anti-Inflation:** Protection against metric manipulation and spam clicks.
 
+### 👤 For Reviewers
+- **Magic Link & Social Auth:** Seamless onboarding via Google OAuth (branded compliance) or secure Magic Links.
+- **Reputation System:** Dynamic tiers (Recurrent to Elite) based on contribution quality.
+- **Review Ownership:** Full control over history, profile visibility, and LGPD-safe data sync.
+- **Gamified Badges:** Visual recognition for trusted community contributors.
+
 ### 🛡️ Governance & Security
-- **RBAC & RLS:** Enterprise-grade security with Row Level Security and Role-Based Access Control.
+- **RBAC & RLS:** Enterprise-grade security with Row Level Security and Role-Based Access Control (Super Admin, Admin, Customer, Reviewer).
 - **Moderation Center:** Full transparency for sanctions (Warnings, Suspensions, Bans) and an integrated Appeals system.
 - **Abuse Prevention:** SHA-256 fingerprinting and server-side cooldowns to prevent review spam.
-- **Anti-Recursion Safety:** Hardened RLS policies optimized for production scale.
+- **Audit Logging:** Comprehensive tracking of role changes and administrative actions.
 
 ---
 
@@ -65,46 +67,34 @@ Built with a focus on **security**, **governance**, and **performance**, Avalia 
 | **Styling** | Tailwind CSS 4, Radix UI, shadcn/ui |
 | **Validation** | Zod, React Hook Form |
 | **Testing** | Vitest, React Testing Library |
-| **Infrastructure** | Vercel (Edge Runtime for OG Images), Resend (Transactional Email) |
+| **Infrastructure** | Vercel (Edge Runtime), Resend (Transactional Email), Stripe (Planned) |
 
 ---
 
 ## 🏗 Architecture Overview
 
-The project follows a **Clean Architecture** approach to ensure long-term maintainability and technical decoupling:
+The project follows a **Clean Architecture** approach with a **Hybrid Rendering Strategy**:
 
-- **Domain Layer (`src/core/domain`):** Pure business logic, entities, and repository interfaces. No external dependencies.
-- **Application Layer (`src/core/application`):** Orchestrates use cases (e.g., submitting reviews, processing appeals).
-- **Infrastructure Layer (`src/core/infrastructure`):** Technical implementations, Supabase repositories, and data mappers.
-- **UI Layer (`src/components` & `src/app`):** SSR-first React components, context providers, and domain-specific hooks.
+- **Domain Layer:** Pure business logic and entities.
+- **Application Layer:** Use cases orchestrating data flow.
+- **Infrastructure Layer:** Supabase repositories and technical implementations.
+- **UI Layer (Hybrid):** 
+  - **SSR-First:** Public pages are server-side rendered for maximum SEO.
+  - **Query-Powered:** Authenticated areas use **React Query** for a snappy, app-like experience with optimistic updates and pagination.
 
-### Performance & SEO
-- **SSR-First:** All public pages are server-side rendered for maximum SEO and performance.
-- **Edge Runtime:** Dynamic OG Images generated via Satori on Vercel Edge.
-- **Intelligent Hydration:** Minimal client-side JS for a snappy, app-like feel.
-- **Optimized RPCs:** Database-level logic for complex aggregations (Bayesian rankings, reputation stats).
+### SEO & Discovery Strategy
+- **Native Metadata Routes:** Automated `sitemap.ts` and `robots.ts`.
+- **Crawler Infrastructure:** Optimized SSR content wrappers ensure rankings are indexable before hydration.
+- **ISR Optimization:** Automatic revalidation for high-traffic discovery pages.
 
 ---
 
-## 🔐 Authentication & Security
+## 🔐 Security & Safety
 
-### Hybrid Onboarding & Auth
-Avalia Prudente implements a dual-mode authentication strategy designed for both convenience and high-security SaaS ownership:
-
-- **Reviewers:** Lightweight onboarding via Google OAuth or Magic Links. No password required for casual feedback submission.
-- **Businesses:** Premium, multi-step onboarding flow (`/onboarding`) that leverages Google OAuth to prefill identity while mandating the creation of a traditional secure password. This ensures business accounts support multi-channel login and are "billing-ready" for long-term operational ownership.
-
-### SSR-Safe Auth
-We leverage `@supabase/ssr` to handle authentication entirely via secure cookies. This allows:
-- Seamless route protection in `middleware.ts`.
-- Instant session validation in Server Components.
-- Secure token refresh without LocalStorage vulnerabilities.
-
-### Governance Model
-- **Super Admin:** Platform-wide oversight and manual override capabilities.
-- **Business Owner:** Full management of their specific tenant (isolation via `owner_id`).
-- **Reviewer:** Standard profile with verified identity attributions.
-- **Audit Logging:** Every critical action is tracked through database triggers and moderation logs.
+- **Multi-tenant Isolation:** Strict data separation via `owner_id` and RLS.
+- **Anti-Recursion:** Hardened `is_admin` security definers.
+- **Auth Hardening:** Secure cookie-based session management with `@supabase/ssr`.
+- **Operational Safety:** Mandatory confirmation for production database operations via `db-safety.sh`.
 
 ---
 
@@ -116,77 +106,24 @@ We leverage `@supabase/ssr` to handle authentication entirely via secure cookies
 - Supabase CLI
 
 ### Setup
-1. **Clone and Install:**
-   ```bash
-   git clone https://github.com/your-repo/avaliaprudente.git
-   cd avaliaprudente
-   npm install
-   ```
+1. **Clone and Install:** `npm install`
+2. **Environment:** Copy `.env.example` to `.env.local`
+3. **Database:** `npm run supabase:start`
+4. **Run:** `npm run dev`
 
-2. **Environment Configuration:**
-   Copy `.env.example` to `.env.local` and fill in your Supabase credentials.
-
-3. **Start Local Database:**
-   ```bash
-   npm run supabase:start
-   ```
-
-4. **Run Development Server:**
-   ```bash
-   npm run dev
-   ```
-
-### 🛡️ Developer Experience: Safety Guard
-We use a custom `db-safety.sh` script to prevent accidental destructive operations on production databases.
-- `npm run supabase:reset`: Safe reset of local environment.
-- `npm run db:push`: Securely pushes migrations with mandatory confirmation.
+### 🛡️ Developer Experience
+- `npm run lint`: Enforce code quality and branding compliance.
+- `npm run test`: Validate critical business logic.
+- `npm run build`: Verify production readiness and SSR integrity.
 
 ---
 
 ## 🚢 Deployment
 
-The platform is optimized for a hybrid **Vercel + Supabase** architecture:
-
-1. **Migrations:** Managed via Supabase CLI and synchronized with GitHub Actions.
-2. **Compute:** Next.js deployment on Vercel, utilizing both Node.js and Edge runtimes.
-3. **Database:** PostgreSQL on Supabase with strict RLS policies enabled.
-4. **Safety:** All production deployments require passing the `lint` and `test` suites.
-
----
-
-## 📁 Project Structure
-
-```text
-src/
-├── app/             # Next.js 15 App Router (Routes & Server Components)
-├── components/      # UI Components (Domain-driven: admin, dashboard, marketing)
-├── core/            # Clean Architecture Core (Domain, Application, Infrastructure)
-├── hooks/           # Domain-specific React hooks
-├── lib/             # Shared utilities (supabase client, validators, constants)
-├── providers/       # React Context Providers
-└── types/           # Global TypeScript definitions
-supabase/
-├── migrations/      # Versioned SQL migrations
-└── seed.sql         # Local development seed data
-```
-
----
-
-## 📖 Documentation Reference
-
-Detailed technical guides can be found in the `docs/` directory:
-- [Architecture & Patterns](docs/ARCHITECTURE.md)
-- [Multi-tenant Strategy](docs/adr/001-multi-tenant-strategy.md)
-- [Authentication Workflow](docs/adr/002-auth-strategy.md)
-- [Verification System](docs/adr/003-verification-flow.md)
-
----
-
-## 🗺 Future Roadmap
-- [ ] **Stripe Integration:** Premium tiers for businesses with advanced analytics.
-- [ ] **AI Assistant:** Automated response suggestions for business owners.
-- [ ] **Mobile App:** Native experience for reviewers with NFC quick-tap.
-- [ ] **Advanced Moderation:** ML-based spam detection and sentiment analysis.
+Optimized for **Vercel + Supabase Cloud**:
+1. Continuous Integration via GitHub Actions.
+2. Edge Runtime utilization for dynamic branding assets.
+3. Versioned migrations and rollback-ready deployment strategy.
 
 ---
 

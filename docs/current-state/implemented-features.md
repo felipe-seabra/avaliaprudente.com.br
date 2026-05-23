@@ -7,6 +7,7 @@
 - [x] **Responsive Mobile Navbar:** Full mobile-first navigation with interactive `Sheet` menu for marketing and public pages.
 - [x] **Dynamic Role visualization:** Clear visual badges for Super Admin, Business, and Reviewer roles in the user menu.
 - [x] **Standardized Logout Flow:** Unified session termination across landing page, dashboard, and account pages.
+- [x] **Compliance & Trust Bar:** Global notification system for platform announcements.
 - [x] **Landing Page foundation:** Premium Hero, Features, Pricing, and FAQ sections.
 - [x] **Dashboard Shell:** Sidebar-based administration with breadcrumbs and top-nav alerts.
 - [x] **Dark/Light Mode:** Full theme support with system preference detection.
@@ -17,6 +18,7 @@
 - [x] **Super Admin Governance:** Privileged role hierarchy (`user_role` enum) for authoritative administrative access management.
 - [x] **Secure Role Management API:** Server-side role transition logic with explicit hierarchy validation and audit logging.
 - [x] **Role Transition Auditing:** Detailed logging of all role changes in `role_change_logs`.
+- [x] **OAuth Branding Compliance:** Google-aligned authentication assets and flows.
 - [x] Middleware session hardening & central routing.
 - [x] Blocked user detection (suspended, banned, deleted).
 - [x] Infinite recursion RLS protections (`is_admin` security definer).
@@ -39,6 +41,8 @@
 
 ## Core SaaS
 - [x] Public Business Page (NFC-ready).
+- [x] **Official Business Responses:** Verified response threads for business owners.
+- [x] **Review Pagination:** Server-side pagination for high-volume feedback management.
 - [x] Drag-and-drop link management.
 - [x] Branded QR Code generator.
 - [x] Bayesian Ranking system.
@@ -74,8 +78,10 @@
 ## SEO & Discovery
 - [x] **Native Next.js 15 Metadata Routes:** Implemented `robots.ts` and `sitemap.ts`.
 - [x] **Dynamic Sitemap Generation:** Automated indexing of public businesses and legal pages.
+- [x] **Crawler Visibility Infrastructure:** SSR-optimized rankings and above-the-fold content.
 - [x] **Visibility Guardrails:** Explicit filtering of frozen, draft, and private businesses from search engines.
 - [x] **Discovery Showcase:** Inclusion of demo routes in the sitemap for better product indexing.
+- [x] **Localization Cleanup:** Optimized "Explorar" terminology for search intent.
 
 ## Testing & Stability (Phase 4)
 - [x] Automated Testing Infrastructure (Vitest & React Testing Library).
