@@ -151,6 +151,16 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **New Tab Strategy:** External navigation to Google Reviews is always performed in a new tab (`_blank`) to ensure the user remains active on the Avalia Prudente platform.
 - **UX Logic:** Subtle, non-invasive modals/cards are used to maintain a premium feel and prevent abandonment.
 
+### Centralized Moderation Scope Architecture
+- **Goal:** Eliminate duplicate filtering logic and prevent public moderation leakage.
+- **Database Layer:** Views like `public.active_businesses` and `public.active_reviews` provide a canonical "active only" data source.
+- **Application Layer:** `PublicScopes` in `src/core/infrastructure/repositories/public-scopes.ts` provides reusable Supabase query builders for public entities.
+- **Repository Integration:** Public-facing repository methods MUST use `PublicScopes` or the corresponding database views.
+- **Defense-in-Depth:** Moderation is enforced at three levels:
+  1. **RLS Policies:** Standard database-level security.
+  2. **Database Views:** High-level abstraction for public queries.
+  3. **Application Scopes:** Code-level consistency for repositories and use cases.
+
 - **Isolation:** Multi-tenant strictness via `owner_id`.
 - **RLS Safety:** Use `is_admin()` security definer to avoid infinite recursion. NEVER query `profiles` directly in RLS.
 - **Public Access:** Anonymous access is strictly restricted to `is_frozen = false`.

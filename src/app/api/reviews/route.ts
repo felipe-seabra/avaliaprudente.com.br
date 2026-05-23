@@ -4,6 +4,8 @@ import { createClient as createServerClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 import crypto from 'crypto'
 import { z } from 'zod'
+import { PublicScopes } from '@/core/infrastructure/repositories/public-scopes'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 const ReviewSubmissionSchema = z.object({
   business_id: z.string().uuid(),
@@ -108,24 +110,32 @@ export async function POST(request: Request) {
       )
     }
 
-    const { data: business, error: businessError } = await supabaseAdmin
-      .from('businesses')
+    const { data: business, error: businessError } = await PublicScopes.businesses(supabaseAdmin as SupabaseClient)
       .select('id, is_frozen')
       .eq('id', business_id)
-      .single()
+      .maybeSingle()
 
     if (businessError || !business) {
-      return NextResponse.json(
-        { error: 'Empresa não encontrada.' },
-        { status: 404 }
-      )
-    }
+      // If not found in public scope, it might be frozen or non-existent
+      const { data: rawBusiness } = await supabaseAdmin
+        .from('businesses')
+        .select('id, is_frozen')
+        .eq('id', business_id)
+        .maybeSingle()
 
-    if (!isAdmin && business.is_frozen) {
-      return NextResponse.json(
-        { error: 'Esta empresa está temporariamente indisponível para novas avaliações.' },
-        { status: 403 }
-      )
+      if (!rawBusiness) {
+        return NextResponse.json(
+          { error: 'Empresa não encontrada.' },
+          { status: 404 }
+        )
+      }
+
+      if (!isAdmin && rawBusiness.is_frozen) {
+        return NextResponse.json(
+          { error: 'Esta empresa está temporariamente indisponível para novas avaliações.' },
+          { status: 403 }
+        )
+      }
     }
 
     const authProvider = getAuthProvider(user)

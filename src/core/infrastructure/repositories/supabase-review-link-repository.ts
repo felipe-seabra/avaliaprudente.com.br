@@ -1,6 +1,8 @@
 import { createClient as createBrowserClient } from '@/lib/supabase/client'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { ReviewLink, CreateReviewLinkDTO, Business } from '@/core/domain/entities'
+import { PublicScopes } from './public-scopes'
+import { Database } from '@/types/supabase'
 
 export class ReviewLinkRepository {
   private supabase: SupabaseClient
@@ -21,24 +23,14 @@ export class ReviewLinkRepository {
   }
 
   async getBySlug(slug: string): Promise<(ReviewLink & { businesses: Business }) | null> {
-    const { data, error } = await this.supabase
-      .from('review_links')
-      .select('*, businesses(*)')
+    const { data, error } = await PublicScopes.reviewLinks(this.supabase as SupabaseClient<Database>)
+      .select('*, businesses!inner(*)')
       .ilike('slug', slug)
-      .eq('is_active', true)
-      .single()
-      .returns<ReviewLink & { businesses: Business }>()
+      .maybeSingle()
 
     if (error || !data) return null
     
-    // Safety: If the associated business is frozen, the link should not work for public users.
-    // RLS might already handle this, but we reinforce it here.
-    const result = data as unknown as (ReviewLink & { businesses: Business })
-    if (result.businesses?.is_frozen) {
-       return null
-    }
-
-    return result
+    return data as unknown as (ReviewLink & { businesses: Business })
   }
 
   async isSlugAvailable(slug: string): Promise<boolean> {

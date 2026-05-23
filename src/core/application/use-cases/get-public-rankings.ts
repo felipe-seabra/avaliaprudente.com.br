@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/supabase'
+import { PublicScopes } from '@/core/infrastructure/repositories/public-scopes'
 
 interface RankedBusiness {
   id: string
@@ -41,9 +42,8 @@ export async function getPublicRankings() {
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-  // Fetch businesses with reviews and analytics
-  const { data: businesses, error } = await supabase
-    .from('businesses')
+  // Fetch businesses using centralized public scope
+  const { data: businesses, error } = await PublicScopes.businesses(supabase)
     .select(`
       id, 
       name, 
@@ -55,7 +55,6 @@ export async function getPublicRankings() {
       reviews (rating, created_at),
       analytics_events (event_type, created_at)
     `)
-    .eq('is_frozen', false)
     .limit(100)
 
   if (error) {

@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2026-05-23]
+### Added
+- **Centralized Moderation Scope Architecture:** Formalized a multi-layer strategy for public visibility to eliminate leakage risks.
+  - **Database Views:** Introduced `active_businesses`, `active_reviews`, `active_business_pages`, and `active_page_links` as canonical public data sources.
+  - **Application Scopes:** Created `PublicScopes` utility in the infrastructure layer to provide reusable, moderation-safe Supabase query builders.
+  - **Defense-in-Depth:** Unified visibility rules across rankings, sitemaps, business pages, and review links.
+### Refactored
+- **Public Query Logic:** Updated `getPublicRankings`, `BusinessPageRepository`, `ReviewLinkRepository`, and `ReviewSubmissionAPI` to use the centralized moderation scopes.
+
 ### Added
 - **Review Pagination:** Implemented server-side pagination for business reviews, reviewer account history, and customer dashboard.
   - Added reusable `Pagination` component with mobile-friendly navigation.

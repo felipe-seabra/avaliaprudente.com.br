@@ -1,6 +1,8 @@
 import { createClient as createBrowserClient } from '@/lib/supabase/client'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { BusinessPage, PageLink, CreatePageLinkDTO, Business } from '@/core/domain/entities'
+import { PublicScopes } from './public-scopes'
+import { Database } from '@/types/supabase'
 
 interface BusinessWithModeration extends Business {
   is_frozen: boolean
@@ -125,8 +127,7 @@ export class BusinessPageRepository {
   }
 
   async getSitemapEntries(): Promise<{ slug: string, updated_at: string }[]> {
-    const { data, error } = await this.supabase
-      .from('businesses')
+    const { data, error } = await PublicScopes.businesses(this.supabase as SupabaseClient<Database>)
       .select(`
         slug,
         updated_at,
@@ -134,7 +135,6 @@ export class BusinessPageRepository {
           is_published
         )
       `)
-      .eq('is_frozen', false)
 
     if (error) {
       console.error('Error fetching sitemap entries:', error)

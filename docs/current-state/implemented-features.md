@@ -38,6 +38,7 @@
 - [x] Complete Admin Bypass mechanism.
 - [x] **Transparency Center:** Dashboard for users to view sanctions.
 - [x] **Appeals Workflow:** System for contesting moderation actions.
+- [x] **Centralized Moderation Scope Architecture:** Formalized "Public Scopes" and Database Views to ensure consistent visibility across all public surfaces.
 
 ## Core SaaS
 - [x] Public Business Page (NFC-ready).
