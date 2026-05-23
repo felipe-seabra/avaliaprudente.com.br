@@ -67,7 +67,7 @@ export function NfcHeroAnimation() {
 
         @keyframes phone-approach {
           0% { transform: translate(140px, 180px) rotate(15deg); opacity: 0; }
-          100% { transform: translate(32px, 64px) rotate(-4deg); opacity: 1; }
+          100% { transform: translate(62px, 64px) rotate(-4deg); opacity: 1; }
         }
 
         @keyframes nfc-pulse-ring {
@@ -77,11 +77,11 @@ export function NfcHeroAnimation() {
         }
 
         @keyframes device-vibrate {
-          0%, 100% { transform: translate(32px, 64px) rotate(-4deg); }
-          20% { transform: translate(34px, 62px) rotate(-3.5deg); }
-          40% { transform: translate(30px, 66px) rotate(-4.5deg); }
-          60% { transform: translate(33px, 63px) rotate(-3.8deg); }
-          80% { transform: translate(31px, 65px) rotate(-4.2deg); }
+          0%, 100% { transform: translate(62px, 64px) rotate(-4deg); }
+          20% { transform: translate(64px, 62px) rotate(-3.5deg); }
+          40% { transform: translate(60px, 66px) rotate(-4.5deg); }
+          60% { transform: translate(63px, 63px) rotate(-3.8deg); }
+          80% { transform: translate(61px, 65px) rotate(-4.2deg); }
         }
 
         @keyframes tag-shimmer {
@@ -97,6 +97,20 @@ export function NfcHeroAnimation() {
         @keyframes list-item-up {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (min-width: 768px) {
+          @keyframes phone-approach {
+            0% { transform: translate(140px, 180px) rotate(15deg); opacity: 0; }
+            100% { transform: translate(78px, 64px) rotate(-4deg); opacity: 1; }
+          }
+          @keyframes device-vibrate {
+            0%, 100% { transform: translate(78px, 64px) rotate(-4deg); }
+            20% { transform: translate(80px, 62px) rotate(-3.5deg); }
+            40% { transform: translate(76px, 66px) rotate(-4.5deg); }
+            60% { transform: translate(79px, 63px) rotate(-3.8deg); }
+            80% { transform: translate(77px, 65px) rotate(-4.2deg); }
+          }
         }
 
         .animate-tag-fix {
@@ -134,8 +148,8 @@ export function NfcHeroAnimation() {
 
       {/* 1. THE ANCHOR: VERTICAL PREMIUM NFC TAG (Always Visible) */}
       <div className={cn(
-        "absolute z-10 w-[130px] h-[200px] md:w-[150px] md:h-[230px] rounded-[2.5rem] bg-zinc-950 border border-white/10 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] flex flex-col items-center justify-between py-10 md:py-12 transform-gpu overflow-hidden transition-all duration-700",
-        inView ? "opacity-100 -translate-x-28 md:-translate-x-36 -translate-y-4 blur-[0.4px]" : "opacity-0"
+        "absolute z-10 w-[130px] h-[200px] md:w-[150px] md:h-[230px] rounded-2xl md:rounded-3xl bg-zinc-950 border border-white/10 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] flex flex-col items-center justify-between py-10 md:py-12 transform-gpu overflow-hidden transition-all duration-700",
+        inView ? "opacity-100 -translate-x-16 md:-translate-x-[80px] -translate-y-4 blur-[0.4px]" : "opacity-0"
       )}>
         {/* Card Material Effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/60 pointer-events-none" />
@@ -168,12 +182,12 @@ export function NfcHeroAnimation() {
               <Zap className="w-7 h-7 md:w-8 md:h-8 text-primary fill-primary/10" />
             </div>
           </div>
-          <div className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.5em] text-zinc-400 opacity-80">Tap to Review</div>
+          <div className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 opacity-80 text-center px-4">Aproxime para Avaliar</div>
         </div>
 
         {/* Bottom Detail */}
         <div className="relative z-10 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/5 backdrop-blur-md">
-          <span className="text-[6px] md:text-[7px] uppercase font-bold text-zinc-500 tracking-[0.2em]">Premium Access</span>
+          <span className="text-[6px] md:text-[7px] uppercase font-bold text-zinc-500 tracking-[0.2em]">Experiência NFC</span>
         </div>
 
         {/* Premium Glossy Reflection */}
@@ -267,7 +281,7 @@ export function NfcHeroAnimation() {
       {/* Floor Shadow for Tag */}
       <div className={cn(
         "absolute bottom-[15%] left-1/2 w-32 h-6 bg-black/80 blur-3xl rounded-full -z-10 transition-all duration-700",
-        inView ? "-translate-x-[calc(50%+112px)] md:-translate-x-[calc(50%+144px)]" : "-translate-x-1/2"
+        inView ? "-translate-x-[calc(50%+64px)] md:-translate-x-[calc(50%+80px)]" : "-translate-x-1/2"
       )} />
 
       {/* Global Background Glow */}
