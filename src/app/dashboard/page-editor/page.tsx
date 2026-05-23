@@ -1,11 +1,10 @@
 'use client'
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useBusiness } from '@/providers/business-provider'
-import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
-import { BusinessPage, PageLink, Business } from '@/core/domain/entities'
+import { PageLink, Business } from '@/core/domain/entities'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -56,23 +55,26 @@ import { BrandIcons } from '@/components/shared/brand-icons'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
+import { useBusinessPage, usePageLinks, useLinkMutations } from '@/hooks/use-dashboard-queries'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function PageEditor() {
   const { currentBusiness, refreshBusinesses } = useBusiness()
-  const [page, setPage] = useState<BusinessPage | null>(null)
-  const [links, setLinks] = useState<PageLink[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { data: page, isLoading: isPageLoading } = useBusinessPage(currentBusiness?.id)
+  const { data: links = [], isLoading: isLinksLoading } = usePageLinks(page?.id)
+  const { createMutation, updateMutation, deleteMutation, updateOrderMutation } = useLinkMutations(page?.id)
+  
   const [isSaving, setIsSaving] = useState(false)
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false)
   const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<string>('customer')
   const [isAdminActionLoading, setIsAdminActionLoading] = useState(false)
+  const [localDescription, setLocalDescription] = useState('')
 
-  const pageRepo = useMemo(() => new BusinessPageRepository(), [])
-  const linkRepo = useMemo(() => new PageLinkRepository(), [])
   const businessRepo = useMemo(() => new BusinessRepository(), [])
   const adminRepo = useMemo(() => new AdminRepository(), [])
   const supabase = useMemo(() => createClient(), [])
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     async function getRole() {
@@ -97,6 +99,12 @@ export default function PageEditor() {
     }
   }, [currentBusiness?.logo_url])
 
+  useEffect(() => {
+    if (page?.description) {
+      setLocalDescription(page.description)
+    }
+  }, [page?.description])
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -104,36 +112,15 @@ export default function PageEditor() {
     })
   )
 
-  const fetchData = useCallback(async () => {
-    if (!currentBusiness) return
-    setIsLoading(true)
-    try {
-      let pageData = await pageRepo.getByBusinessId(currentBusiness.id)
-      if (!pageData) {
-        pageData = await pageRepo.create(currentBusiness.id)
-      }
-      setPage(pageData)
-      const linksData = await linkRepo.getByPageId(pageData.id)
-      setLinks(linksData)
-    } catch (err) {
-      logError(err, 'Fetch Page Data')
-      const normalized = parseError(err)
-      toast.error('Erro ao carregar dados', { description: normalized.message })
-    } finally {
-      setIsLoading(false)
-    }
-  }, [currentBusiness, pageRepo, linkRepo])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
   const handleUpdatePage = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!page) return
     setIsSaving(true)
     try {
-      await pageRepo.update(page.id, { description: page.description })
+      const { BusinessPageRepository } = await import('@/core/infrastructure/repositories/supabase-page-repository')
+      const pageRepo = new BusinessPageRepository()
+      await pageRepo.update(page.id, { description: localDescription })
+      queryClient.invalidateQueries({ queryKey: ['business-page', currentBusiness?.id] })
       toast.success('Página atualizada!')
     } catch (err: unknown) {
       logError(err, 'Update Page Content')
@@ -206,45 +193,42 @@ export default function PageEditor() {
       custom: 'Novo Link'
     }
 
-    try {
-      await linkRepo.create({
-        page_id: page.id,
-        type,
-        title: titles[type] || 'Novo Link',
-        url: '',
-        sort_order: links.length
-      })
-      fetchData()
-      toast.success('Link adicionado!')
-    } catch (err: unknown) {
-      logError(err, 'Add Link')
-      const normalized = parseError(err)
-      toast.error('Erro ao adicionar link', { description: normalized.message })
-    }
+    createMutation.mutate({
+      page_id: page.id,
+      type,
+      title: titles[type] || 'Novo Link',
+      url: '',
+      sort_order: links.length
+    }, {
+      onSuccess: () => toast.success('Link adicionado!'),
+      onError: (err) => {
+        logError(err, 'Add Link')
+        const normalized = parseError(err)
+        toast.error('Erro ao adicionar link', { description: normalized.message })
+      }
+    })
   }
 
   const handleDeleteLink = async (id: string) => {
     if (!confirm('Tem certeza?')) return
-    try {
-      await linkRepo.delete(id)
-      setLinks(links.filter(l => l.id !== id))
-      toast.success('Link removido')
-    } catch (err: unknown) {
-      logError(err, 'Delete Link')
-      const normalized = parseError(err)
-      toast.error('Erro ao remover link', { description: normalized.message })
-    }
+    deleteMutation.mutate(id, {
+      onSuccess: () => toast.success('Link removido'),
+      onError: (err) => {
+        logError(err, 'Delete Link')
+        const normalized = parseError(err)
+        toast.error('Erro ao remover link', { description: normalized.message })
+      }
+    })
   }
 
   const handleUpdateLink = async (id: string, updates: Partial<PageLink>) => {
-    try {
-      await linkRepo.update(id, updates)
-      setLinks(links.map(l => l.id === id ? { ...l, ...updates } : l))
-    } catch (err: unknown) {
-      logError(err, 'Update Link')
-      const normalized = parseError(err)
-      toast.error('Erro ao atualizar link', { description: normalized.message })
-    }
+    updateMutation.mutate({ id, updates }, {
+      onError: (err) => {
+        logError(err, 'Update Link')
+        const normalized = parseError(err)
+        toast.error('Erro ao atualizar link', { description: normalized.message })
+      }
+    })
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -255,22 +239,19 @@ export default function PageEditor() {
       const newIndex = links.findIndex((item) => item.id === over.id)
       const newItems = arrayMove(links, oldIndex, newIndex)
       
-      setLinks(newItems)
-
       // Update order in DB
       const updates = newItems.map((item, index) => ({
         id: item.id,
         sort_order: index,
       }))
       
-      try {
-        await linkRepo.updateOrder(updates)
-      } catch (err: unknown) {
-        logError(err, 'Update Links Order')
-        const normalized = parseError(err)
-        toast.error('Erro ao salvar nova ordem', { description: normalized.message })
-        fetchData() // Revert to DB state on error
-      }
+      updateOrderMutation.mutate(updates, {
+        onError: (err) => {
+          logError(err, 'Update Links Order')
+          const normalized = parseError(err)
+          toast.error('Erro ao salvar nova ordem', { description: normalized.message })
+        }
+      })
     }
   }
 
@@ -290,7 +271,7 @@ export default function PageEditor() {
     return <LinkIcon className="h-3.5 w-3.5 text-muted-foreground" />
   }
 
-  if (isLoading) return <div className="p-8 animate-pulse space-y-4">
+  if (isPageLoading || isLinksLoading) return <div className="p-8 animate-pulse space-y-4">
     <div className="h-10 w-64 bg-muted rounded" />
     <div className="h-64 bg-muted rounded-xl" />
   </div>
@@ -466,8 +447,8 @@ export default function PageEditor() {
                   <Label>Descrição da Empresa</Label>
                   <Textarea 
                     placeholder="Conte um pouco sobre seu negócio..."
-                    value={page.description || ''}
-                    onChange={(e) => setPage({ ...page, description: e.target.value })}
+                    value={localDescription}
+                    onChange={(e) => setLocalDescription(e.target.value)}
                   />
                 </div>
                 <Button type="submit" disabled={isSaving} className="cursor-pointer font-bold gap-2">
@@ -587,7 +568,7 @@ export default function PageEditor() {
               
               <h3 className="font-extrabold text-xl mb-2 text-center tracking-tight">{currentBusiness.name}</h3>
               <p className="text-[11px] text-muted-foreground mb-8 line-clamp-3 text-center px-4 leading-relaxed font-medium">
-                {page.description || 'Sua descrição aparecerá aqui...'}
+                {localDescription || 'Sua descrição aparecerá aqui...'}
               </p>
               
               <div className="w-full space-y-3">

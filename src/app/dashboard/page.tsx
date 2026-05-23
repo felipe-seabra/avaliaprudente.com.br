@@ -1,10 +1,7 @@
 'use client'
 
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { useBusiness } from '@/providers/business-provider'
-import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
-import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase-analytics-repository'
-import { Review, AnalyticsEvent } from '@/core/domain/entities'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Star, MessageSquare, Building2, MousePointer2, Users, Link as LinkIcon, ExternalLink, QrCode, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
@@ -13,38 +10,12 @@ import { Button } from '@/components/ui/button'
 import { APP_CONFIG } from '@/lib/constants'
 import { BusinessOnboardingAlert } from '@/components/dashboard/business-onboarding-alert'
 import { PlanBadge } from '@/components/dashboard/plan-badge'
+import { useDashboardStats } from '@/hooks/use-dashboard-queries'
 
 export default function DashboardPage() {
   const { currentBusiness, businesses, isLoading: isBusinessLoading } = useBusiness()
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [stats, setStats] = useState<AnalyticsEvent[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: dashboardData, isLoading: isStatsLoading } = useDashboardStats(currentBusiness?.id)
   const [copied, setCopied] = useState(false)
-
-  const reviewRepo = useMemo(() => new ReviewRepository(), [])
-  const analyticsRepo = useMemo(() => new AnalyticsRepository(), [])
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!currentBusiness?.id) return
-      setIsLoading(true)
-      try {
-        const [reviewsResponse, statsData] = await Promise.all([
-          reviewRepo.getByBusinessId(currentBusiness.id, 100),
-          analyticsRepo.getStatsByBusinessId(currentBusiness.id)
-        ])
-        setReviews(reviewsResponse.data || [])
-        setStats((statsData as AnalyticsEvent[]) || [])
-      } catch (error: unknown) {
-        console.error('Failed to load dashboard data:', error)
-        // Only show toast, don't crash
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [currentBusiness?.id, reviewRepo, analyticsRepo])
 
   if (isBusinessLoading) {
     return <div className="p-8 animate-pulse space-y-4">
@@ -77,12 +48,15 @@ export default function DashboardPage() {
     )
   }
 
+  const reviews = dashboardData?.reviews || []
+  const stats = dashboardData?.stats || []
+
   const avgRating = reviews.length > 0 
     ? (reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0) / reviews.length).toFixed(1)
     : '0.0'
 
-  const pageVisits = (stats || []).filter(s => s?.event_type === 'page_visit').length
-  const ctaClicks = (stats || []).filter(s => s?.event_type === 'cta_click').length
+  const pageVisits = stats.filter(s => s?.event_type === 'page_visit').length
+  const ctaClicks = stats.filter(s => s?.event_type === 'cta_click').length
 
   const publicUrl = `${APP_CONFIG.url}/r/${currentBusiness.slug}`
 
@@ -167,7 +141,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{isLoading && stats.length === 0 ? '...' : pageVisits}</div>
+            <div className="text-2xl font-bold">{isStatsLoading ? '...' : pageVisits}</div>
             <p className="text-xs text-muted-foreground">Leituras NFC / QR</p>
           </CardContent>
         </Card>
@@ -178,7 +152,7 @@ export default function DashboardPage() {
             <MousePointer2 className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{isLoading && stats.length === 0 ? '...' : ctaClicks}</div>
+            <div className="text-2xl font-bold">{isStatsLoading ? '...' : ctaClicks}</div>
             <p className="text-xs text-muted-foreground">Engajamento total</p>
           </CardContent>
         </Card>
@@ -189,7 +163,7 @@ export default function DashboardPage() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{isLoading && reviews.length === 0 ? '...' : reviews.length}</div>
+            <div className="text-2xl font-bold">{isStatsLoading ? '...' : reviews.length}</div>
             <p className="text-xs text-muted-foreground">Acumulado</p>
           </CardContent>
         </Card>
@@ -200,7 +174,7 @@ export default function DashboardPage() {
             <Star className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{isLoading && reviews.length === 0 ? '...' : avgRating}</div>
+            <div className="text-2xl font-bold">{isStatsLoading ? '...' : avgRating}</div>
             <p className="text-xs text-muted-foreground">Satisfação média</p>
           </CardContent>
         </Card>

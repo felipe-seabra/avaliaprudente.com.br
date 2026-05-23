@@ -1,52 +1,28 @@
 'use client'
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import React, { useState } from 'react'
 import { useBusiness } from '@/providers/business-provider'
-import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { Review } from '@/core/domain/entities'
 import { ReputationBadge } from '@/components/shared/reputation-badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Star, MessageSquare, Calendar, User, Reply, Edit3 } from 'lucide-react'
-import { toast } from 'sonner'
+import { Star, MessageSquare, Calendar, User, Reply, Edit3, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ReviewResponseDialog } from '@/components/dashboard/review-response-dialog'
 import { Pagination } from '@/components/shared/pagination'
+import { useReviews } from '@/hooks/use-dashboard-queries'
 
 export default function ReviewsPage() {
   const { currentBusiness } = useBusiness()
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [totalReviews, setTotalReviews] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
-  const [isLoading, setIsLoading] = useState(true)
   const [selectedReview, setSelectedReview] = useState<Review | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const repository = useMemo(() => new ReviewRepository(), [])
-
+  
   const limit = 5
-
-  const fetchReviews = useCallback(async (page: number = 1) => {
-    if (!currentBusiness) return
-    setIsLoading(true)
-    try {
-      const offset = (page - 1) * limit
-      const { data, total } = await repository.getByBusinessId(currentBusiness.id, limit, offset)
-      setReviews(data)
-      setTotalReviews(total)
-      setCurrentPage(page)
-    } catch {
-      toast.error('Erro ao carregar avaliações')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [currentBusiness, repository])
-
-  useEffect(() => {
-    fetchReviews(1)
-  }, [fetchReviews])
+  const { data: reviewsData, isLoading, refetch } = useReviews(currentBusiness?.id, currentPage, limit)
 
   const handlePageChange = (page: number) => {
-    fetchReviews(page)
+    setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -55,8 +31,6 @@ export default function ReviewsPage() {
     setIsDialogOpen(true)
   }
 
-  const totalPages = Math.ceil(totalReviews / limit)
-
   if (!currentBusiness) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center">
@@ -64,6 +38,10 @@ export default function ReviewsPage() {
       </div>
     )
   }
+
+  const reviews = reviewsData?.data || []
+  const totalReviews = reviewsData?.total || 0
+  const totalPages = Math.ceil(totalReviews / limit)
 
   return (
     <div className="space-y-8">
@@ -76,9 +54,10 @@ export default function ReviewsPage() {
 
       <div className="space-y-4">
         {isLoading ? (
-          [1, 2, 3].map((i) => (
-            <div key={i} className="h-32 animate-pulse rounded-xl bg-muted" />
-          ))
+          <div className="flex flex-col items-center justify-center py-20 space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Carregando avaliações...</p>
+          </div>
         ) : reviews.length === 0 ? (
           <Card className="p-12 text-center">
             <MessageSquare className="h-12 w-12 text-muted-foreground mb-4 opacity-20 mx-auto" />
@@ -197,7 +176,7 @@ export default function ReviewsPage() {
           setSelectedReview(null)
         }}
         review={selectedReview}
-        onSuccess={() => fetchReviews(currentPage)}
+        onSuccess={() => refetch()}
       />
     </div>
   )

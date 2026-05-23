@@ -1,10 +1,9 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { Business } from '@/core/domain/entities'
-import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
-import { toast } from 'sonner'
-import { parseError, logError } from '@/lib/error-handler'
+import { useBusinesses } from '@/hooks/use-dashboard-queries'
+import { useQueryClient } from '@tanstack/react-query'
 
 const STORAGE_KEY = 'avaliaprudente_selected_business_id'
 
@@ -19,11 +18,11 @@ interface BusinessContextType {
 export const BusinessContext = createContext<BusinessContextType | undefined>(undefined)
 
 export function BusinessProvider({ children }: { children: React.ReactNode }) {
-  const [businesses, setBusinesses] = useState<Business[]>([])
   const [currentBusiness, setCurrentBusiness] = useState<Business | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const isInitialLoad = useRef(true)
-  const repository = useMemo(() => new BusinessRepository(), [])
+  const queryClient = useQueryClient()
+  
+  const { data: businesses = [], isLoading, refetch } = useBusinesses()
 
   // Safely get item from localStorage
   const getStoredId = useCallback(() => {
@@ -50,43 +49,27 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     setStoredId(business.id)
   }, [setStoredId])
 
-  const refreshBusinesses = useCallback(async () => {
-    try {
-      const data = await repository.getAll()
-      setBusinesses(data)
+  useEffect(() => {
+    if (!isLoading && businesses.length > 0 && isInitialLoad.current) {
+      const storedId = getStoredId()
+      const storedBusiness = businesses.find(b => b.id === storedId)
       
-      if (data.length > 0) {
-        const storedId = getStoredId()
-        const storedBusiness = data.find(b => b.id === storedId)
-        
-        if (storedBusiness) {
-          setCurrentBusiness(storedBusiness)
-        } else {
-          // If no stored business or it no longer exists, 
-          // check if current business is still valid
-          setCurrentBusiness(prev => {
-            if (prev && data.find(b => b.id === prev.id)) {
-              return prev
-            }
-            return data[0]
-          })
-        }
+      if (storedBusiness) {
+        setCurrentBusiness(storedBusiness)
       } else {
-        setCurrentBusiness(null)
+        setCurrentBusiness(businesses[0])
       }
-    } catch (error: unknown) {
-      logError(error, 'Refresh Businesses')
-      const normalized = parseError(error)
-      toast.error('Erro ao carregar empresas', { description: normalized.message })
-    } finally {
-      setIsLoading(false)
+      isInitialLoad.current = false
+    } else if (!isLoading && businesses.length === 0) {
+      setCurrentBusiness(null)
       isInitialLoad.current = false
     }
-  }, [repository, getStoredId])
+  }, [isLoading, businesses, getStoredId])
 
-  useEffect(() => {
-    refreshBusinesses()
-  }, [refreshBusinesses])
+  const refreshBusinesses = async () => {
+    await refetch()
+    queryClient.invalidateQueries({ queryKey: ['businesses'] })
+  }
 
   return (
     <BusinessContext.Provider
