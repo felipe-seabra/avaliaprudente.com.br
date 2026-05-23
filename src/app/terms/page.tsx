@@ -5,6 +5,9 @@ import { Footer } from '@/components/marketing/footer'
 export const metadata: Metadata = {
   title: 'Termos de Uso',
   description: 'Leia os termos e condições de uso da plataforma SaaS e dos produtos NFC da Avalia Prudente.',
+  alternates: {
+    canonical: 'https://www.avaliaprudente.com.br/terms',
+  },
 }
 
 export default function TermsPage() {

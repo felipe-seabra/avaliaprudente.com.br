@@ -37,4 +37,4 @@ jobs:
         NEXT_PUBLIC_SUPABASE_URL: "https://dummy.supabase.co"
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-key"
         SUPABASE_SERVICE_ROLE_KEY: "dummy-service-key"
-        NEXT_PUBLIC_APP_URL: "https://dummy.avaliaprudente.com.br"
+        NEXT_PUBLIC_APP_URL: "https://www.avaliaprudente.com.br"

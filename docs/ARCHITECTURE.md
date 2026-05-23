@@ -23,6 +23,14 @@ The platform employs a hybrid architecture to balance SEO, performance, and inte
      - Background data synchronization and intelligent caching.
      - Reduced server load by offloading state management to the client after the initial secure shell is loaded.
 
+### 3. Discovery Infrastructure (SEO & Compliance)
+- **Canonical Domain Enforcement:** The platform exclusively uses `https://www.avaliaprudente.com.br`. All non-www traffic is permanently redirected (301) via `src/middleware.ts`.
+- **MetadataBase:** Standardized in `src/app/layout.tsx` using `APP_CONFIG.url` to ensure all relative metadata URLs are absolute and correct.
+- **SSR Visibility Guarantees:** 
+  - Legal links (Privacy, Terms, Contact) are rendered as native `<a>` tags in server components (`ComplianceBar`, `Footer`) to ensure they are present in the initial HTML for crawler and OAuth verification.
+  - A dedicated `CrawlerComplianceSection` provides an explicit platform description above the fold in the initial SSR payload.
+- **Sitemap & Robots:** Dynamically generated using `APP_CONFIG.url` to maintain 100% consistency with the canonical domain.
+
 ## Layers
 
 ### 1. Domain (`src/core/domain`)

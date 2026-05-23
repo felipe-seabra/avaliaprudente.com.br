@@ -313,7 +313,7 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
                       label="Slug (URL amigável)"
                       placeholder="ex: pizzaria-do-joao"
                       disabled={isLoading}
-                      description="Link: avaliaprudente.com.br/r/seu-slug"
+                      description="Link: www.avaliaprudente.com.br/r/seu-slug"
                     />
                     <div className="absolute top-9 right-3 flex items-center gap-2">
                       {isCheckingSlug && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}

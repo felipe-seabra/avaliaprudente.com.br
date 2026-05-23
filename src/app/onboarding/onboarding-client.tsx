@@ -352,7 +352,7 @@ export function OnboardingClient() {
                           label="URL Personalizada (Slug)"
                           placeholder="ex: cafe-bela-vista"
                           disabled={isLoading}
-                          description={`Seu link será: avaliaprudente.com.br/r/${watchedSlug || 'seu-slug'}`}
+                          description={`Seu link será: www.avaliaprudente.com.br/r/${watchedSlug || 'seu-slug'}`}
                         />
                         <div className="absolute top-9 right-3 flex items-center gap-2">
                           {isCheckingSlug && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}

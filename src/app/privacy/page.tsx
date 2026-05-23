@@ -5,6 +5,9 @@ import { Footer } from '@/components/marketing/footer'
 export const metadata: Metadata = {
   title: 'Política de Privacidade',
   description: 'Saiba como a Avalia Prudente coleta, utiliza e protege seus dados em conformidade com a LGPD.',
+  alternates: {
+    canonical: 'https://www.avaliaprudente.com.br/privacy',
+  },
 }
 
 export default function PrivacyPage() {

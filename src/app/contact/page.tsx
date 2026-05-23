@@ -9,6 +9,9 @@ import { APP_CONFIG } from '@/lib/constants'
 export const metadata: Metadata = {
   title: 'Contato',
   description: 'Entre em contato com a equipe do Avalia Prudente para suporte, vendas ou parcerias.',
+  alternates: {
+    canonical: 'https://www.avaliaprudente.com.br/contact',
+  },
 }
 
 export default function ContactPage() {

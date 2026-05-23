@@ -31,8 +31,9 @@ All notable changes to this project will be documented in this file.
   - **Reviewer → Customer Onboarding Fix:** Resolved edge cases in the role transition during business onboarding, ensuring metadata and database roles are perfectly synchronized.
   - **Audit Logging Refinement:** Improved the structure and verbosity of moderation and role change logs for better administrative oversight.
 - **OAuth & Branding Compliance:**
+  - **Canonical Domain Enforcement:** Standardized the entire application to the `https://www.avaliaprudente.com.br` domain, with hardened 301 redirects for non-www traffic.
   - **Google Branding Alignment:** Updated all Google OAuth buttons and assets to strictly follow the latest brand guidelines (spacing, colors, and naming).
-  - **SSR Branding Visibility:** Ensured brand assets and logos are served with optimal cache headers and correctly metadata-tagged for social previews.
+  - **SSR Compliance & Visibility:** Guaranteed that legal links (Privacy, Terms, Contact) and a clear platform description are present in the initial SSR HTML payload, ensuring full compliance with Google OAuth verification requirements.
 - **Moderation & SEO Synchronization:**
   - **Frozen Business ISR Fix:** Updated Incremental Static Regeneration logic to automatically purge and exclude frozen or banned businesses from public rankings and sitemap.
   - **Sitemap Moderation Sync:** Integrated real-time moderation status into the sitemap generator to prevent indexing of restricted content.

@@ -374,7 +374,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           }}
         >
           <div style={{ display: 'flex' }}>Avalia Prudente</div>
-          <div style={{ fontSize: 20, color: '#71717a', marginTop: 10, display: 'flex' }}>avaliaprudente.com.br</div>
+          <div style={{ fontSize: 20, color: '#71717a', marginTop: 10, display: 'flex' }}>www.avaliaprudente.com.br</div>
         </div>
       ),
       { ...size }
