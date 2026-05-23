@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, SmartphoneNfc, Zap, Star } from 'lucide-react'
+import { ArrowRight, Zap } from 'lucide-react'
 import { APP_CONFIG } from '@/lib/constants'
+
+import { NfcHeroAnimation } from './nfc-hero-animation'
 
 export function Hero() {
   return (
@@ -61,55 +63,12 @@ export function Hero() {
           </Button>
         </div>
         
-        {/* Abstract NFC Mockup */}
-        <div className="mt-20 relative w-full max-w-4xl mx-auto animate-in fade-in zoom-in-95 duration-1000 delay-500">
-          <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10 h-full w-full pointer-events-none" />
-          <div className="relative aspect-video w-full bg-card rounded-[2.5rem] border-4 border-muted overflow-hidden shadow-2xl flex items-center justify-center rotate-x-6 transform-gpu perspective-1000">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-primary)_0%,transparent_70%)] opacity-5" />
-            
-            <div className="flex flex-col md:flex-row gap-12 items-center justify-center w-full px-12">
-              {/* Phone Mockup */}
-              <div className="w-40 h-[350px] border-[8px] border-zinc-800 rounded-[2.5rem] bg-background shadow-2xl flex flex-col items-center pt-4 relative z-20 transition-transform duration-700 hover:scale-105">
-                <div className="w-16 h-1.5 bg-muted rounded-full mb-4" />
-                <div className="flex-1 w-full bg-card px-3 pt-6 space-y-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 mx-auto flex items-center justify-center border border-primary/20 overflow-hidden">
-                    {/* Dark Mode Variant (White) */}
-                    <Image src="/branding/logo-vertical.webp" alt="V" width={20} height={20} sizes="20px" className="h-4 w-auto hidden dark:block" />
-                    {/* Light Mode Variant (Dark) */}
-                    <Image src="/branding/logo-vertical-white-mode.webp" alt="V" width={20} height={20} sizes="20px" className="h-4 w-auto block dark:hidden" />
-                  </div>
-                  <div className="w-20 h-2 bg-muted mx-auto rounded-full" />
-                  <div className="space-y-2">
-                    <div className="w-full h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/10">
-                       <Star className="h-4 w-4 text-white fill-white" />
-                    </div>
-                    <div className="w-full h-10 border rounded-lg" />
-                    <div className="w-full h-10 border rounded-lg" />
-                  </div>
-                </div>
-              </div>
-              
-              {/* NFC Card Mockup */}
-              <div className="w-48 h-72 rounded-2xl bg-zinc-950 border border-white/10 shadow-2xl flex flex-col items-center justify-between p-8 text-white relative z-10 hover:-translate-y-4 transition-transform duration-500">
-                <div className="w-full flex justify-between items-start">
-                   <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/20">
-                      <SmartphoneNfc size={20} className="text-primary" />
-                   </div>
-                   <Image src="/branding/logo-horizontal.webp" alt="Logo" width={80} height={20} sizes="80px" className="h-3 w-auto opacity-80" />
-                </div>
-                <div className="flex flex-col items-center gap-4">
-                  <div className="h-16 w-16 rounded-full border-2 border-dashed border-primary/40 flex items-center justify-center">
-                     <Zap className="h-6 w-6 text-primary animate-pulse" />
-                  </div>
-                  <span className="font-bold text-sm uppercase tracking-widest text-center">Aproxime</span>
-                </div>
-                <div className="w-full h-1 bg-white/10 rounded-full" />
-              </div>
-            </div>
-            
-          </div>
+        {/* Animated NFC Hero Interaction */}
+        <div className="mt-20 w-full animate-in fade-in zoom-in-95 duration-1000 delay-500">
+          <NfcHeroAnimation />
         </div>
       </div>
     </section>
   )
 }
+

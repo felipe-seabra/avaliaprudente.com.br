@@ -96,18 +96,25 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Multipliers:** Verified businesses (`is_verified`) and Featured businesses receive visibility boosts in the final score.
 
 ### Reviewer Reputation & Badge System
-- **Goal:** Encourage high-quality reviews and recognize trustworthy contributors through dynamic badges.
-- **Tiers:** Progression-based system (Recurrent, Active, Specialist, Elite, Reference) derived from total approved review counts.
-- **Calculated Stats:** Reputation is based on the `reviewer_stats` database view, which filters out reviews from frozen businesses or moderated content.
-- **Admin Privilege:** Administrators and Super Admins automatically display the "Equipe Avalia Prudente" badge to distinguish official feedback.
-- **Performance:** Optimized data fetching via `get_business_reviews_with_stats` RPC to avoid N+1 queries during page rendering.
+...
+
+### Cinematic NFC Hero Animation
+- **Goal:** Create a high-end, cinematic interactive moment that demonstrates the platform's core NFC value proposition with realistic human-like motion and progressive loading.
+- **Architecture:** Isolated into a standalone `NfcHeroAnimation` component using pure CSS, Tailwind CSS, and `IntersectionObserver`.
+- **Motion Strategy:** 
+  - **Human Deceleration:** Uses a sharp out-easing (`cubic-bezier(0.19, 1, 0.22, 1)`) and diagonal entry to simulate a hand slowing down precisely near the NFC tag.
+  - **Premium Interaction:** Features a critical ~200ms detection pause before triggering subtle NFC ripples, a visual haptic vibration (1px shift), and a soft screen light response.
+  - **Progressive UI Reveal:** Smartphone screen loads in a staggered sequence (`header-reveal`, `content-reveal`, `cta-reveal`) to simulate a natural mobile OS experience.
+- **Trigger Logic:** 
+  - **Viewport Activation:** Plays automatically when entering the viewport (threshold 0.3) using `IntersectionObserver`.
+  - **Interaction Replay:** Replays the entire 3.5s sequence on hover or focus.
+  - **Confidence over Reactivity:** Slower, more deliberate timing to match a luxury product aesthetic.
+- **Performance & Accessibility:** 
+  - **GPU Acceleration:** Exclusively uses `translate3d`, `rotate3d`, and `opacity` for smooth 60fps performance.
+  - **Motion Reduction:** Respects `prefers-reduced-motion` by bypassing all entry and movement animations.
 
 ### OG Image Architecture (Dynamic Branding)
-- **Tech:** `next/og` running on **Vercel Edge Runtime**.
-- **Rendering:** JSX-to-SVG via Satori.
-- **Branding:** Dynamically fetches business logo and primary colors to generate a personalized preview.
-- **Caching:** `Cache-Control: public, max-age=31536000, immutable`.
-- **Constraint:** Must not use Node.js-only libraries.
+...
 ### Review Abuse Prevention System
 - **Hybrid Strategy:** Combines authenticated reviewer identity with anonymous fingerprinting and server-side cooldowns.
 - **Authenticated Submission:** Public review creation requires Supabase Auth through Google OAuth or Magic Link. The API stores `user_id`, `display_name`, and minimal `auth_provider` attribution for new reviews.

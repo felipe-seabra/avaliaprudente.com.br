@@ -4,7 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2026-05-23]
+### Changed
+- **Premium NFC Interaction Redesign:** Refined the primary hero animation to feel more natural and cinematic (Apple/Stripe style).
+  - **Human Deceleration:** Implemented diagonal phone entry with non-linear easing (`cubic-bezier(0.19, 1, 0.22, 1)`) to simulate a hand slowing down as it reaches the NFC tag.
+  - **Detection Realism:** Added a critical ~200ms pause after phone arrival before triggering NFC pulses and haptic responses.
+  - **Progressive UI Loading:** Redesigned the smartphone screen with a staggered reveal sequence (Header -> Content -> CTA) to simulate a natural mobile experience.
+  - **Cinematic Timing:** Orchestrated the entire interaction on a calm, confident 3.5s master timeline with reduced internal motion offsets.
+  - **Performance & Accessibility:** Optimized with GPU-friendly `translate3d` transforms, respecting `prefers-reduced-motion` and ensuring zero hydration issues.
+
+### Added
+- **Cinematic NFC Hero Animation:** Redesigned the primary landing page interaction to feel more premium and conversion-focused.
+  - **Magic Moment UX:** New isolated `NfcHeroAnimation` component featuring a smooth, automatic 8-second loop.
+  - **High-End Motion:** Implementation of a "phone approach -> pulse -> vibrate -> screen transition" flow using GPU-accelerated CSS keyframes.
+  - **Performance Optimized:** Zero extra heavy libraries, using pure CSS and Tailwind for maximum LCP performance and CLS=0.
+  - **Accessibility First:** Integrated `prefers-reduced-motion` support and semantic structure.
+  - **Luxury Aesthetic:** Refined dark-mode mockups for the smartphone and NFC card with realistic shadows and reflections.
+
 ### Added
 - **Moderation-Aware Cache Invalidation:** Implemented a targeted invalidation strategy to solve stale ISR/client cache issues.
   - **Centralized Invalidation:** New `revalidateBusiness` Server Action for unified cache purging.

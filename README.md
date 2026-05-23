@@ -21,9 +21,9 @@
 
 ## 🌟 Product Overview
 
-**Avalia Prudente** is a premium Reputation-as-a-Service (RaaS) platform designed to bridge the gap between local businesses and their customers. It provides a sophisticated ecosystem for verified feedback, official business interactions, and a transparent reputation scoring system.
+**Avalia Prudente** is a premium Reputation-as-a-Service (RaaS) platform designed to bridge the gap between local businesses and their customers through **NFC-powered smart interactions**. It provides a sophisticated ecosystem for verified feedback, official business interactions, and a transparent reputation scoring system.
 
-Built with a focus on **security**, **governance**, and **performance**, Avalia Prudente empowers business owners to manage their digital presence while offering reviewers a gamified, trustworthy platform to share their experiences.
+Built with a focus on **security**, **governance**, and **performance**, Avalia Prudente empowers business owners to manage their digital presence while offering reviewers a **cinematic, "tap-and-rate" magic moment** that transforms physical counters into digital growth engines.
 
 ### The Ecosystem
 - **Reviewers:** Earn reputation, badges, and recognition for high-quality, authentic feedback.
@@ -35,6 +35,7 @@ Built with a focus on **security**, **governance**, and **performance**, Avalia 
 ## 🚀 Core Features
 
 ### 🏢 For Businesses (SaaS)
+- **NFC Magic Interaction:** Premium, cinematic landing experience demonstrating the "tap-to-rate" flow.
 - **Dynamic Branding:** Personalized public pages with custom logos, colors, and social CTAs.
 - **Official Responses:** Engage directly with customers through verified response threads.
 - **Onboarding Excellence:** Google-aligned multi-step onboarding flow for friction-less setup.
