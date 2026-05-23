@@ -47,6 +47,7 @@ export function Footer() {
             <ul className="space-y-3">
               <li><Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Termos de uso</Link></li>
               <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Política de privacidade</Link></li>
+              <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Contato</Link></li>
               <li>
                 <button 
                   onClick={() => {
@@ -58,7 +59,6 @@ export function Footer() {
                   Preferências de Cookies
                 </button>
               </li>
-              <li><a href="mailto:contato@avaliaprudente.com.br" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Contato</a></li>
             </ul>
           </div>
         </div>

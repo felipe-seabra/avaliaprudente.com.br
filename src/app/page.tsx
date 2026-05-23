@@ -6,6 +6,7 @@ import { Pricing } from '@/components/marketing/pricing'
 import { FAQ } from '@/components/marketing/faq'
 import { Footer } from '@/components/marketing/footer'
 import { BusinessRanking } from '@/components/marketing/business-ranking'
+import { PlatformPurpose } from '@/components/marketing/platform-purpose'
 import { Star, ShieldCheck, Zap, ShoppingBag } from 'lucide-react'
 import { getPublicRankings } from '@/core/application/use-cases/get-public-rankings'
 
@@ -63,6 +64,8 @@ export default async function Home() {
              <BusinessRanking topRated={topRated} mostViewed={mostViewed} />
           </div>
         </section>
+
+        <PlatformPurpose />
 
         <Features />
         <HowItWorks />

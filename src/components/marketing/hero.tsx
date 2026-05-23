@@ -33,7 +33,7 @@ export function Hero() {
           />
           <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8">
             <Zap className="mr-2 h-4 w-4 fill-primary" />
-            <span>Aproximou, avaliou. Simples assim.</span>
+            <span>Plataforma de Reputação: Aproximou, avaliou.</span>
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-4xl mb-6 leading-[1.1]">
