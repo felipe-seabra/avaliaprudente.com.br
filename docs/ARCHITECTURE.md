@@ -101,13 +101,16 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 ### Premium NFC Hero Interaction (Final Restoration)
 - **Goal:** Demonstrate the core value proposition (NFC -> Review) through a high-end, Apple-like interactive sequence with absolute stability and visual connectivity.
 - **Tag-Anchored Composition:**
-  - **Visible Anchor:** The physical NFC Tag is the central, static anchor of the scene, visible at all times to establish the product context.
+  - **Visible Anchor:** The physical NFC Tag is a horizontal card, centered and always visible as the foundation of the scene.
   - **Diagonal Vector Entry:** The device enters from the bottom-right on a clear diagonal path, decelerating naturally as it approaches the tag.
   - **Perfect Alignment:** The smartphone lands sensor-first over the tag, triggering the NFC interaction and revealing the review UI.
+- **Interactive Replay System:**
+  - **Auto-Play:** Triggers automatically once when entering the viewport.
+  - **Hover & Focus Replay:** A robust state-based key system restarts the entire animation sequence whenever a user hovers or focuses on the component, encouraging engagement.
 - **Hierarchy & Spacing:**
   - **Supporting Visual:** Positioned below the primary hero content to maintain messaging dominance while providing a rich visual demonstration.
   - **Compact Integration:** Vertical spacing is tuned to eliminate dead space, creating a cohesive visual unit on both desktop and mobile.
-  - **Refined Proportions:** Smartphone dimensions reduced by 10% for better balance with the hero copy and the anchor tag.
+  - **Refined Proportions:** Smartphone and Tag dimensions balanced to ensure the tag remains visible even during the "tap" interaction.
 - **Performance & Reliability:** 
   - **Atomic CSS Animations:** Uses isolated keyframes to avoid transform collisions and ensure 60fps performance.
   - **Motion Reduction:** Full support for `prefers-reduced-motion` media query.

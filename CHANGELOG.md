@@ -5,15 +5,15 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- **NFC Hero Animation Final Composition Fix:** Restored the physical NFC tag as the central anchor and refined the interaction flow.
-  - **Tag Anchor Restoration:** Reintroduced the physical NFC tag as a stable, centered anchor with a premium matte dark finish and purple accent.
-  - **Interaction Flow:** Corrected the visual narrative where the smartphone approaches and lands sensor-first on the tag to trigger the NFC pulse.
-  - **Composition Tightening:** Reduced empty vertical space and dead zones to keep the animation balanced below the hero text.
-  - **Proportional Refinement:** Reduced smartphone dimensions by 10% for better visual harmony with the hero copy and the tag.
-  - **Visual Polish:** Added subtle NFC pulse effects and haptic bump animations upon contact for a tactile feel.
+- **Interactive NFC Hero Experience (Major Composition Fix):** Rebuilt the hero animation to be fully interactive and visually descriptive.
+  - **Visible Anchor Card:** Reintroduced the NFC tag as a horizontal physical card (always visible) to establish the "Phone + Tag" interaction context.
+  - **State-Based Replay System:** Implemented a `key`-driven animation restart that triggers on viewport entry, mouse hover, and keyboard focus.
+  - **Narrative Interaction:** Refined the smartphone approach to land sensor-first on the tag center, followed by a haptic vibration and NFC pulse effect.
+  - **Proportional Balance:** Adjusted smartphone and tag dimensions to ensure the tag remains visible behind the device during the tap.
+  - **Zero-Dead-Space Layout:** Tightened vertical spacing to keep the animation integrated with the hero CTA and text.
 
 ### Added
-- **NFC Hero Animation Final Restoration:** Fixed a regression where the NFC tag was missing, restoring the full interaction concept.
+- **NFC Hero Animation Final Composition Fix:** Restored the physical NFC tag as the central anchor and refined the interaction flow.
   - **Tag Anchor Restoration:** Reintroduced the physical NFC tag as a centered, straight-oriented anchor with a premium dark material and glossy finish.
   - **Visual Connectivity:** Tuned the composition to ensure the phone approaches and lands sensor-first on the tag, creating a cohesive product demonstration.
   - **Diagonal Vector Refinement:** Refined the entry path (bottom-right -> center) with a natural decelerating slowdown precisely over the tag.
