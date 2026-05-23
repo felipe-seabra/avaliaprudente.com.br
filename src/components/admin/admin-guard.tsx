@@ -13,13 +13,11 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
     let isMounted = true
 
     async function check() {
-      console.log('AdminGuard: Checking access...')
       const supabase = createClient()
       
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        console.log('AdminGuard: No user found. Redirecting to /login')
         if (isMounted) {
           setStatus('redirecting')
           router.push('/login')
@@ -33,14 +31,11 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
         .eq('id', user.id)
         .single()
       
-      console.log(`AdminGuard: User role is ${profile?.role || 'none'}`)
-
       const isAdmin = checkIsAdmin(profile?.role)
 
       if (isAdmin) {
         if (isMounted) setStatus('authorized')
       } else {
-        console.log('AdminGuard: Not an admin. Redirecting to /dashboard')
         if (isMounted) {
           setStatus('redirecting')
           router.push('/dashboard')

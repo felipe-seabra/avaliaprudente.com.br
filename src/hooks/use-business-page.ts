@@ -24,16 +24,12 @@ export function useBusinessPage(slug: string) {
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log(`🔍 Resolving public page for slug: ${slug}`)
         const page = await pageRepo.getBySlug(slug)
         
         if (!page) {
-          console.error(`❌ Business not found for slug: ${slug}`)
           setError('Página não encontrada')
           return
         }
-
-        console.log(`✅ Business resolved: ${page.businesses.name} (${page.business_id})`)
 
         const [links, reviewsResponse] = await Promise.all([
           linkRepo.getByPageId(page.id),

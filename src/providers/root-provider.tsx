@@ -10,7 +10,7 @@ export function RootProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   
   useEffect(() => {
-    console.log(`RootProvider: App mounted at ${pathname}`)
+    // Silence mount logs in production
   }, [pathname])
 
   return (

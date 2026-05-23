@@ -64,14 +64,16 @@ export async function middleware(request: NextRequest) {
   const needsTermsReacceptance = user && !isAdmin && termsVersion !== APP_CONFIG.currentTermsVersion
 
   // DEBUG LOGS
-  if (isAdminPage || isDashboardPage || isBlockedPage || isAuthPage || isTermsPage) {
+  if (process.env.NODE_ENV === 'development' && (isAdminPage || isDashboardPage || isBlockedPage || isAuthPage || isTermsPage)) {
     console.log(`Middleware [${request.nextUrl.pathname}]: User: ${user?.id || 'none'}, Role: ${role}, isAdmin: ${isAdmin}, isReviewer: ${isReviewer}, Status: ${accountStatus}, Deleted: ${isDeleted}, NeedsTerms: ${needsTermsReacceptance}`)
   }
 
   // 1. Admin Master Bypass: If admin is logged in, they bypass all moderation blocks
   if (user && isAdmin) {
     if (isAuthPage) {
-      console.log('Middleware: Admin at Auth Page -> Redirecting to /admin/dashboard')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Middleware: Admin at Auth Page -> Redirecting to /admin/dashboard')
+      }
       return NextResponse.redirect(new URL('/admin/dashboard', request.url))
     }
     // Allow admin to access anything (dashboard or admin panel)
@@ -80,46 +82,60 @@ export async function middleware(request: NextRequest) {
 
   // 2. Terms Re-acceptance (Regular users only)
   if (needsTermsReacceptance && !isTermsPage && (isDashboardPage || isAdminPage)) {
-    console.log('Middleware: User needs terms re-acceptance -> Redirecting to /terms-reaccept')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Middleware: User needs terms re-acceptance -> Redirecting to /terms-reaccept')
+    }
     return NextResponse.redirect(new URL('/terms-reaccept', request.url))
   }
 
   // 3. Permanent Block / Ban / Deactivation check (Regular users only)
   if (user && isUserBlocked && !isBlockedPage) {
     const type = isUserDeleted ? 'deleted' : (isBanned ? 'banned' : 'blocked')
-    console.log(`Middleware: Blocked/Banned/Deleted User (${type}) -> Redirecting to /blocked`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Middleware: Blocked/Banned/Deleted User (${type}) -> Redirecting to /blocked`)
+    }
     return NextResponse.redirect(new URL(`/blocked${type !== 'blocked' ? `?type=${type}` : ''}`, request.url))
   }
 
   // 4. Temporary Suspension check (Regular users only)
   if (user && isSuspended && (isDashboardPage || isAdminPage) && !isBlockedPage) {
-    console.log('Middleware: Suspended User -> Redirecting to /blocked?type=suspended')
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Middleware: Suspended User -> Redirecting to /blocked?type=suspended')
+    }
     return NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
   }
 
   // 5. Redirect away from /blocked if not actually blocked
   if (user && !isUserBlocked && !isSuspended && isBlockedPage) {
     const target = isReviewer ? '/account' : '/dashboard'
-    console.log(`Middleware: Not Blocked User at /blocked -> Redirecting to ${target}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Middleware: Not Blocked User at /blocked -> Redirecting to ${target}`)
+    }
     return NextResponse.redirect(new URL(target, request.url))
   }
 
   // 6. Redirect logged in users away from auth pages
   if (user && isAuthPage) {
     const target = isReviewer ? '/account' : '/dashboard'
-    console.log(`Middleware: Logged in User at Auth Page -> Redirecting to ${target}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Middleware: Logged in User at Auth Page -> Redirecting to ${target}`)
+    }
     return NextResponse.redirect(new URL(target, request.url))
   }
 
   // 7. Protect dashboard and enforce reviewer restrictions
   if (isDashboardPage) {
     if (!user) {
-      console.log('Middleware: Anonymous User at Dashboard -> Redirecting to /login')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Middleware: Anonymous User at Dashboard -> Redirecting to /login')
+      }
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
     if (isReviewer) {
-      console.warn(`Middleware: Reviewer user ${user.id} attempted to access dashboard -> Redirecting to /account`)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Middleware: Reviewer user ${user.id} attempted to access dashboard -> Redirecting to /account`)
+      }
       return NextResponse.redirect(new URL('/account', request.url))
     }
   }
@@ -127,12 +143,16 @@ export async function middleware(request: NextRequest) {
   // 8. Protect admin routes (Double check for security)
   if (isAdminPage) {
     if (!user) {
-      console.log('Middleware: Anonymous User at Admin Page -> Redirecting to /login')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Middleware: Anonymous User at Admin Page -> Redirecting to /login')
+      }
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
     if (!isAdmin) {
-      console.warn(`Middleware: Non-admin user ${user.id} attempted to access ${request.nextUrl.pathname} -> Redirecting to /dashboard`)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Middleware: Non-admin user ${user.id} attempted to access ${request.nextUrl.pathname} -> Redirecting to /dashboard`)
+      }
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }

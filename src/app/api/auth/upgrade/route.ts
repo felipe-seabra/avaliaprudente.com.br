@@ -80,7 +80,9 @@ export async function POST() {
     )
   }
 
-  console.log(`Upgrade API: User ${user.id} upgraded from reviewer to customer`)
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Upgrade API: User ${user.id} upgraded from reviewer to customer`)
+  }
 
   return NextResponse.json({ 
     success: true, 

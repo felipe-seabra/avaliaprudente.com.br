@@ -43,7 +43,9 @@ export async function updateSession(request: NextRequest) {
   let termsVersion: string | null = null
 
   if (user) {
-    console.log(`Middleware [Session]: User ${user.id} found. Metadata role: ${user.app_metadata?.role || 'none'}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Middleware [Session]: User ${user.id} found. Metadata role: ${user.app_metadata?.role || 'none'}`)
+    }
     
     // 1. Initial assignment from JWT (fast path)
     // IMPORTANT: DO NOT TRUST user_metadata for roles! Users can modify it via auth.updateUser().
@@ -59,10 +61,14 @@ export async function updateSession(request: NextRequest) {
       .single()
     
     if (profileError) {
-      console.error(`Middleware [DB Error]: Profile fetch failed for ${user.id}`, profileError.message)
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`Middleware [DB Error]: Profile fetch failed for ${user.id}`, profileError.message)
+      }
       // We don't overwrite 'role' here to preserve JWT fallback if DB fails
     } else if (profile) {
-      console.log(`Middleware [DB Success]: Profile loaded for ${user.id}. Role: ${profile.role}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Middleware [DB Success]: Profile loaded for ${user.id}. Role: ${profile.role}`)
+      }
       role = profile.role
       isBlocked = profile.is_blocked
       isDeleted = profile.is_deleted
@@ -70,7 +76,9 @@ export async function updateSession(request: NextRequest) {
       suspendedUntil = profile.suspended_until
       termsVersion = profile.terms_version
     } else {
-      console.warn(`Middleware [DB Warning]: No profile row for ${user.id}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Middleware [DB Warning]: No profile row for ${user.id}`)
+      }
     }
   }
 
