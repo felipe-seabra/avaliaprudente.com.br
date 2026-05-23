@@ -15,12 +15,14 @@ import { Label } from '@/components/ui/label'
 import { Snowflake, Loader2, Lock } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
+import { revalidateBusiness } from '@/app/actions/cache'
 
 interface ModerationFreezeDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   businessId: string
   businessName: string
+  businessSlug?: string
   onSuccess?: () => void
 }
 
@@ -29,6 +31,7 @@ export function ModerationFreezeDialog({
   onOpenChange,
   businessId,
   businessName,
+  businessSlug,
   onSuccess
 }: ModerationFreezeDialogProps) {
   const [reason, setReason] = useState('')
@@ -45,6 +48,12 @@ export function ModerationFreezeDialog({
     try {
       await repo.freezeBusiness(businessId, reason.trim())
       toast.success('Empresa congelada com sucesso.')
+      
+      // Cache Invalidation
+      if (businessSlug) {
+        await revalidateBusiness(businessSlug)
+      }
+
       setReason('')
       onOpenChange(false)
       if (onSuccess) onSuccess()

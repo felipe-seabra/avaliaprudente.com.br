@@ -13,7 +13,7 @@ The platform employs a hybrid architecture to balance SEO, performance, and inte
 1. **Public SSR (Server-Side Rendering):** 
    - **Routes:** Homepage, Business Pages (`/[slug]`), Review Flow (`/r/[slug]`), Rankings, and Legal pages.
    - **Why:** Maximum SEO visibility, instant "Time to Content", and reliable crawler indexing. Critical ranking data and business identities must be available in the initial HTML payload.
-   - **ISR (Incremental Static Regeneration):** Used for rankings and sitemaps with background revalidation to ensure data freshness without sacrificing speed.
+   - **ISR (Incremental Static Regeneration):** Used for rankings, sitemaps, and business pages with targeted programmatic revalidation. Leverages `unstable_cache` with stable tags to ensure moderation changes propagate immediately.
 
 2. **Authenticated Query-based UX:**
    - **Routes:** `/dashboard/*`, `/admin/*`, `/account/*`.
@@ -160,6 +160,22 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
   1. **RLS Policies:** Standard database-level security.
   2. **Database Views:** High-level abstraction for public queries.
   3. **Application Scopes:** Code-level consistency for repositories and use cases.
+
+### Cache Invalidation & Consistency Strategy
+- **Goal:** Ensure immediate propagation of moderation actions while preserving the performance benefits of ISR.
+- **Stable Tags:** Programmatic invalidation via `revalidateTag` using stable patterns:
+  - `public-rankings`: Global rankings and homepage highlights.
+  - `business-page-[slug]`: Individual business page data and metadata.
+- **Centralized Invalidation:** A unified `revalidateBusiness(slug)` server action handles all necessary path and tag purges.
+- **Triggers:** Revalidation is triggered by the following events:
+  - **Freezing/Unfreezing:** Immediate removal or restoration of public visibility.
+  - **Verification Status Changes:** Updating trust signals in rankings.
+  - **Onboarding/Publishing:** Making a new business page visible for the first time.
+- **Consistency Guarantees:** Moderation actions result in the purge of:
+  1. **Full Page Cache:** `revalidatePath('/r/[slug]')`
+  2. **Data Cache:** `revalidateTag('business-page-[slug]')`
+  3. **Discovery Cache:** `revalidateTag('public-rankings')`
+  4. **SEO Infrastructure:** `revalidatePath('/sitemap.xml')`
 
 - **Isolation:** Multi-tenant strictness via `owner_id`.
 - **RLS Safety:** Use `is_admin()` security definer to avoid infinite recursion. NEVER query `profiles` directly in RLS.

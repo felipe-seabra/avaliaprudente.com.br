@@ -11,6 +11,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Business, BusinessPage, PageLink, Review } from '@/core/domain/entities'
 import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
+import { unstable_cache } from 'next/cache'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -31,7 +32,10 @@ interface BusinessData {
   redirectUrl: string | null
 }
 
-async function getBusinessData(slug: string, pageNumber: number = 1): Promise<BusinessData | null> {
+/**
+ * Internal function to fetch business data.
+ */
+async function fetchBusinessData(slug: string, pageNumber: number = 1): Promise<BusinessData | null> {
   const supabase = await createClient()
   const pageRepo = new BusinessPageRepository(supabase)
   const linkRepo = new PageLinkRepository(supabase)
@@ -79,6 +83,20 @@ async function getBusinessData(slug: string, pageNumber: number = 1): Promise<Bu
     redirectUrl: null 
   }
 }
+
+/**
+ * Cached version of fetchBusinessData using Next.js unstable_cache.
+ * Supports targeted invalidation using the slug-specific tag.
+ */
+const getBusinessData = (slug: string, pageNumber: number = 1) => 
+  unstable_cache(
+    async () => fetchBusinessData(slug, pageNumber),
+    [`business-page-${slug}`, `page-${pageNumber}`],
+    {
+      revalidate: 3600,
+      tags: [`business-page-${slug}`]
+    }
+  )()
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params

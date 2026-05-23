@@ -24,6 +24,7 @@ import { useBusiness } from '@/providers/business-provider'
 import { parseError, logError } from '@/lib/error-handler'
 import { isValidGoogleReviewUrl } from '@/lib/utils'
 import { GoogleReviewTutorial } from './google-review-tutorial'
+import { revalidateBusiness } from '@/app/actions/cache'
 
 const createReviewLinkSchema = z.object({
   title: z.string().min(2, 'O texto deve ter pelo menos 2 caracteres'),
@@ -102,10 +103,20 @@ export function CreateReviewLinkDialog({ onCreated }: { onCreated?: () => void }
       // Requirement: Auto-activate public profile
       if (page && !page.is_published) {
         await pageRepo.update(page.id, { is_published: true })
+        
+        // Cache Invalidation
+        if (currentBusiness?.slug) {
+          await revalidateBusiness(currentBusiness.slug)
+        }
+
         toast.success('Botão configurado e página ativada!', {
           description: 'Sua empresa agora está visível para o público.'
         })
       } else {
+        // Also revalidate if just updating, to ensure metadata or rankings are fresh
+        if (currentBusiness?.slug) {
+          await revalidateBusiness(currentBusiness.slug)
+        }
         toast.success('Botão de avaliação salvo com sucesso!')
       }
 

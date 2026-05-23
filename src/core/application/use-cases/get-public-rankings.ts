@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/supabase'
 import { PublicScopes } from '@/core/infrastructure/repositories/public-scopes'
+import { unstable_cache } from 'next/cache'
 
 interface RankedBusiness {
   id: string
@@ -29,10 +30,10 @@ interface SupabaseBusinessRow {
 }
 
 /**
- * Fetches and calculates rankings on the server side to bypass RLS
- * for analytics_events and other protected data used in public aggregates.
+ * Internal function to fetch and calculate rankings.
+ * Bypasses RLS using Service Role for analytics processing.
  */
-export async function getPublicRankings() {
+async function fetchAndCalculateRankings() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
@@ -130,3 +131,18 @@ export async function getPublicRankings() {
 
   return { topRated, mostViewed }
 }
+
+/**
+ * Fetches and calculates rankings on the server side to bypass RLS
+ * for analytics_events and other protected data used in public aggregates.
+ * 
+ * Cached for 1 hour but supports programmatic invalidation via 'public-rankings' tag.
+ */
+export const getPublicRankings = unstable_cache(
+  async () => fetchAndCalculateRankings(),
+  ['public-rankings'],
+  { 
+    revalidate: 3600,
+    tags: ['public-rankings']
+  }
+)

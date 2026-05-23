@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ## [2026-05-23]
 ### Added
+- **Moderation-Aware Cache Invalidation:** Implemented a targeted invalidation strategy to solve stale ISR/client cache issues.
+  - **Centralized Invalidation:** New `revalidateBusiness` Server Action for unified cache purging.
+  - **Granular Tagging:** Introduced `public-rankings` and `business-page-[slug]` tags using `unstable_cache`.
+  - **Automatic Propagation:** Moderation actions (freeze, unfreeze, verify) and business publishing now trigger immediate cache updates.
 - **Centralized Moderation Scope Architecture:** Formalized a multi-layer strategy for public visibility to eliminate leakage risks.
   - **Database Views:** Introduced `active_businesses`, `active_reviews`, `active_business_pages`, and `active_page_links` as canonical public data sources.
   - **Application Scopes:** Created `PublicScopes` utility in the infrastructure layer to provide reusable, moderation-safe Supabase query builders.

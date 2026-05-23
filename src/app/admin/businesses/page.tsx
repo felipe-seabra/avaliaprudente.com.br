@@ -19,6 +19,7 @@ import {
 import { cn } from '@/lib/utils'
 import { ModerationFreezeDialog } from '@/components/admin/moderation/moderation-freeze-dialog'
 import { Badge } from '@/components/ui/badge'
+import { revalidateBusiness } from '@/app/actions/cache'
 
 interface BusinessWithProfile extends Business {
   profiles?: {
@@ -42,7 +43,7 @@ export default function AdminBusinessesPage() {
   
   // Freeze Dialog State
   const [isFreezeDialogOpen, setIsFreezeDialogOpen] = useState(false)
-  const [selectedBusiness, setSelectedBusiness] = useState<{ id: string, name: string } | null>(null)
+  const [selectedBusiness, setSelectedBusiness] = useState<{ id: string, name: string, slug: string } | null>(null)
   
   const [repo] = useState(() => new AdminRepository())
 
@@ -89,6 +90,13 @@ export default function AdminBusinessesPage() {
         await repo.removeBusinessVerification(id)
         toast.success('Status resetado para Pendente.')
       }
+      
+      // Cache Invalidation
+      const business = businesses.find(b => b.id === id)
+      if (business?.slug) {
+        await revalidateBusiness(business.slug)
+      }
+
       loadBusinesses()
     } catch (error) {
       console.error('Error handling verification', error)
@@ -101,6 +109,13 @@ export default function AdminBusinessesPage() {
     try {
       await repo.unfreezeBusiness(id)
       toast.success('Empresa descongelada com sucesso.')
+      
+      // Cache Invalidation
+      const business = businesses.find(b => b.id === id)
+      if (business?.slug) {
+        await revalidateBusiness(business.slug)
+      }
+
       loadBusinesses()
     } catch (error) {
       console.error('Error unfreezing business', error)
@@ -108,8 +123,8 @@ export default function AdminBusinessesPage() {
     }
   }
 
-  const handleOpenFreezeDialog = (id: string, name: string) => {
-    setSelectedBusiness({ id, name })
+  const handleOpenFreezeDialog = (id: string, name: string, slug: string) => {
+    setSelectedBusiness({ id, name, slug })
     setIsFreezeDialogOpen(true)
   }
 
@@ -300,9 +315,11 @@ export default function AdminBusinessesPage() {
                             <DropdownMenuLabel className="text-xs font-bold uppercase text-muted-foreground">Moderação</DropdownMenuLabel>
 
                             {!business.is_frozen ? (
-                              <DropdownMenuItem className="cursor-pointer text-blue-600 font-medium" onClick={() => handleOpenFreezeDialog(business.id, business.name)}>
-                                <Snowflake className="mr-2 h-4 w-4" /> Congelar Empresa
+                              <DropdownMenuItem className="cursor-pointer text-blue-600 font-medium" onClick={() => handleOpenFreezeDialog(business.id, business.name, business.slug)}>
+                                <Snowflake className="mr-2 h-4 w-4" />
+                                Congelar Empresa
                               </DropdownMenuItem>
+
                             ) : (
                               <DropdownMenuItem className="cursor-pointer text-green-600 font-medium" onClick={() => handleUnfreezeBusiness(business.id)}>
                                 <RotateCcw className="mr-2 h-4 w-4" /> Descongelar Empresa
@@ -353,10 +370,12 @@ export default function AdminBusinessesPage() {
         <ModerationFreezeDialog
           open={isFreezeDialogOpen}
           onOpenChange={setIsFreezeDialogOpen}
-          businessId={selectedBusiness.id}
-          businessName={selectedBusiness.name}
+          businessId={selectedBusiness?.id || ''}
+          businessName={selectedBusiness?.name || ''}
+          businessSlug={selectedBusiness?.slug || ''}
           onSuccess={loadBusinesses}
         />
+
       )}
     </div>
   )

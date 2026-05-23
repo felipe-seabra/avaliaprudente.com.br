@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
-    url: 'https://avaliaprudente.com.br',
+    url: 'https://www.avaliaprudente.com.br',
     title: 'Avalia Prudente | Plataforma NFC Inteligente',
     description: 'A plataforma definitiva para avaliações e reputação digital via NFC.',
     siteName: 'Avalia Prudente',
@@ -50,6 +50,9 @@ export const metadata: Metadata = {
       },
     ],
   },
+    alternates: {
+    canonical: 'https://www.avaliaprudente.com.br',
+  }, 
   twitter: {
     card: 'summary_large_image',
     title: 'Avalia Prudente | Plataforma NFC Inteligente',
