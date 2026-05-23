@@ -112,10 +112,11 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 
   - **Progressive UI Reveal:** Smartphone screen loads in a staggered sequence (`header-reveal`, `content-reveal`, `cta-reveal`) to simulate a natural mobile OS experience.
 - **Trigger Logic:** 
-  - **Viewport Activation:** Plays automatically when entering the viewport using `IntersectionObserver`. Optimized for mobile with `threshold: 0` and `rootMargin: '0px 0px -10% 0px'`.
-  - **Safety Fallback:** Implements a 1.5s `setTimeout` fallback to force the animation start if the observer fails or is delayed (critical for mobile Safari/Chrome consistency).
-  - **Interaction Replay:** Replays the entire 3.5s sequence on hover or focus. Initial autoplay is decoupled from interaction logic to ensure reliable execution on touch devices.
-  - **Confidence over Reactivity:** Slower, more deliberate timing to match a luxury product aesthetic.
+  - **Viewport Activation:** Plays automatically when entering the viewport using `IntersectionObserver`. Optimized for mobile with `threshold: 0` and `rootMargin: '50px'`.
+  - **Safety Fallback:** Implements a 1s `setTimeout` fallback to force the animation start if the observer fails or is delayed.
+  - **Interaction Replay:** Replays the entire 3.5s sequence on hover or focus, guarded by `(pointer: fine)` to prevent touch-device interference.
+  - **Scaling & Composition:** Uses a reduced scale (~30% smaller than initial implementation) to ensure the animation remains a secondary, elegant complement to the hero text rather than a dominant visual mass.
+  - **Visibility Assurance:** Explicit initial and final opacity states in keyframes coupled with `animation-fill-mode: forwards` ensure elements never disappear post-animation.
 - **Performance & Accessibility:** 
   - **GPU Acceleration:** Exclusively uses `translate3d`, `rotate3d`, and `opacity` for smooth 60fps performance.
   - **Motion Reduction:** Respects `prefers-reduced-motion` by bypassing all entry and movement animations.
