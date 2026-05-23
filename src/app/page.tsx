@@ -7,6 +7,7 @@ import { FAQ } from '@/components/marketing/faq'
 import { Footer } from '@/components/marketing/footer'
 import { BusinessRanking } from '@/components/marketing/business-ranking'
 import { PlatformPurpose } from '@/components/marketing/platform-purpose'
+import { CrawlerComplianceSection } from '@/components/marketing/crawler-compliance'
 import { Star, ShieldCheck, Zap, ShoppingBag } from 'lucide-react'
 import { getPublicRankings } from '@/core/application/use-cases/get-public-rankings'
 
@@ -18,6 +19,8 @@ export default async function Home() {
       <Navbar />
       <main className="flex-1">
         <Hero />
+
+        <CrawlerComplianceSection />
         
         {/* Onboarding Section */}
         <section className="py-20 bg-primary/5 border-y border-primary/10">

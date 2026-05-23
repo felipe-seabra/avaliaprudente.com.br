@@ -1,9 +1,8 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import { APP_CONFIG } from '@/lib/constants'
 import { MessageCircle } from 'lucide-react'
+import { CookiePreferenceButton } from './cookie-preference-button'
 
 export function Footer() {
   return (
@@ -31,33 +30,26 @@ export function Footer() {
             >
               <MessageCircle className="mr-2 h-4 w-4" />
               Falar com o Comercial
-            </a>          </div>
+            </a>
+          </div>
           
           <div>
             <h4 className="font-semibold mb-4">Produto</h4>
             <ul className="space-y-3">
-              <li><Link href="/#features" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Recursos</Link></li>
-              <li><Link href="/#how-it-works" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Como funciona</Link></li>
-              <li><Link href="/#pricing" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Preços</Link></li>
+              <li><Link href="/#features" className="text-muted-foreground hover:text-primary transition-colors">Recursos</Link></li>
+              <li><Link href="/#how-it-works" className="text-muted-foreground hover:text-primary transition-colors">Como funciona</Link></li>
+              <li><Link href="/#pricing" className="text-muted-foreground hover:text-primary transition-colors">Preços</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="font-semibold mb-4">Empresa</h4>
             <ul className="space-y-3">
-              <li><Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Termos de uso</Link></li>
-              <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Política de privacidade</Link></li>
-              <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">Contato</Link></li>
+              <li><Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">Termos de uso</Link></li>
+              <li><Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Política de privacidade</Link></li>
+              <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contato</Link></li>
               <li>
-                <button 
-                  onClick={() => {
-                    localStorage.removeItem('avaliaprudente_cookie_consent');
-                    window.location.reload();
-                  }} 
-                  className="text-muted-foreground hover:text-primary transition-colors cursor-pointer text-left"
-                >
-                  Preferências de Cookies
-                </button>
+                <CookiePreferenceButton />
               </li>
             </ul>
           </div>
