@@ -12,6 +12,8 @@ import { CrawlerComplianceSection } from '@/components/marketing/crawler-complia
 import { Star, ShieldCheck, Zap, ShoppingBag } from 'lucide-react'
 import { getPublicRankings } from '@/core/application/use-cases/get-public-rankings'
 
+export const revalidate = 3600
+
 export default async function Home() {
   const { topRated, mostViewed } = await getPublicRankings()
 
@@ -59,7 +61,7 @@ export default async function Home() {
           <div className="container mx-auto px-4 md:px-8">
              <div className="text-center mb-16">
                <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-bold text-primary uppercase tracking-widest mb-4">
-                 Discovery
+                 Explorar
                </div>
                <h2 className="text-4xl font-black tracking-tight mb-4">Empresas em Destaque</h2>
                <p className="text-muted-foreground max-w-xl mx-auto">

@@ -3,6 +3,8 @@ import { APP_CONFIG } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/server'
 import { BusinessPageRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 
+export const revalidate = 3600
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
   const pageRepo = new BusinessPageRepository(supabase)
