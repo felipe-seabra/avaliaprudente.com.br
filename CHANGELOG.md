@@ -6,7 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Bilingual English Trust Line:** Added a subtle English tagline to the homepage Hero section to improve Google OAuth branding classifier compatibility.
-  - **Classifier Optimization:** Included the exact phrase "Business reviews and digital reputation platform powered by NFC technology" in the SSR HTML payload.
+  - **Responsive Hero Refinement:** Optimized the NFC hero animation for mobile devices.
+  - **Dynamic Scaling:** Implemented CSS variables to reduce phone and NFC card sizes on smaller viewports.
+  - **Motion Tuning:** Reduced entry offsets and rotation angles on mobile for a more restrained, premium feel.
+  - **Viewport Optimization:** Adjusted vertical spacing and contained animation height to prevent viewport crowding on iPhone and Android devices.
+- **Classifier Optimization:** Included the exact phrase "Business reviews and digital reputation platform powered by NFC technology" in the SSR HTML payload.
   - **Premium Aesthetic:** Implemented as a muted, small-typography micro-tagline (text-[10px], 40% opacity) that complements the high-end SaaS design without visual clutter.
 - **Cinematic NFC Hero Animation:** Redesigned the primary landing page interaction to feel more premium and conversion-focused.
   - **Magic Moment UX:** New isolated `NfcHeroAnimation` component featuring a smooth, automatic 8-second loop.

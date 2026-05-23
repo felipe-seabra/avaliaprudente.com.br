@@ -101,9 +101,15 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 ### Cinematic NFC Hero Animation
 - **Goal:** Create a high-end, cinematic interactive moment that demonstrates the platform's core NFC value proposition with realistic human-like motion and progressive loading.
 - **Architecture:** Isolated into a standalone `NfcHeroAnimation` component using pure CSS, Tailwind CSS, and `IntersectionObserver`.
-- **Motion Strategy:** 
+- **Responsive Strategy:**
+  - **Dynamic Scaling:** Uses CSS variables (`--phone-w`, `--card-w`, etc.) and media queries to scale down the interaction on mobile devices (e.g., phone reduced to 240x496 on mobile vs 300x620 on desktop).
+  - **Motion Tuning:** Entry offsets and rotation angles are dynamically adjusted via variables to maintain elegance on small screens without overwhelming the viewport.
+  - **Composition:** Flexible vertical spacing (`gap-12` on mobile vs `gap-32` on desktop) and container height management ensure a balanced fold on standard mobile sizes (390x844).
+- **Animation Details:**
   - **Human Deceleration:** Uses a sharp out-easing (`cubic-bezier(0.19, 1, 0.22, 1)`) and diagonal entry to simulate a hand slowing down precisely near the NFC tag.
   - **Premium Interaction:** Features a critical ~200ms detection pause before triggering subtle NFC ripples, a visual haptic vibration (1px shift), and a soft screen light response.
+- **Performance:** GPU-friendly transforms (translate3d, rotateX/Y/Z) ensure smooth 60fps performance on all devices. Fallbacks provided for `prefers-reduced-motion`.
+
   - **Progressive UI Reveal:** Smartphone screen loads in a staggered sequence (`header-reveal`, `content-reveal`, `cta-reveal`) to simulate a natural mobile OS experience.
 - **Trigger Logic:** 
   - **Viewport Activation:** Plays automatically when entering the viewport (threshold 0.3) using `IntersectionObserver`.
