@@ -13,6 +13,11 @@ export function Hero() {
       
       <div className="container relative mx-auto max-w-6xl px-4 md:px-8 flex flex-col items-center text-center">
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
+          {/* English trust line for Google OAuth classification compatibility */}
+          <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground/40 font-medium mb-10">
+            Business reviews and digital reputation platform powered by NFC technology.
+          </p>
+
           {/* Dark Mode Logo (White) */}
           <Image
             src="/branding/logo-vertical.webp"
