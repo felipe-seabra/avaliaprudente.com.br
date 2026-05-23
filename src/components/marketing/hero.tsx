@@ -22,30 +22,27 @@ export function Hero() {
           <Image
             src="/branding/logo-vertical.webp"
             alt={APP_CONFIG.name}
-            width={160}
-            height={160}
-            sizes="160px"
-            className="h-32 w-auto object-contain mb-8 mx-auto hidden dark:block"
+            width={120}
+            height={120}
+            sizes="120px"
+            className="h-24 w-auto object-contain mb-8 mx-auto hidden dark:block"
             priority
           />
           {/* Light Mode Logo (Dark) */}
           <Image
             src="/branding/logo-vertical-white-mode.webp"
             alt={APP_CONFIG.name}
-            width={160}
-            height={160}
-            sizes="160px"
-            className="h-32 w-auto object-contain mb-8 mx-auto block dark:hidden"
+            width={120}
+            height={120}
+            sizes="120px"
+            className="h-24 w-auto object-contain mb-8 mx-auto block dark:hidden"
             priority
           />
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-4">
+          
+          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-6">
             <Zap className="mr-2 h-4 w-4 fill-primary" />
             <span>Plataforma de Reputação: Aproximou, avaliou.</span>
           </div>
-
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60 font-semibold mb-8 max-w-xl mx-auto leading-relaxed">
-            Avalia Prudente é uma plataforma de reputação empresarial e avaliações online que ajuda consumidores a compartilhar experiências reais enquanto permite que empresas gerenciem e respondam aos feedbacks de clientes.
-          </p>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground max-w-4xl mb-6 leading-[1.1]">
             A tag inteligente que <span className="text-gradient">conecta seu balcão</span> ao mundo digital
@@ -69,7 +66,7 @@ export function Hero() {
         </div>
         
         {/* Animated NFC Hero Interaction */}
-        <div className="mt-20 w-full animate-in fade-in zoom-in-95 duration-1000 delay-500">
+        <div className="mt-16 w-full animate-in fade-in zoom-in-95 duration-1000 delay-500">
           <NfcHeroAnimation />
         </div>
       </div>

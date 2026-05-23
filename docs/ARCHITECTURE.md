@@ -98,28 +98,19 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 ### Reviewer Reputation & Badge System
 ...
 
-### Cinematic NFC Hero Animation
-- **Goal:** Create a high-end, cinematic interactive moment that demonstrates the platform's core NFC value proposition with realistic human-like motion and progressive loading.
-- **Architecture:** Isolated into a standalone `NfcHeroAnimation` component using pure CSS, Tailwind CSS, and `IntersectionObserver`.
-- **Responsive Strategy:**
-  - **Dynamic Scaling:** Uses CSS variables (`--phone-w`, `--card-w`, etc.) and media queries to scale down the interaction on mobile devices (e.g., phone reduced to 240x496 on mobile vs 300x620 on desktop).
-  - **Motion Tuning:** Entry offsets and rotation angles are dynamically adjusted via variables to maintain elegance on small screens without overwhelming the viewport.
-  - **Composition:** Flexible vertical spacing (`gap-12` on mobile vs `gap-32` on desktop) and container height management ensure a balanced fold on standard mobile sizes (390x844).
-- **Animation Details:**
-  - **Human Deceleration:** Uses a sharp out-easing (`cubic-bezier(0.19, 1, 0.22, 1)`) and diagonal entry to simulate a hand slowing down precisely near the NFC tag.
-  - **Premium Interaction:** Features a critical ~200ms detection pause before triggering subtle NFC ripples, a visual haptic vibration (1px shift), and a soft screen light response.
-- **Performance:** GPU-friendly transforms (translate3d, rotateX/Y/Z) ensure smooth 60fps performance on all devices. Fallbacks provided for `prefers-reduced-motion`.
-
-  - **Progressive UI Reveal:** Smartphone screen loads in a staggered sequence (`header-reveal`, `content-reveal`, `cta-reveal`) to simulate a natural mobile OS experience.
-- **Trigger Logic:** 
-  - **Viewport Activation:** Plays automatically when entering the viewport using `IntersectionObserver`. Optimized for mobile with `threshold: 0` and `rootMargin: '50px'`.
-  - **Safety Fallback:** Implements a 1s `setTimeout` fallback to force the animation start if the observer fails or is delayed.
-  - **Interaction Replay:** Replays the entire 3.5s sequence on hover or focus, guarded by `(pointer: fine)` to prevent touch-device interference.
-  - **Scaling & Composition:** Uses a reduced scale (~30% smaller than initial implementation) to ensure the animation remains a secondary, elegant complement to the hero text rather than a dominant visual mass.
-  - **Visibility Assurance:** Explicit initial and final opacity states in keyframes coupled with `animation-fill-mode: forwards` ensure elements never disappear post-animation.
-- **Performance & Accessibility:** 
-  - **GPU Acceleration:** Exclusively uses `translate3d`, `rotate3d`, and `opacity` for smooth 60fps performance.
-  - **Motion Reduction:** Respects `prefers-reduced-motion` by bypassing all entry and movement animations.
+### Premium NFC Hero Interaction (Final Restoration)
+- **Goal:** Demonstrate the core value proposition (NFC -> Review) through a high-end, Apple-like interactive sequence with absolute stability and visual connectivity.
+- **Tag-Anchored Composition:**
+  - **Visible Anchor:** The physical NFC Tag is the central, static anchor of the scene, visible at all times to establish the product context.
+  - **Diagonal Vector Entry:** The device enters from the bottom-right on a clear diagonal path, decelerating naturally as it approaches the tag.
+  - **Perfect Alignment:** The smartphone lands sensor-first over the tag, triggering the NFC interaction and revealing the review UI.
+- **Hierarchy & Spacing:**
+  - **Supporting Visual:** Positioned below the primary hero content to maintain messaging dominance while providing a rich visual demonstration.
+  - **Compact Integration:** Vertical spacing is tuned to eliminate dead space, creating a cohesive visual unit on both desktop and mobile.
+  - **Refined Proportions:** Smartphone dimensions reduced by 10% for better balance with the hero copy and the anchor tag.
+- **Performance & Reliability:** 
+  - **Atomic CSS Animations:** Uses isolated keyframes to avoid transform collisions and ensure 60fps performance.
+  - **Motion Reduction:** Full support for `prefers-reduced-motion` media query.
 
 ### OG Image Architecture (Dynamic Branding)
 ...

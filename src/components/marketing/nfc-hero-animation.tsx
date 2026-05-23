@@ -1,194 +1,112 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { SmartphoneNfc, Zap, Star, ShieldCheck } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+import { Zap, Star, Check } from 'lucide-react'
 import { BrandIcons } from '@/components/shared/brand-icons'
 import { cn } from '@/lib/utils'
 
 /**
- * NfcHeroAnimation Refinement
+ * NFC Hero Animation - FINAL RESTORATION
  * 
- * Final Realism Adjustments:
- * - Human Deceleration: Phone slows down significantly near the tag.
- * - Detection Pause: ~200ms delay between arrival and NFC response.
- * - Staggered UI Reveal: Header -> Content -> CTA load sequence.
- * - Subtle Motion: Reduced offsets, focus on opacity and micro-scaling.
- * - Cinematic Timing: Calm, confident 3.5s master timeline.
+ * 1. THE ANCHOR: NFC Tag is visible at all times, centered and straight.
+ * 2. THE MOTION: Phone enters from bottom-right, slows down, lands sensor-first on tag.
+ * 3. VISUALS: Premium dark materials, purple accents, realistic shadows.
+ * 4. HIERARCHY: Compact composition to support hero text.
  */
 export function NfcHeroAnimation() {
-  const [hasPlayed, setHasPlayed] = useState(false)
-  const [animationKey, setAnimationKey] = useState(0)
+  const [inView, setInView] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const observerRef = useRef<IntersectionObserver | null>(null)
-
-  const triggerAnimation = useCallback(() => {
-    if (!hasPlayed) {
-      setHasPlayed(true)
-      setAnimationKey(prev => prev + 1)
-    }
-  }, [hasPlayed])
 
   useEffect(() => {
-    const fallbackTimer = setTimeout(() => {
-      if (!hasPlayed) triggerAnimation()
-    }, 1000)
-
-    observerRef.current = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasPlayed) {
-          triggerAnimation()
-          if (observerRef.current) observerRef.current.disconnect()
+        if (entry.isIntersecting) {
+          setInView(true)
+          observer.disconnect()
         }
       },
-      { 
-        threshold: 0,
-        rootMargin: '50px' 
-      }
+      { threshold: 0.1 }
     )
 
     if (containerRef.current) {
-      observerRef.current.observe(containerRef.current)
+      observer.observe(containerRef.current)
     }
 
-    return () => {
-      if (observerRef.current) observerRef.current.disconnect()
-      clearTimeout(fallbackTimer)
-    }
-  }, [hasPlayed, triggerAnimation])
-
-  const handleInteraction = () => {
-    // Only replay on explicit interaction if it has already played
-    // and only for mouse devices to avoid touch-flicker
-    if (hasPlayed && window.matchMedia('(pointer: fine)').matches) {
-      setAnimationKey(prev => prev + 1)
-    }
-  }
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <div 
       ref={containerRef}
-      className="relative w-full max-w-4xl mx-auto py-4 md:py-8 perspective-2000 focus:outline-none overflow-visible"
-      onMouseEnter={handleInteraction}
-      onFocus={handleInteraction}
-      tabIndex={0}
-      role="img"
-      aria-label="Animação cinematográfica demonstrando a tecnologia NFC da Avalia Prudente"
+      className="relative w-full max-w-md mx-auto h-[300px] md:h-[350px] flex items-center justify-center overflow-visible select-none"
     >
       <style jsx>{`
-        :root {
-          --phone-w: 180px;
-          --phone-h: 370px;
-          --card-w: 140px;
-          --card-h: 196px;
-          --entry-x: 40px;
-          --entry-y: 20px;
-          --entry-rot-x: 8deg;
-          --entry-rot-y: 10deg;
-          --entry-rot-z: 8deg;
-          --final-rot-z: -3deg;
+        /* 
+          ANIMATION TIMELINE 
+          0.0s - 0.6s: Tag settles (fade + slide)
+          0.6s - 1.6s: Phone enters diagonally (bottom-right -> center-low)
+          1.6s - 1.9s: Haptic bump + NFC Pulse
+          1.9s - 2.4s: UI Reveal Stagger
+        */
+
+        @keyframes tag-entry {
+          from { opacity: 0; transform: translateY(10px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @media (min-width: 768px) {
-          :root {
-            --phone-w: 240px;
-            --phone-h: 496px;
-            --card-w: 190px;
-            --card-h: 266px;
-            --entry-x: 120px;
-            --entry-y: 80px;
-            --entry-rot-x: 12deg;
-            --entry-rot-y: 15deg;
-            --entry-rot-z: 12deg;
-            --final-rot-z: -5deg;
-          }
+        @keyframes phone-entry {
+          0% { transform: translate(80px, 120px) rotate(12deg); opacity: 0; }
+          100% { transform: translate(0, 60px) rotate(-4deg); opacity: 1; }
         }
 
-        /* Master Timeline: 3.5s */
-        
-        @keyframes phone-entry-cinematic {
-          0% { 
-            transform: translate3d(var(--entry-x), var(--entry-y), 0) rotateX(var(--entry-rot-x)) rotateY(var(--entry-rot-y)) rotateZ(var(--entry-rot-z)); 
-            opacity: 0; 
-          }
-          30%, 100% { 
-            transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(var(--final-rot-z)); 
-            opacity: 1; 
-          }
+        @keyframes nfc-pulse {
+          0% { transform: scale(1); opacity: 0; }
+          50% { transform: scale(1.6); opacity: 0.4; }
+          100% { transform: scale(2.2); opacity: 0; }
         }
 
-        @keyframes nfc-pulse-cinematic {
-          0%, 40% { transform: scale(0.8); opacity: 0; }
-          46% { transform: scale(1.1); opacity: 0.4; }
-          60%, 100% { transform: scale(1.4); opacity: 0; }
+        @keyframes haptic-bump {
+          0%, 100% { transform: translate(0, 60px) rotate(-4deg); }
+          25% { transform: translate(1px, 58px) rotate(-3.5deg); }
+          75% { transform: translate(-1px, 62px) rotate(-4.5deg); }
         }
 
-        @keyframes phone-haptic-cinematic {
-          0%, 40% { transform: translate3d(0, 0, 0); }
-          42% { transform: translate3d(1px, -1px, 0); }
-          44% { transform: translate3d(-1px, 1px, 0); }
-          46%, 100% { transform: translate3d(0, 0, 0); }
+        @keyframes screen-on {
+          from { opacity: 0; filter: brightness(0.6); }
+          to { opacity: 1; filter: brightness(1); }
         }
 
-        @keyframes screen-light-cinematic {
-          0%, 40% { opacity: 0; }
-          42% { opacity: 0.15; }
-          55%, 100% { opacity: 0; }
+        @keyframes ui-slide-up {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes ui-fade-cinematic {
-          0%, 42% { opacity: 0; }
-          52%, 100% { opacity: 1; }
+        .animate-tag {
+          animation: tag-entry 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes header-reveal-cinematic {
-          0%, 44% { opacity: 0; transform: translateY(6px); }
-          56%, 100% { opacity: 1; transform: translateY(0); }
+        .animate-phone {
+          animation: phone-entry 1.0s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
         }
 
-        @keyframes content-reveal-cinematic {
-          0%, 50% { opacity: 0; transform: translateY(6px); }
-          64%, 100% { opacity: 1; transform: translateY(0); }
+        .animate-haptic {
+          animation: haptic-bump 0.1s ease-in-out 1.6s 2;
         }
 
-        @keyframes cta-reveal-cinematic {
-          0%, 58% { opacity: 0; transform: scale(0.98); }
-          74%, 100% { opacity: 1; transform: scale(1); }
+        .animate-pulse {
+          animation: nfc-pulse 0.6s ease-out 1.6s forwards;
         }
 
-        .animate-phone-master {
-          animation: phone-entry-cinematic 3.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        .animate-screen {
+          animation: screen-on 0.4s ease-out 1.9s forwards;
         }
 
-        .animate-haptic-master {
-          animation: phone-haptic-cinematic 3.5s ease-in-out forwards;
-        }
-
-        .animate-pulse-master {
-          animation: nfc-pulse-cinematic 3.5s ease-out forwards;
-        }
-
-        .animate-light-master {
-          animation: screen-light-cinematic 3.5s ease-out forwards;
-        }
-
-        .animate-ui-master {
-          animation: ui-fade-cinematic 3.5s ease-out forwards;
-        }
-
-        .animate-header-master {
-          animation: header-reveal-cinematic 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .animate-content-master {
-          animation: content-reveal-cinematic 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .animate-cta-master {
-          animation: cta-reveal-cinematic 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+        .animate-ui-1 { animation: ui-slide-up 0.4s ease-out 2.1s forwards; opacity: 0; }
+        .animate-ui-2 { animation: ui-slide-up 0.4s ease-out 2.3s forwards; opacity: 0; }
+        .animate-ui-3 { animation: ui-slide-up 0.4s ease-out 2.5s forwards; opacity: 0; }
 
         @media (prefers-reduced-motion: reduce) {
-          .animate-phone-master, .animate-haptic-master, .animate-pulse-master, .animate-light-master, .animate-ui-master, .animate-header-master, .animate-content-master, .animate-cta-master {
+          .animate-tag, .animate-phone, .animate-haptic, .animate-pulse, .animate-screen, .animate-ui-1, .animate-ui-2, .animate-ui-3 {
             animation: none !important;
             opacity: 1 !important;
             transform: none !important;
@@ -196,164 +114,118 @@ export function NfcHeroAnimation() {
         }
       `}</style>
 
-      {/* Background Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-48 md:h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-      
-      <div className="relative flex flex-col md:flex-row items-center justify-center gap-8 md:gap-24 min-h-[400px] md:min-h-[500px]">
+      {/* 1. THE ANCHOR: PREMIUM NFC TAG */}
+      <div className={cn(
+        "relative z-10 w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] bg-zinc-950 border border-white/10 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center text-white transform-gpu",
+        inView ? "animate-tag" : "opacity-0"
+      )}>
+        {/* Glossy Overlay */}
+        <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
         
-        {/* NFC Card - The "Anchor" */}
-        <div className="relative z-10 transition-transform duration-700">
-          <div 
-            style={{ width: 'var(--card-w)', height: 'var(--card-h)' }}
-            className="rounded-[1.5rem] md:rounded-[2rem] bg-zinc-900 border border-white/10 shadow-2xl flex flex-col items-center justify-between p-5 md:p-8 text-white transform-gpu rotate-y-[-12deg] rotate-x-[8deg] shadow-[20px_20px_40px_rgba(0,0,0,0.5)] transition-all duration-700 hover:rotate-y-[-15deg] hover:border-white/20 group"
-          >
-            <div className="w-full flex justify-between items-start">
-              <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-primary/5 flex items-center justify-center border border-primary/10 backdrop-blur-sm group-hover:bg-primary/10 transition-colors duration-500">
-                <SmartphoneNfc className="w-5 h-5 md:w-6 md:h-6 text-primary/80 group-hover:text-primary transition-colors" />
+        {/* NFC Icon & Text */}
+        <div className="relative flex flex-col items-center gap-3">
+          <div className="relative">
+            {/* NFC Pulse Effect */}
+            {inView && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-14 h-14 md:w-16 md:h-16 border-2 border-primary/40 rounded-full animate-pulse" />
               </div>
-              <div className="h-1 w-10 md:w-16 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full w-1/3 bg-primary/20" />
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center gap-4 md:gap-6">
-              <div className="relative">
-                {/* NFC Ripple effect */}
-                {hasPlayed && (
-                  <div key={animationKey} className="pointer-events-none">
-                    <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse-master" />
-                    <div className="absolute inset-0 bg-primary/10 rounded-full animate-pulse-master [animation-delay:0.1s]" />
-                  </div>
-                )}
-                
-                <div className="relative h-12 w-12 md:h-20 md:w-20 rounded-full border border-primary/20 flex items-center justify-center bg-zinc-900/90 backdrop-blur-sm shadow-[0_0_30px_rgba(var(--primary),0.05)]">
-                  <Zap className="h-6 w-6 md:h-8 md:h-8 text-primary/70" />
-                </div>
-              </div>
-              <div className="space-y-0.5 md:space-y-1 text-center">
-                <span className="block font-black text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/80">Aproxime</span>
-                <span className="block text-[8px] md:text-[10px] text-white/20 uppercase tracking-widest font-medium">NFC Ativo</span>
-              </div>
-            </div>
-
-            <div className="w-full space-y-2 md:space-y-3">
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-              <div className="flex justify-between items-center px-2">
-                 <div className="h-1 w-5 md:h-1.5 md:w-6 bg-white/5 rounded-full" />
-                 <div className="h-1 w-8 md:h-1.5 md:w-10 bg-white/10 rounded-full" />
-              </div>
+            )}
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center shadow-inner relative z-10">
+              <Zap className="w-7 h-7 md:w-8 md:h-8 text-primary fill-primary/10" />
             </div>
           </div>
-          
-          {/* Card shadow on the "floor" */}
-          <div className="absolute -bottom-6 md:-bottom-10 left-1/2 -translate-x-1/2 w-32 md:w-48 h-6 md:h-8 bg-black/50 blur-xl md:blur-2xl rounded-full -z-10" />
+          <div className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500">NFC Ativo</div>
         </div>
 
-        {/* Smartphone Animation */}
-        <div key={animationKey} className={cn(
-          "relative z-20 transition-opacity duration-700",
-          hasPlayed ? "animate-phone-master opacity-100" : "opacity-0"
-        )}>
-          <div className={cn(hasPlayed && "animate-haptic-master")}>
-            <div 
-              style={{ width: 'var(--phone-w)', height: 'var(--phone-h)' }}
-              className="border-[6px] md:border-[10px] border-zinc-800/90 rounded-[2rem] md:rounded-[3rem] bg-black shadow-2xl relative overflow-hidden ring-1 ring-white/10 transform-gpu"
-            >
-              
-              {/* Dynamic Island / Notch */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 md:w-28 h-5 md:h-7 bg-zinc-800/90 rounded-b-xl md:rounded-b-2xl z-50" />
-              
-              {/* Screen Content */}
-              <div className="absolute inset-0 bg-zinc-950 flex flex-col">
-                
-                {/* Soft Screen Light Response */}
-                <div className={cn(
-                  "absolute inset-0 bg-primary/20 z-20 pointer-events-none opacity-0",
-                  hasPlayed && "animate-light-master"
-                )} />
-
-                {/* Idle State / Lock Screen */}
-                <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black z-10 flex items-center justify-center">
-                   <div className="opacity-10 flex flex-col items-center gap-3 md:gap-4">
-                      <div className="w-12 h-12 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2.2rem] bg-white/5 border border-white/5 flex items-center justify-center">
-                        <SmartphoneNfc className="w-6 h-6 md:w-8 md:h-8 text-white" />
-                      </div>
-                      <div className="h-1 w-12 md:w-20 bg-white/5 rounded-full" />
-                   </div>
-                </div>
-
-                {/* Success/Review Page State */}
-                <div className={cn(
-                  "relative z-30 flex-1 flex flex-col bg-zinc-950 opacity-0",
-                  hasPlayed && "animate-ui-master"
-                )}>
-                  {/* Business Header */}
-                  <div className={cn(
-                    "pt-8 md:pt-14 px-5 md:px-7 pb-5 md:pb-7 bg-zinc-900/40 border-b border-white/5 opacity-0",
-                    hasPlayed && "animate-header-master"
-                  )}>
-                    <div className="flex items-center gap-3 md:gap-4">
-                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center shadow-inner">
-                        <Star className="w-4 h-4 md:w-5 md:h-5 text-primary/60 fill-primary/40" />
-                      </div>
-                      <div className="space-y-1 md:space-y-1.5">
-                        <div className="h-2.5 md:h-3 w-16 md:w-24 bg-white/80 rounded-full" />
-                        <div className="h-1 md:h-1.5 w-10 md:w-14 bg-white/10 rounded-full" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Rating Section */}
-                  <div className={cn(
-                    "p-5 md:p-7 space-y-5 md:space-y-7 opacity-0",
-                    hasPlayed && "animate-content-master"
-                  )}>
-                    <div className="space-y-2 md:space-y-2.5">
-                       <div className="h-3 md:h-3.5 w-full bg-white/5 rounded-lg" />
-                       <div className="h-3 md:h-3.5 w-5/6 bg-white/5 rounded-lg" />
-                    </div>
-
-                    <div className="flex justify-center gap-1.5 md:gap-2 py-3 md:py-5">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <Star key={i} className="w-5 h-5 md:w-8 md:h-8 text-primary/80 fill-primary/60 drop-shadow-[0_0_10px_rgba(var(--primary),0.2)]" />
-                      ))}
-                    </div>
-
-                    <div className={cn(
-                      "space-y-2.5 md:space-y-3 opacity-0",
-                      hasPlayed && "animate-cta-master"
-                    )}>
-                      <div className="w-full h-10 md:h-12 bg-primary/90 rounded-lg md:rounded-xl flex items-center justify-center gap-2 md:gap-2 shadow-lg shadow-primary/10 border border-primary-foreground/5 hover:bg-primary transition-colors duration-500">
-                        <span className="font-bold text-[11px] md:text-sm text-white">Enviar Avaliação</span>
-                      </div>
-                      <div className="w-full h-10 md:h-12 border border-white/5 rounded-lg md:rounded-xl flex items-center justify-center gap-2 md:gap-2 bg-white/[0.03]">
-                         <BrandIcons.Instagram className="w-3.5 h-3.5 md:w-4 md:h-4 text-white/60" />
-                        <span className="font-semibold text-[10px] md:text-xs text-white/60">Seguir no Instagram</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Footer/Trust */}
-                  <div className="mt-auto p-5 md:p-7 border-t border-white/5 bg-zinc-900/20">
-                    <div className="flex items-center justify-center gap-2 md:gap-2.5">
-                      <div className="w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-primary/10 flex items-center justify-center">
-                        <ShieldCheck className="w-2.5 md:w-3 h-2.5 md:h-3 text-primary/60" />
-                      </div>
-                      <span className="text-[8px] md:text-[9px] text-white/30 uppercase tracking-[0.2em] font-bold">Verificado Oficial</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Light reflection overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent pointer-events-none z-40" />
-              </div>
-            </div>
-          </div>
-          
-          {/* Phone shadow on the "floor" */}
-          <div className="absolute -bottom-8 md:-bottom-12 left-1/2 -translate-x-1/2 w-48 md:w-60 h-8 md:h-12 bg-black/60 blur-[25px] md:blur-[35px] rounded-full -z-10" />
+        {/* Decorative Badge */}
+        <div className="absolute bottom-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/5">
+          <div className="w-1 h-1 rounded-full bg-primary" />
+          <span className="text-[7px] md:text-[8px] uppercase font-bold text-zinc-400">Avalia Prudente</span>
         </div>
+
+        {/* Physical Shadow on Floor */}
+        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-2/3 h-6 bg-black/60 blur-2xl rounded-full -z-10" />
       </div>
+
+      {/* 2. THE ACTOR: SMARTPHONE (10% Smaller) */}
+      <div className={cn(
+        "absolute z-20 w-[150px] h-[310px] md:w-[180px] md:h-[370px] transform-gpu pointer-events-none",
+        inView ? "animate-phone animate-haptic" : "opacity-0"
+      )}>
+        {/* Device Frame */}
+        <div className="w-full h-full rounded-[2rem] md:rounded-[2.5rem] bg-zinc-900 border-[5px] md:border-[6px] border-zinc-800 shadow-2xl relative overflow-hidden ring-1 ring-white/10">
+          
+          {/* Dynamic Island */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 md:w-20 h-5 md:h-6 bg-zinc-800 rounded-b-xl z-50" />
+
+          {/* Screen */}
+          <div className="absolute inset-0 bg-black flex flex-col">
+            
+            {/* UI Reveal */}
+            <div className={cn(
+              "flex-1 flex flex-col bg-zinc-950 opacity-0",
+              inView && "animate-screen"
+            )}>
+              {/* Review Header */}
+              <div className="pt-8 md:pt-10 px-4 pb-3 bg-zinc-900/50 border-b border-white/5 animate-ui-1">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <Star className="w-4 h-4 text-primary fill-primary/30" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="h-2.5 w-20 bg-white/90 rounded-full" />
+                    <div className="h-1.5 w-12 bg-white/10 rounded-full" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Content Section */}
+              <div className="p-4 space-y-5">
+                <div className="space-y-1.5 animate-ui-2">
+                  <div className="h-2 w-full bg-white/5 rounded-full" />
+                  <div className="h-2 w-4/5 bg-white/5 rounded-full" />
+                </div>
+
+                {/* Star Selection */}
+                <div className="flex justify-center gap-1.5 py-1 animate-ui-2">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star key={i} className="w-5 h-5 md:w-6 md:h-6 text-primary fill-primary" />
+                  ))}
+                </div>
+
+                {/* CTA Buttons */}
+                <div className="space-y-2.5 animate-ui-3">
+                  <div className="w-full h-8 md:h-10 bg-primary rounded-lg flex items-center justify-center font-bold text-[10px] md:text-xs text-white shadow-lg shadow-primary/20">
+                    Enviar Avaliação
+                  </div>
+                  <div className="w-full h-8 md:h-10 border border-white/10 rounded-lg flex items-center justify-center gap-2 bg-white/5">
+                    <BrandIcons.Instagram className="w-3.5 h-3.5 text-white/70" />
+                    <span className="text-[9px] md:text-[10px] font-medium text-white/70">Seguir</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Verified Badge */}
+              <div className="mt-auto p-4 border-t border-white/5 flex items-center justify-center gap-1.5 animate-ui-3">
+                <div className="w-3.5 h-3.5 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Check className="w-2 h-2 text-primary" />
+                </div>
+                <span className="text-[7px] md:text-[8px] uppercase tracking-widest text-zinc-600 font-bold">Oficial</span>
+              </div>
+            </div>
+
+            {/* Reflection Layer */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Smartphone Shadow */}
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-full h-8 bg-black/60 blur-2xl rounded-full -z-10" />
+      </div>
+
+      {/* Background Decorative Glow */}
+      <div className="absolute inset-0 bg-primary/5 blur-[100px] rounded-full -z-20 pointer-events-none" />
     </div>
   )
 }
