@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'pt_BR',
     url: 'https://www.avaliaprudente.com.br',
-    title: 'Avalia Prudente | Plataforma NFC Inteligente',
+    title: "Avalia Prudente | Plataforma NFC Inteligente",
     description: 'A plataforma definitiva para avaliações e reputação digital via NFC.',
     siteName: 'Avalia Prudente',
     images: [
@@ -50,9 +50,9 @@ export const metadata: Metadata = {
       },
     ],
   },
-    alternates: {
+  alternates: {
     canonical: 'https://www.avaliaprudente.com.br',
-  }, 
+  },
   twitter: {
     card: 'summary_large_image',
     title: 'Avalia Prudente | Plataforma NFC Inteligente',
@@ -78,6 +78,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'Avalia Prudente',
+              alternateName: 'Avalia Prudente',
+              url: 'https://www.avaliaprudente.com.br',
+            }),
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
