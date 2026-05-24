@@ -6,6 +6,7 @@ import { HowItWorks } from '@/components/marketing/how-it-works'
 import { Pricing } from '@/components/marketing/pricing'
 import { FAQ } from '@/components/marketing/faq'
 import { Footer } from '@/components/marketing/footer'
+import { LegalFooterBlock } from '@/components/marketing/legal-footer-block'
 import { BusinessRanking } from '@/components/marketing/business-ranking'
 import { PlatformPurpose } from '@/components/marketing/platform-purpose'
 import { CrawlerComplianceSection } from '@/components/marketing/crawler-compliance'
@@ -79,6 +80,7 @@ export default async function Home() {
         <Pricing />
         <FAQ />
       </main>
+      <LegalFooterBlock />
       <Footer />
     </div>
   )

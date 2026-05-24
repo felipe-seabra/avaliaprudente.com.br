@@ -1,20 +1,18 @@
-import Link from 'next/link'
-
 export function ComplianceBar() {
   return (
-    <div className="w-full bg-muted/30 border-b border-border/40 py-2 relative z-[60]">
-      <div className="container mx-auto px-4 md:px-8 flex justify-center items-center gap-3 md:gap-6 text-[10px] md:text-xs text-muted-foreground font-medium">
-        <Link href="/privacy" className="hover:text-primary transition-colors">
+    <div className="w-full bg-background border-b border-border py-2 relative z-[60]">
+      <div className="container mx-auto px-4 md:px-8 flex justify-center items-center gap-3 md:gap-6 text-[10px] md:text-xs text-foreground font-bold">
+        <a href="/privacy" className="hover:text-primary transition-colors underline underline-offset-2">
           Política de Privacidade
-        </Link>
+        </a>
         <span className="text-border">•</span>
-        <Link href="/terms" className="hover:text-primary transition-colors">
+        <a href="/terms" className="hover:text-primary transition-colors underline underline-offset-2">
           Termos de Uso
-        </Link>
+        </a>
         <span className="text-border">•</span>
-        <Link href="/contact" className="hover:text-primary transition-colors">
+        <a href="/contact" className="hover:text-primary transition-colors underline underline-offset-2">
           Contato
-        </Link>
+        </a>
       </div>
     </div>
   )
