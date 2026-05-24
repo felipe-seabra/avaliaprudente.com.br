@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- **Compliance & Transparency Refactor:** Updated homepage and product copy to accurately reflect platform functionality and adhere to external platform policies.
+  - **Accurate Flow Description:** Clarified that positive experiences are redirected to external platforms (like Google) while negative experiences remain internal, ensuring transparency for businesses and consumers.
+  - **Policy Alignment:** Removed misleading "collect Google reviews" and "Google review collection" terminology to avoid implying official partnership or manipulation.
+  - **Repositioning:** Rebranded the platform as a "Digital Reputation Platform powered by NFC", focusing on sharing experiences and digital interactions.
+  - **Updated Marketing Assets:** Refined Hero, Features, FAQ, and Footer sections across the landing page and metadata for improved compliance and technical accuracy.
+
 ### Added
 - **Final Premium NFC Tag Design:**
   - **Vertical Card Orientation:** Reimagined the NFC tag as a portrait-oriented premium card for a modern business aesthetic.

@@ -7,8 +7,8 @@ const features = [
     icon: Filter,
   },
   {
-    title: 'Redirecionamento Google',
-    description: 'Clientes que dão 4 ou 5 estrelas são convidados a publicar a avaliação diretamente no seu Google Meu Negócio.',
+    title: 'Redirecionamento Estratégico',
+    description: 'Experiências positivas podem ser redirecionadas para plataformas externas de avaliação, como o Google.',
     icon: Zap,
   },
   {

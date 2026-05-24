@@ -20,7 +20,7 @@ export function Footer() {
               />
             </Link>
             <p className="text-muted-foreground max-w-sm mb-6">
-              Plataforma NFC inteligente para negócios locais. Aumente suas avaliações no Google e digitalize seu atendimento com uma única tag.
+              Plataforma de reputação digital via NFC. Ajude seu negócio a compartilhar experiências e interações digitais através de tags inteligentes e páginas personalizadas.
             </p>
             <a
               href={`https://wa.me/${APP_CONFIG.whatsappOrderNumber}?text=${encodeURIComponent('Olá! Gostaria de saber mais sobre a Avalia Prudente.')}`}

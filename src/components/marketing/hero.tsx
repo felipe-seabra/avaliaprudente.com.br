@@ -49,7 +49,7 @@ export function Hero() {
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed mx-auto">
-            Tenha uma página interativa da sua empresa. Basta o cliente aproximar o celular da sua tag NFC para acessar WhatsApp, Instagram e avaliar seu negócio no Google.
+            Tenha uma página interativa da sua empresa. O Avalia Prudente ajuda seu negócio a compartilhar experiências de avaliação e interações digitais através de tags NFC inteligentes e páginas de avaliação personalizadas.
           </p>
         </div>
         

@@ -8,7 +8,7 @@ import {
 const faqs = [
   {
     question: 'Como funciona o filtro de avaliações?',
-    answer: 'Quando o cliente escaneia o QR Code, ele é levado para uma página com a sua marca para dar uma nota de 1 a 5 estrelas. Se ele der 4 ou 5 estrelas, é redirecionado automaticamente para o seu Google Meu Negócio. Se der de 1 a 3 estrelas, abrimos um formulário de feedback interno que vai direto para o seu painel, e ele NÃO é redirecionado para o Google.',
+    answer: 'Quando o cliente escaneia o QR Code, ele é levado para uma página com a sua marca para dar uma nota de 1 a 5 estrelas. Se ele der 4 ou 5 estrelas, ele pode ser redirecionado para uma plataforma externa de sua escolha, como o Google. Se der de 1 a 3 estrelas, abrimos um formulário de feedback interno que vai direto para o seu painel, mantendo a interação privada.',
   },
   {
     question: 'Eu preciso de conhecimento técnico para usar?',

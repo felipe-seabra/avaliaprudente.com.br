@@ -11,10 +11,10 @@ export function CrawlerComplianceSection() {
           <div className="space-y-2">
             <h2 className="text-xl font-bold">Sobre o Avalia Prudente</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Avalia Prudente is a business reviews and digital reputation platform that helps consumers share real experiences while allowing businesses to manage and respond to customer feedback.
+              Avalia Prudente is a digital reputation platform powered by NFC technology that helps businesses share review experiences and digital interactions through smart tags and custom pages.
               <br />
               <span className="text-sm opacity-70">
-                O Avalia Prudente é uma plataforma de reputação empresarial e avaliações online que ajuda consumidores a compartilhar experiências reais.
+                O Avalia Prudente é uma plataforma de reputação digital baseada em NFC que ajuda empresas a compartilharem experiências de avaliação e interações digitais.
               </span>
             </p>
           </div>

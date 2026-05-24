@@ -25,8 +25,8 @@ export const metadata: Metadata = {
     template: '%s | Avalia Prudente',
     default: 'Avalia Prudente | Plataforma NFC para Negócios Locais',
   },
-  description: 'Transforme seu balcão em uma central de conexões digitais. Aumente suas avaliações no Google com Tags NFC inteligentes e redirecionamento estratégico.',
-  keywords: ['NFC', 'Avaliações Google', 'Marketing Local', 'Cartão de Visita Digital', 'Review', 'Google Meu Negócio'],
+  description: 'Plataforma de reputação digital baseada em NFC. O Avalia Prudente ajuda empresas a compartilharem experiências de avaliação e interações digitais através de tags NFC inteligentes e páginas personalizadas.',
+  keywords: ['NFC', 'Reputação Digital', 'Marketing Local', 'Cartão de Visita Digital', 'Review', 'Google Meu Negócio', 'Feedback de Clientes'],
   authors: [{ name: 'Avalia Prudente' }],
   creator: 'Avalia Prudente',
   icons: {

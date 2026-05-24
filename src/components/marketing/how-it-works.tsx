@@ -22,7 +22,7 @@ const steps = [
   {
     id: '03',
     title: 'Filtro em ação',
-    description: 'Se for 4 ou 5 estrelas, ele é levado ao Google. Se for 1 a 3, o feedback vai só para você.',
+    description: 'Se a experiência for positiva, o cliente pode ser convidado a avaliar em plataformas externas. Se for neutra ou negativa, o feedback fica apenas para você.',
     icon: ShieldCheck,
   },
 ]

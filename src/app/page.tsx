@@ -33,7 +33,7 @@ export default async function Home() {
              <div className="text-center mb-16">
                <h2 className="text-3xl font-black tracking-tight mb-4">Como funciona?</h2>
                <p className="text-muted-foreground max-w-xl mx-auto">
-                 Quatro passos simples para transformar o balcão da sua empresa em uma máquina de avaliações 5 estrelas.
+                 Quatro passos simples para transformar o balcão da sua empresa em uma máquina de engajamento e reputação.
                </p>
              </div>
 
@@ -42,7 +42,7 @@ export default async function Home() {
                   { step: 1, title: 'Crie sua empresa', desc: 'Cadastre seu negócio em segundos e tenha um link único.', icon: Zap },
                   { step: 2, title: 'Personalize a página', desc: 'Adicione sua logo, descrição e links das redes sociais.', icon: Star },
                   { step: 3, title: 'Receba sua Tag NFC', desc: 'Peça sua tag física inteligente para colocar no seu balcão.', icon: ShoppingBag },
-                  { step: 4, title: 'Colete avaliações', desc: 'Seus clientes aproximam o celular e avaliam instantaneamente.', icon: ShieldCheck },
+                  { step: 4, title: 'Gerencie sua Reputação', desc: 'Seus clientes aproximam o celular, interagem e avaliam sua empresa com facilidade.', icon: ShieldCheck },
                 ].map((item) => (
                   <div key={item.step} className="relative group">
                     <div className="bg-background p-8 rounded-3xl border-2 border-transparent transition-all hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 text-center space-y-4">
