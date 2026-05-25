@@ -33,6 +33,17 @@ export async function verifyPasswordForSudo(password: string) {
   return { success: true }
 }
 
+export async function getSudoAuthProvider() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return null
+
+  // Supabase stores provider in app_metadata or identities
+  const provider = user.app_metadata?.provider || user.identities?.[0]?.provider
+  return provider as string || 'email'
+}
+
 export async function checkSudoStatus() {
   const hasSudo = await checkSudo()
   return { hasSudo }

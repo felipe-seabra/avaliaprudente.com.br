@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Provider-Aware Sudo Mode:**
+  - **OAuth Re-authentication:** Enabled Google OAuth users to complete privileged operations via secure provider-side re-authentication (`prompt=login`).
+  - **Provider Detection:** Automated detection of the current user's auth provider to show context-relevant sudo options.
+  - **Security Hardening:** Maintained 15-minute elevation window while allowing non-password users to fulfill security requirements without compromising UX.
 - **Privileged Operation Security (Sudo Mode):**
   - **Sudo Session Management:** Implemented an encrypted `sudo_session` token using Web Crypto API to elevate privileges temporarily.
   - **Sudo Modal:** Added a reusable `<SudoDialog />` and `useSudo` hook to enforce re-authentication before sensitive operations.

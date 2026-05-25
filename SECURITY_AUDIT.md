@@ -66,6 +66,9 @@ Before integrating Stripe or any payment gateway, the following blockers must be
 1. **[FIXED] Webhook Integrity:** Implemented isolated `/api/webhooks/billing` route with strict signature validation structure. Bypassed the CSRF layer specifically for this route.
 2. **[FIXED] Database Isolation:** Implemented `BillingService` abstraction. Billing data must not be exposed to the `anon` key. A new schema or highly restricted table is required.
 3. **[FIXED] Session Replay / Sudo Mode:** Payment flows and sensitive operations (like business deletion and account deactivation) now require fresh authentication (re-auth) via a Sudo modal.
+   - **Provider-Aware:** Supports both traditional password users and Google OAuth users.
+   - **OAuth Security:** Forces a fresh provider login using `prompt=login` for Google users, ensuring recent identity verification without requiring a local password if not available.
+   - **Elevation Window:** Enforces a strict 15-minute window for elevated privileges.
 4. **[FIXED] Audit Logging:** Implemented `audit_logs` foundation with robust database triggers and API logging for tamper-resistant tracking of privileged operations.
 
 ---

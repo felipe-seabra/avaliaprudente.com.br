@@ -94,7 +94,7 @@
 - [x] Safeguards against schema drift and missing profiles.
 
 ## Payment Readiness & Advanced Security (Phase 10)
-- [x] **Sudo Mode:** Sensitive mutations (e.g., deleting a business, deactivating an account) require a recent password confirmation, utilizing an ephemeral signed `sudo_session` token.
+- [x] **Sudo Mode:** Sensitive mutations (e.g., deleting a business, deactivating an account) require a recent identity confirmation. Supports both password verification and OAuth re-authentication (Google), utilizing ephemeral signed tokens or fresh sign-in validation.
 - [x] **Audit Logging:** Tamper-resistant `audit_logs` foundation via `service_role` APIs and robust PostgreSQL triggers for critical `DELETE` and `UPDATE` operations.
 - [x] **Billing Abstraction:** `BillingService` encapsulates future payment gateway operations, establishing clear trust boundaries before Stripe integration.
 - [x] **Webhook Security:** Dedicated placeholder endpoints configured to enforce cryptographic signature validation, bypassing CSRF only for fully authenticated server-to-server webhook events.
