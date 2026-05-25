@@ -178,6 +178,13 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
   2. **Database Views:** High-level abstraction for public queries.
   3. **Application Scopes:** Code-level consistency for repositories and use cases.
 
+### Trusted Write Boundaries (RLS Hardening)
+- **Goal:** Prevent direct database manipulation and ensure all writes are validated by server-side logic.
+- **Restricted Tables:** `reviews` and `analytics_events` have all direct `INSERT` permissions revoked for `anon` and `authenticated` roles.
+- **Enforcement:** All writes to these tables MUST go through Next.js API Routes (e.g., `/api/reviews`).
+- **Authorization:** API Routes perform validation and then use the `service_role` key to perform the database write, bypassing restricted RLS policies safely.
+- **Benefits:** Prevents automated spam, protects PII integrity, and ensures that abuse-prevention triggers (fingerprinting, cooldowns) cannot be bypassed by direct PostgREST calls.
+
 ### Cache Invalidation & Consistency Strategy
 - **Goal:** Ensure immediate propagation of moderation actions while preserving the performance benefits of ISR.
 - **Stable Tags:** Programmatic invalidation via `revalidateTag` using stable patterns:

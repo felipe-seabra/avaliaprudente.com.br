@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **RLS Hardening & Anonymous Insert Protection:**
+  - **Revoked Public Inserts:** Revoked `INSERT` grants on `reviews` and `analytics_events` for `anon` and `authenticated` roles.
+  - **Trusted Write Boundaries:** Enforced that all database writes for these tables MUST go through Next.js API Routes using the `service_role` key.
+  - **Privacy Hardening:** Revoked `SELECT` access on `analytics_events` for anonymous users to prevent raw data exposure.
+  - **Admin & Owner Maintenance:** Preserved `UPDATE` and `DELETE` grants for authenticated users to allow legitimate review management via the API.
+  - **RLS Defense-in-Depth:** Dropped overly permissive "Anyone can insert" policies as a secondary security layer.
+
 ### Changed
 - **Compliance & Transparency Refactor:** Updated homepage and product copy to accurately reflect platform functionality and adhere to external platform policies.
   - **Accurate Flow Description:** Clarified that positive experiences are redirected to external platforms (like Google) while negative experiences remain internal, ensuring transparency for businesses and consumers.

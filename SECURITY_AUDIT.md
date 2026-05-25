@@ -19,12 +19,11 @@ This audit evaluated the Next.js 15 App Router and Supabase architecture for sec
 
 ## 🚨 Confirmed Vulnerabilities
 
-### 1. [CRITICAL] Unauthenticated RLS Bypass for Reviews and Analytics (Data Poisoning)
-- **Affected Files:** `supabase/migrations/*_fix_public_reviews_and_anonymous_access.sql`
-- **Description:** The RLS policies for the `reviews` and `analytics_events` tables contain `CREATE POLICY "Anyone can insert a review" ON reviews FOR INSERT WITH CHECK (true);`. This allows any unauthenticated user with the Supabase `anon` key to bypass Next.js completely and send POST requests directly to the PostgREST API.
-- **Exploitation Scenario:** An attacker scripts direct inserts to the Supabase URL, generating fake fingerprints to bypass the database trigger `enforce_review_abuse_protection()`. This allows infinite spamming of fake reviews and analytics manipulation.
-- **Business Impact:** Total loss of platform integrity, ruining the core business value (trust in reviews).
-- **Remediation:** Remove public `INSERT` policies. All inserts must go through the Next.js API Routes using the `service_role` key (as currently implemented in the API, but not enforced by the DB). RLS for these tables should completely block anonymous inserts.
+### 1. [FIXED] Unauthenticated RLS Bypass for Reviews and Analytics (Data Poisoning)
+- **Status:** **REMEDIATED** (2026-05-24)
+- **Affected Files:** `supabase/migrations/20260524000000_harden_rls_anonymous_inserts.sql`
+- **Description:** Direct `INSERT` grants were revoked from `anon` and `authenticated` roles. Permissive RLS policies were dropped.
+- **Remediation:** All inserts now strictly go through Next.js API Routes using the `service_role` key. Direct PostgREST inserts are blocked at the database level.
 
 ### 2. [HIGH] Distributed Rate Limiting Failure (DDoS / Brute Force)
 - **Affected Files:** `src/middleware.ts`
