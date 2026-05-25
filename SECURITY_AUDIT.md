@@ -17,7 +17,33 @@ This audit evaluated the Next.js 15 App Router and Supabase architecture for sec
 
 ---
 
-## 🚨 Confirmed Vulnerabilities
+## 👁️ Phase 11: Observability & Security Monitoring
+
+**Status:** **IMPLEMENTED** (2026-05-25)
+
+### 1. Structured Security Logging
+- **Architecture:** Implemented a structured JSON logger (`src/lib/logger.ts`) compatible with Next.js Edge Runtime and standard Server components.
+- **Traceability:** Injected `requestId` (via Vercel/X-Request-Id), `path`, `method`, and `fingerprint` (privacy-safe IP hash) into every log entry.
+- **Categorization:** Established clear levels: `INFO`, `WARN`, `ERROR`, and a specialized `SECURITY` level for tracking boundary violations.
+- **Privacy:** Enforced zero-raw-PII logging. IP addresses are hashed with a cryptographic pepper before being included in logs.
+
+### 2. Real-time Abuse Monitoring
+- **Middleware Integration:** All **Rate Limit violations** (429) and **CSRF failures** (403) are now logged as structured `SECURITY` events.
+- **Correlation:** Security events are linked to the specific request identifier, allowing for rapid incident reconstruction.
+- **Persistent Audit:** Critical security violations are also duplicated to the database `audit_logs` table for long-term governance and administrative visibility.
+
+### 3. Sudo & Privileged Operation Observability
+- **Elevation Tracking:** Every successful and failed Sudo Mode elevation is logged with the actor's ID and failure reason (expired token, signature mismatch, etc.).
+- **Incident Readiness:** Error normalization now includes structured severity. Database RLS violations are automatically flagged as security events.
+
+### 4. Webhook & Billing Health
+- **Signature Tracking:** Webhook signature failures are logged with full request context (sans payload) to detect potential replay attacks or configuration drifts.
+- **Operational Health:** Successful and unhandled webhook events are logged as `INFO` or `WARN` for proactive monitoring of payment lifecycles.
+
+---
+
+## 🚨 Confirmed Vulnerabilities (Updated)
+... (keep rest of file)
 
 ### 1. [FIXED] Unauthenticated RLS Bypass for Reviews and Analytics (Data Poisoning)
 - **Status:** **REMEDIATED** (2026-05-24)

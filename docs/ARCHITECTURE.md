@@ -125,7 +125,17 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Throttling:** Enforced via `tr_enforce_review_abuse_protection` trigger.
 - **Cooldowns:** 60-minute window per business; 10-minute window for identical content.
 
+### Review Abuse Prevention System
+...
+### Observability & Incident Readiness
+- **Structured Logging:** Centralized `Logger` utility using JSON output for seamless ingestion by Vercel Logs, Datadog, or CloudWatch.
+- **Security Event Model:** Standardized events for Rate Limiting, CSRF, Auth Anomaly, and Sudo elevation.
+- **Privacy-Safe Telemetry:** Fingerprinting using cryptographic peppers to track sessions without persisting raw PII.
+- **Request Tracing:** Correlation IDs injected at Middleware to trace requests through the entire stack.
+- **Incident Response:** Standardized error normalization (`parseError`) with severity-aware logging.
+
 ### Analytics Anti-Inflation System
+...
 - **Deduplication:** Prevents metric manipulation via rapid refreshes or click spam.
 - **Trigger-based Throttling:** `tr_enforce_analytics_deduplication` silently drops duplicate events.
 - **Cooldown Window:** 15 minutes per business/session/event-type.

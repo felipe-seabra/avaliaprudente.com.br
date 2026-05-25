@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { env } from './env'
+import { logger } from './logger'
 
 // Web Crypto API helpers for edge-safe base64 conversion
 function bufferToBase64(buffer: ArrayBuffer): string {
@@ -52,19 +53,31 @@ export async function signSudoToken(userId: string): Promise<string> {
   const encoder = new TextEncoder()
   const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
   const signature = bufferToBase64(signatureBuffer)
+
+  await logger.security('Sudo token generated', { actorId: userId })
+
   return `${payload}.${signature}`
 }
 
 export async function verifySudoToken(token: string, expectedUserId: string): Promise<boolean> {
   try {
     const parts = token.split('.')
-    if (parts.length !== 3) return false
+    if (parts.length !== 3) {
+      await logger.security('Sudo verification failed: invalid token format', { actorId: expectedUserId })
+      return false
+    }
     
     const [userId, expStr, signature] = parts
-    if (userId !== expectedUserId) return false
+    if (userId !== expectedUserId) {
+      await logger.security('Sudo verification failed: user mismatch', { actorId: expectedUserId, tokenUserId: userId })
+      return false
+    }
     
     const exp = parseInt(expStr, 10)
-    if (Date.now() > exp) return false
+    if (Date.now() > exp) {
+      await logger.security('Sudo verification failed: token expired', { actorId: expectedUserId })
+      return false
+    }
 
     const key = await getSigningKey()
     const encoder = new TextEncoder()
@@ -77,9 +90,14 @@ export async function verifySudoToken(token: string, expectedUserId: string): Pr
       signatureBuffer,
       encoder.encode(payload)
     )
+
+    if (!isValid) {
+      await logger.security('Sudo verification failed: invalid signature', { actorId: expectedUserId })
+    }
+
     return isValid
   } catch (err) {
-    console.error('[Sudo] Token verification failed:', err)
+    await logger.error('[Sudo] Token verification error', err, { actorId: expectedUserId })
     return false
   }
 }
@@ -102,7 +120,13 @@ export async function checkSudo(): Promise<boolean> {
   const sudoToken = cookieStore.get('sudo_session')?.value
   if (!sudoToken) return false
 
-  return verifySudoToken(sudoToken, user.id)
+  const isValid = await verifySudoToken(sudoToken, user.id)
+  
+  if (isValid) {
+    await logger.info('Sudo mode verified via token', { actorId: user.id })
+  }
+
+  return isValid
 }
 
 export async function enableSudoMode(userId: string) {
@@ -116,4 +140,6 @@ export async function enableSudoMode(userId: string) {
     maxAge: 15 * 60, // 15 minutes
     path: '/',
   })
+
+  await logger.security('Sudo mode enabled for user', { actorId: userId })
 }

@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- **Provider-Aware Sudo Mode:**
+- **Full Platform Observability & Security Monitoring:**
+  - **Structured JSON Logging:** Implemented a new isomorphic `Logger` (`src/lib/logger.ts`) for Edge and Server-side structured logging.
+  - **Middleware Security Visibility:** Added real-time logging for Rate Limit (429) and CSRF (403) violations.
+  - **Sudo Mode Auditing:** Instrumented Sudo elevation and verification flows with structured security events.
+  - **Request Correlation:** Automated injection of `requestId`, `path`, and `fingerprint` into all system logs.
+  - **Incident Readiness:** Integrated `error-handler` with the new logger to categorize and track critical failures with appropriate severity.
+  - **Webhook Observability:** Hardened the Stripe webhook handler with structured tracking for event lifecycles and signature failures.
+  - **Hybrid Audit Trail:** Critical security violations are now mirrored to both JSON logs (operational) and the database `audit_logs` (tamper-resistant governance).
+
+### Added
+- **Provider-Aware Sudo Mode:****
   - **OAuth Re-authentication:** Enabled Google OAuth users to complete privileged operations via secure provider-side re-authentication (`prompt=login`).
   - **Provider Detection:** Automated detection of the current user's auth provider to show context-relevant sudo options.
   - **Security Hardening:** Maintained 15-minute elevation window while allowing non-password users to fulfill security requirements without compromising UX.

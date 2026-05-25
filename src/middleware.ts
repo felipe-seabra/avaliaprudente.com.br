@@ -4,6 +4,8 @@ import { APP_CONFIG } from '@/lib/constants'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { generatePrivacyFingerprint } from '@/lib/privacy'
 import { validateCSRF, generateSecurityHeaders } from '@/lib/security'
+import { logger } from '@/lib/logger'
+import { logAuditEvent } from '@/lib/audit-logger'
 
 export async function middleware(request: NextRequest) {
   // 1. Precise IP Extraction (Safe X-Forwarded-For handling)
@@ -31,6 +33,19 @@ export async function middleware(request: NextRequest) {
   const { success, limit, remaining, reset } = await checkRateLimit(identifier, limitType)
 
   if (!success) {
+    await logger.security('Rate limit violation', {
+      limitType,
+      limit,
+      fingerprint: identifier,
+    }, request)
+
+    // Log to DB for persistent audit
+    await logAuditEvent({
+      action: 'security/rate-limit-violation',
+      resourceType: 'system',
+      metadata: { limitType, limit, fingerprint: identifier }
+    })
+
     return new NextResponse('Too Many Requests', { 
       status: 429,
       headers: {
@@ -46,6 +61,21 @@ export async function middleware(request: NextRequest) {
   const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
   
   if (!isWebhook && !validateCSRF(request)) {
+    await logger.security('CSRF validation failure', {
+      origin: request.headers.get('origin'),
+      referer: request.headers.get('referer'),
+    }, request)
+
+    // Log to DB for persistent audit
+    await logAuditEvent({
+      action: 'security/csrf-violation',
+      resourceType: 'request',
+      metadata: { 
+        origin: request.headers.get('origin'),
+        referer: request.headers.get('referer')
+      }
+    })
+
     return new NextResponse('Invalid CSRF Token or Origin', { status: 403 })
   }
 

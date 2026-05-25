@@ -1,3 +1,5 @@
+import { logger } from './logger'
+
 /**
  * Utility to normalize and parse errors from various sources (Supabase, Auth, DB, etc.)
  * into human-readable messages in Portuguese.
@@ -67,13 +69,27 @@ export function parseError(error: unknown): NormalizedError {
 }
 
 /**
- * Logs errors in development mode for better visibility.
+ * Logs errors with structured context.
  */
-export function logError(error: unknown, context?: string) {
+export async function logError(error: unknown, context?: string) {
+  const normalized = parseError(error)
+  
+  if (normalized.code?.startsWith('auth/') || normalized.code?.startsWith('db/rls')) {
+    await logger.security(`Security error in ${context || 'Unknown'}`, {
+      errorCode: normalized.code,
+      context,
+    })
+  } else {
+    await logger.error(`Error in ${context || 'Unknown'}`, error, {
+      errorCode: normalized.code,
+      context,
+    })
+  }
+
   if (process.env.NODE_ENV === 'development') {
     console.group(`[DEBUG] Error in ${context || 'Unknown Context'}`)
     console.error('Original Error:', error)
-    console.info('Parsed Message:', parseError(error).message)
+    console.info('Parsed Message:', normalized.message)
     console.groupEnd()
   }
 }
