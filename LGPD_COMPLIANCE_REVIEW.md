@@ -7,20 +7,15 @@ This document reviews the platform's readiness for the Lei Geral de Proteção d
 
 ## 🚨 LGPD Compliance Gaps
 
-### 1. [HIGH] Implicit PII Fingerprinting without Consent
-- **Affected Files:** `src/app/api/reviews/route.ts`, `src/app/api/analytics/route.ts`
-- **Description:** The API currently generates a server-side fingerprint using the user's IP Address and User Agent:
-  ```typescript
-  const serverFingerprint = crypto
-    .createHash('sha256')
-    .update(`${clientIp}-${userAgent}`)
-    .digest('hex')
-  ```
-  Under LGPD, an IP Address is considered Personally Identifiable Information (PII). Storing a hash that is deterministically tied to an IP without a randomized salt/pepper allows reverse engineering of the user's location and identity.
-- **Lawful Basis Failure:** This tracking is done implicitly for "abuse protection" (legitimate interest), but lacks transparency and explicit disclosure.
+### 1. [FIXED] Implicit PII Fingerprinting without Consent
+- **Status:** **REMEDIATED** (2026-05-24)
+- **Affected Files:** `src/lib/privacy.ts`, `src/app/api/reviews/route.ts`, `src/app/api/analytics/route.ts`
 - **Remediation:** 
-  - Introduce a daily rotating "pepper" (secret key) to the hash function to prevent long-term tracking and reverse-engineering of IP addresses.
-  - Explicitly declare this security tracking in the Privacy Policy.
+  - Implemented a cryptographic `pepper` strategy for all fingerprints.
+  - Added ephemeral rotation (daily/weekly) to prevent permanent tracking.
+  - Fingerprints are now non-reversible and privacy-safe.
+  - User Agents are sanitized before persistence in analytics to minimize PII.
+  - Raw IPs are never persisted and never sent to distributed stores (Middleware rate limit now uses hashed identifiers).
 
 ### 2. [MEDIUM] Lack of Explicit Granular Consent
 - **Observation:** Currently, users and anonymous reviewers can submit data (reviews) without a clear, explicitly checked consent box for data processing.

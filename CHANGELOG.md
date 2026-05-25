@@ -17,6 +17,12 @@ All notable changes to this project will be documented in this file.
   - **Edge Runtime Hardening:** Optimized for Vercel Edge Runtime with HTTP-based Redis connectivity.
   - **Observability:** Added `X-RateLimit-*` and `Retry-After` headers to all responses for transparent abuse prevention.
   - **Development Fallback:** Maintained a local in-memory fallback for development environments to ensure "zero-config" startup for new contributors.
+- **Privacy Hardening & LGPD Compliance (Fingerprinting):**
+  - **Cryptographic Pepper Strategy:** Implemented a non-reversible hashing mechanism using a secure server-side pepper to prevent IP reverse-engineering.
+  - **Ephemeral Rotation:** Introduced daily and weekly rotation for fingerprints, ensuring they do not become permanent identifiers.
+  - **User Agent Sanitization:** Implemented a sanitization layer for analytics that extracts only high-level browser/OS signals, minimizing unique data collection.
+  - **Zero Raw PII Persistence:** Enforced a strict policy of never persisting raw IP addresses or User Agents in the database or distributed cache.
+  - **Privacy-Safe Rate Limiting:** Updated the middleware to use hashed identifiers, protecting user identity even in transient security stores.
 
 ### Changed
 - **Compliance & Transparency Refactor:** Updated homepage and product copy to accurately reflect platform functionality and adhere to external platform policies.

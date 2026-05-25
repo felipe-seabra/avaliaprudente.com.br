@@ -7,6 +7,7 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+  FINGERPRINT_PEPPER: z.string().min(16).optional(),
 })
 
 // Defensive parsing to avoid crashing during build if env vars are missing
@@ -19,6 +20,7 @@ const getEnv = () => {
       SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
       UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
       UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+      FINGERPRINT_PEPPER: process.env.FINGERPRINT_PEPPER,
     })
   } catch (error) {
     if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PHASE) {

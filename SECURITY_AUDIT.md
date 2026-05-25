@@ -48,6 +48,16 @@ This audit evaluated the Next.js 15 App Router and Supabase architecture for sec
 - **Status:** **Secure**. The implementation in `src/app/r/[slug]/page.tsx` correctly segregates cached public data (`unstable_cache` via `getBusinessData`) from dynamic authentication states (`getAuthStatus` via `cookies()`).
 - **Risk:** Developers might accidentally move `cookies()` checks inside the `unstable_cache` block in the future, poisoning the global cache with an admin's view. Strict linting rules must be applied to prevent this.
 
+### 2. [FIXED] Privacy & Data Minimization (LGPD Hardening)
+- **Status:** **REMEDIATED** (2026-05-24)
+- **Affected Files:** `src/lib/privacy.ts`, `src/middleware.ts`, `src/app/api/*`
+- **Description:** Previous implementation used deterministic IP-based hashing for anti-fraud, which posed a re-identification risk.
+- **Remediation:** 
+  - **Cryptographic Pepper:** All fingerprints now use a secure server-side pepper.
+  - **Ephemeral Rotation:** Daily/Weekly rotation strategy prevents long-term tracking.
+  - **Sanitized Analytics:** User Agents are sanitized to remove unique identifiers before storage.
+  - **Zero Raw PII:** IP addresses are never persisted and are hashed before being used as identifiers in rate limiting.
+
 ---
 
 ## 💳 Phase 10: Payment Readiness Blockers

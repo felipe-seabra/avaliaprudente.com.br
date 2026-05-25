@@ -2,13 +2,18 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { APP_CONFIG } from '@/lib/constants'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { generatePrivacyFingerprint } from '@/lib/privacy'
 
 export async function middleware(request: NextRequest) {
   // 1. Precise IP Extraction (Safe X-Forwarded-For handling)
   const forwardedFor = request.headers.get('x-forwarded-for')
   const ip = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
+  const userAgent = request.headers.get('user-agent') || ''
   
-  // 2. Determine Rate Limit Tier
+  // 2. Generate Privacy-safe identifier (Daily rotation)
+  const identifier = await generatePrivacyFingerprint(ip, userAgent, 'daily')
+
+  // 3. Determine Rate Limit Tier
   let limitType: 'global' | 'api' | 'auth' = 'global'
   if (request.nextUrl.pathname.startsWith('/api')) {
     limitType = 'api'
@@ -21,8 +26,8 @@ export async function middleware(request: NextRequest) {
     limitType = 'auth'
   }
 
-  // 3. Distributed Rate Limiting Check
-  const { success, limit, remaining, reset } = await checkRateLimit(ip, limitType)
+  // 4. Distributed Rate Limiting Check
+  const { success, limit, remaining, reset } = await checkRateLimit(identifier, limitType)
 
   if (!success) {
     return new NextResponse('Too Many Requests', { 

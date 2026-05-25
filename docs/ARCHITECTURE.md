@@ -195,6 +195,13 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Observability:** Injects standardized `X-RateLimit-*` headers into all responses, allowing clients and administrators to monitor usage and handle throttling gracefully.
 - **Resilience:** Includes a secure in-memory fallback for local development, ensuring no external dependencies are required for standard development workflows.
 
+### Privacy Engineering (LGPD Compliance)
+- **Goal:** Protect user identity while maintaining effective anti-fraud and analytics capabilities.
+- **Non-Reversible Fingerprinting:** All server-side fingerprints are generated using SHA-256 combined with a high-entropy server-side `pepper`. This prevents "rainbow table" attacks where common IPs could be reverse-engineered from their hashes.
+- **Ephemeral Identifiers:** Fingerprints are rotated automatically using a daily or weekly seed. This ensures that an anonymous user cannot be tracked as a permanent identifier across long periods, adhering to the "Right to be Forgotten" and data minimization principles.
+- **Sanitized Analytics:** User Agents are stripped of unique build versions and specific identifiers before storage. Only general signals (Browser Name, OS) are preserved for legitimate business analytics.
+- **Zero Raw PII Policy:** The system is architected to never persist raw IP addresses. Rate limiting and anti-fraud systems operate exclusively on hashed, anonymous identifiers.
+
 ### Cache Invalidation & Consistency Strategy
 - **Goal:** Ensure immediate propagation of moderation actions while preserving the performance benefits of ISR.
 - **Stable Tags:** Programmatic invalidation via `revalidateTag` using stable patterns:
