@@ -62,7 +62,7 @@ export function generateSecurityHeaders(): Record<string, string> {
   const csp = [
     "default-src 'self'",
     // Allow scripts from self. Next.js development needs unsafe-eval for Fast Refresh.
-    `script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com`,
+    `script-src 'self' ${isDev ? "'unsafe-eval'" : ""} 'unsafe-inline' https://www.googletagmanager.com`,
     // Allow styles from self and inline (required by standard UI libraries/Next.js)
     "style-src 'self' 'unsafe-inline'",
     // Allow images from self, data URIs, and our Supabase storage
