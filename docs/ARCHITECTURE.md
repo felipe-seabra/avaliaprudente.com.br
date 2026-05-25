@@ -253,6 +253,13 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
   - **Visual Realism:** Uses advanced CSS techniques (shadow casting, depth-of-field blur, haptic vibration simulation) to bridge the gap between digital and physical interaction.
   - **Interactive Replay:** Animations are state-synced to trigger on viewport entry and user hover, ensuring accessibility and engagement.
 
+### Legal Compliance & Privacy
+- **LGPD Alignment:** Data handling is architected around "Privacy by Design" and "Data Minimization". Endpoints and API responses only expose the minimum required dataset for the requested operation.
+- **OAuth Transparency:** Google OAuth integration strictly uses basic profile scopes (`email`, `profile`). Legal documents provide clear guidance on how users can revoke access via their Google account settings.
+- **UGC Responsibility:** The platform acts as a routing infrastructure. Public pages and legal documents clearly distinguish between internal feedback (stored) and external redirection (e.g., Google Review Gate), where the platform is not a direct publisher.
+- **Anti-Abuse Transparency:** Operational systems explicitly disclose the use of technical fingerprints, rate limiting, and security logging as essential infrastructure protections required for platform integrity.
+- **Account Governance:** Secure "Soft Delete" flows ensure users can exercise their right to be forgotten while maintaining necessary audit trails for financial, security, and moderation compliance.
+
 ## Maintainability & Folder Structure
 
 ### Important Routes

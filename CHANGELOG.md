@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Legal & Compliance Modernization:**
+  - **Production-Grade Legal Documents:** Rewrote Privacy Policy and Terms of Service with specific SaaS, LGPD, and OAuth compliance language.
+  - **OAuth Transparency:** Added detailed disclosures regarding Google OAuth data usage, purposes, and revocation procedures.
+  - **Operational Disclosures:** Integrated transparent explanations for antifraud rate limiting, security logging, and privacy-safe fingerprinting.
+  - **UGC Responsibility:** Clarified boundaries regarding User-Generated Content and the platform's role as a routing infrastructure (not a direct publisher to Google).
+  - **LGPD Rights:** Explicitly outlined user rights and data retention principles in alignment with Brazilian legislation.
+  - **SSR & SEO Optimized:** Ensured legal pages are fully static, accessible, and correctly indexed with proper metadata.
 - **Full Platform Observability & Security Monitoring:**
   - **Structured JSON Logging:** Implemented a new isomorphic `Logger` (`src/lib/logger.ts`) for Edge and Server-side structured logging.
   - **Middleware Security Visibility:** Added real-time logging for Rate Limit (429) and CSRF (403) violations.
