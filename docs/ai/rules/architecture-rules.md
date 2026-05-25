@@ -1,23 +1,26 @@
-# Architecture Rules
+# Architecture Rules — Avalia Prudente
 
-## 1. Clean Architecture
-- O projeto segue princípios de **Clean Architecture**.
+## 1. Clean Architecture (Strict)
 - Camadas: `Domain` -> `Application` -> `Infrastructure` -> `UI`.
-- As dependências devem apontar para dentro (Domain não depende de ninguém).
-- Entidades devem ser POJOs/POCOs (sem dependência de frameworks).
+- **Domain:** Apenas lógica pura e interfaces. Zero dependência de frameworks.
+- **Application:** Use cases e serviços (ex: `BillingService`).
+- **Infrastructure:** Implementações Supabase, Redis, APIs externas.
+- **UI:** Server/Client Components, Hooks e Actions.
 
-## 2. Separation of Concerns
-- Regras de negócio ficam no `Domain`.
-- Orquestração de dados fica no `Application`.
-- Implementações técnicas (Supabase, APIs) ficam no `Infrastructure`.
-- Lógica de visualização e estado local fica na `UI`.
+## 2. SSR & Cache Isolation
+- **Cache Boundary:** Use `unstable_cache` para dados públicos.
+- **Isolation:** Proibido usar `cookies()` ou `headers()` dentro de funções cacheadas. Isso evita o vazamento de dados de sessão de um usuário para o cache público.
+- **Anonymous Clients:** Alimente o cache público usando clientes Supabase anônimos.
 
-## 3. Dependency Inversion
-- Use interfaces/tipos abstratos para definir repositórios no `Domain`.
-- Implemente essas interfaces no `Infrastructure`.
-- Injete dependências via construtores ou hooks (evite `new` dentro de componentes de UI sempre que possível).
+## 3. Server Actions & Security
+- **Trust Boundaries:** Server Actions devem re-validar a autorização do usuário usando Supabase SSR no servidor. Nunca confie em parâmetros de ID passados pelo cliente sem validação de posse (`owner_id`).
+- **Input Validation:** Validação mandatória com Zod para todos os payloads.
 
-## 4. Single Source of Truth
-- Evite duplicação de estado.
-- Use o `BusinessProvider` para estado global da empresa ativa.
-- Use Supabase como a fonte autoritativa de dados.
+## 4. Multi-tenancy
+- **Single Source of Truth:** O `business_id` deve ser derivado do contexto do usuário ou da rota, nunca apenas de um estado do cliente.
+- **Schema Isolation:** RLS é a ferramenta primária de isolamento. Tabelas compartilhadas devem ter `owner_id`.
+
+## 5. Observabilidade & Logs
+- **Structured Logging:** Use logs com níveis de severidade (`info`, `warn`, `error`, `security`).
+- **Correlation IDs:** Propague IDs de correlação entre middleware e serviços para rastreamento de requisições.
+- **No PII:** Proibido logar dados pessoais identificáveis.

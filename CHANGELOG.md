@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **AI & Security Governance Hardening:**
+  - **Operational AI Guides:** Updated `AGENTS.md`, `GPT.md`, `GEMINI.md`, and `CODEX.md` to reflect the current hardened platform architecture.
+  - **Shared AI Context:** Centralized security rules, trust boundaries, and operational guardrails in `docs/ai/shared-context.md`.
+  - **Security Architecture Reference:** Created `docs/SECURITY_ARCHITECTURE.md` as the technical source of truth for platform defense layers.
+  - **Security Guardrails:** Added `docs/SECURITY_GUARDRAILS.md` with explicit "Do/Don't" rules for developers and AI agents.
+  - **Architecture Governance:** Integrated AI governance into the primary `docs/ARCHITECTURE.md`.
+  - **Enforced Rules:** Documented mandatory rules for SSR cache isolation, Redis-based rate limiting, privacy-safe fingerprinting, and sudo mode awareness.
+
 - **Legal & Compliance Modernization:**
   - **Production-Grade Legal Documents:** Rewrote Privacy Policy and Terms of Service with specific SaaS, LGPD, and OAuth compliance language.
   - **OAuth Transparency:** Added detailed disclosures regarding Google OAuth data usage, purposes, and revocation procedures.

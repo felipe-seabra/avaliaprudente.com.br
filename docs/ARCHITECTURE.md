@@ -274,3 +274,22 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - `src/lib/supabase/middleware.ts`: Session and account status synchronization.
 - `scripts/db-safety.sh`: Database operations safety guard.
 - `scripts/docker-maintenance.sh`: Local environment cleanup.
+
+## AI & Security Governance
+
+O projeto utiliza um modelo de **Governança AI-First** para garantir que o desenvolvimento assistido por inteligência artificial mantenha a integridade da plataforma.
+
+### 1. Instruções Operacionais (Operational Guides)
+- **`docs/ai/shared-context.md`:** Regras universais de segurança, limites de confiança e fluxo de trabalho mandatório.
+- **`docs/ai/agents.md`:** Definição de personas (Architect, Implementer, Security-Reviewer) e suas restrições.
+- **`docs/ai/GEMINI.md` / `CODEX.md` / `GPT.md`:** Manuais específicos para cada runtime de IA, focando em prevenção de regressões e eficiência de contexto.
+
+### 2. Guardrails de Segurança
+- **Trust Boundaries:** Todas as IAs devem validar limites de confiança (Zero-Trust no Cliente).
+- **Protected Areas:** Mudanças em `middleware.ts`, migrações SQL e lógica de faturamento exigem revisão de segurança manual.
+- **Validation Pipeline:** Nenhuma mudança é considerada completa sem passar por `lint`, `build` e `test`.
+
+### 3. Documentação Referencial
+- **`docs/SECURITY_ARCHITECTURE.md`:** Detalhamento técnico das camadas de defesa.
+- **`docs/SECURITY_GUARDRAILS.md`:** Checklist rápido de boas práticas e padrões proibidos.
+- **`docs/ai/rules/*.md`:** Regras granulares para backend, frontend e banco de dados.
