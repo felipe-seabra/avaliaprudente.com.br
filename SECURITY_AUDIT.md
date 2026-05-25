@@ -25,12 +25,15 @@ This audit evaluated the Next.js 15 App Router and Supabase architecture for sec
 - **Description:** Direct `INSERT` grants were revoked from `anon` and `authenticated` roles. Permissive RLS policies were dropped.
 - **Remediation:** All inserts now strictly go through Next.js API Routes using the `service_role` key. Direct PostgREST inserts are blocked at the database level.
 
-### 2. [HIGH] Distributed Rate Limiting Failure (DDoS / Brute Force)
-- **Affected Files:** `src/middleware.ts`
-- **Description:** The application implements rate limiting using an in-memory `Map` (`ipCache`). Next.js Middleware runs in edge/serverless environments (like Vercel), where memory state is isolated per invocation/instance. 
-- **Exploitation Scenario:** An attacker launches a brute-force or spam attack. Because each request hits a different edge node, the `ipCache` is constantly reset or split, effectively bypassing the limit.
-- **Business Impact:** High risk of API abuse, excessive billing from Supabase/Vercel, and potential denial of service.
-- **Remediation:** Replace in-memory rate limiting with a distributed store (e.g., Upstash Redis or Supabase RPC rate-limiting tables).
+### 2. [FIXED] Distributed Rate Limiting Failure (DDoS / Brute Force)
+- **Status:** **REMEDIATED** (2026-05-24)
+- **Affected Files:** `src/middleware.ts`, `src/lib/rate-limit.ts`
+- **Description:** Implemented a distributed rate limiting strategy using Upstash Redis, ensuring protection works correctly across all Edge/Serverless instances.
+- **Remediation:** 
+  - Integrated `@upstash/ratelimit`.
+  - Added multi-tier limits: `global` (100/min), `api` (30/10s), `auth` (5/min).
+  - Enforced `Retry-After` and `X-RateLimit` headers for all requests.
+  - Safe IP extraction with `x-forwarded-for` normalization.
 
 ### 3. [MEDIUM] Fallback Role Evaluation Risk
 - **Affected Files:** `src/lib/supabase/middleware.ts`

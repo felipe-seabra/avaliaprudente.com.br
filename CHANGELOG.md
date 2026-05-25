@@ -11,6 +11,12 @@ All notable changes to this project will be documented in this file.
   - **Privacy Hardening:** Revoked `SELECT` access on `analytics_events` for anonymous users to prevent raw data exposure.
   - **Admin & Owner Maintenance:** Preserved `UPDATE` and `DELETE` grants for authenticated users to allow legitimate review management via the API.
   - **RLS Defense-in-Depth:** Dropped overly permissive "Anyone can insert" policies as a secondary security layer.
+- **Distributed Rate Limiting (Edge Compatible):**
+  - **Upstash Redis Integration:** Replaced the ineffective in-memory middleware rate limiter with a distributed solution using `@upstash/ratelimit`.
+  - **Multi-Tier Protection:** Implemented specialized limits for `global` traffic, `api` endpoints, and `auth` (login/register) flows.
+  - **Edge Runtime Hardening:** Optimized for Vercel Edge Runtime with HTTP-based Redis connectivity.
+  - **Observability:** Added `X-RateLimit-*` and `Retry-After` headers to all responses for transparent abuse prevention.
+  - **Development Fallback:** Maintained a local in-memory fallback for development environments to ensure "zero-config" startup for new contributors.
 
 ### Changed
 - **Compliance & Transparency Refactor:** Updated homepage and product copy to accurately reflect platform functionality and adhere to external platform policies.

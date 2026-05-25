@@ -19,6 +19,7 @@
 - [x] **Secure Role Management API:** Server-side role transition logic with explicit hierarchy validation and audit logging.
 - [x] **Role Transition Auditing:** Detailed logging of all role changes in `role_change_logs`.
 - [x] **OAuth Branding Compliance:** Google-aligned authentication assets and flows.
+- [x] **Distributed Rate Limiting (Edge Compatible):** Multi-tier protection using Upstash Redis to prevent DDoS, brute force, and API abuse across serverless instances.
 - [x] Middleware session hardening & central routing.
 - [x] Blocked user detection (suspended, banned, deleted).
 - [x] Infinite recursion RLS protections (`is_admin` security definer).

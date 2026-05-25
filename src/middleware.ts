@@ -1,35 +1,39 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { APP_CONFIG } from '@/lib/constants'
-
-// Basic rate limiting configuration
-const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
-const MAX_REQUESTS = 100 // 100 requests per minute
-
-// Simple in-memory storage for rate limiting
-const ipCache = new Map<string, { count: number; lastReset: number }>()
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now()
-  const stats = ipCache.get(ip) || { count: 0, lastReset: now }
-
-  if (now - stats.lastReset > RATE_LIMIT_WINDOW) {
-    stats.count = 1
-    stats.lastReset = now
-  } else {
-    stats.count++
-  }
-
-  ipCache.set(ip, stats)
-  return stats.count > MAX_REQUESTS
-}
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function middleware(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for') || '127.0.0.1'
+  // 1. Precise IP Extraction (Safe X-Forwarded-For handling)
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  const ip = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
   
-  // Rate limiting check
-  if (isRateLimited(ip)) {
-    return new NextResponse('Too Many Requests', { status: 429 })
+  // 2. Determine Rate Limit Tier
+  let limitType: 'global' | 'api' | 'auth' = 'global'
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    limitType = 'api'
+  }
+  if (
+    request.nextUrl.pathname.startsWith('/login') || 
+    request.nextUrl.pathname.startsWith('/register') ||
+    request.nextUrl.pathname.startsWith('/forgot-password')
+  ) {
+    limitType = 'auth'
+  }
+
+  // 3. Distributed Rate Limiting Check
+  const { success, limit, remaining, reset } = await checkRateLimit(ip, limitType)
+
+  if (!success) {
+    return new NextResponse('Too Many Requests', { 
+      status: 429,
+      headers: {
+        'X-RateLimit-Limit': limit.toString(),
+        'X-RateLimit-Remaining': remaining.toString(),
+        'X-RateLimit-Reset': reset.toString(),
+        'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString(),
+      }
+    })
   }
 
   // Canonical Domain Normalization (non-www -> www)
@@ -42,6 +46,11 @@ export async function middleware(request: NextRequest) {
   }
 
   const { supabaseResponse, user, role, isBlocked, isDeleted, accountStatus, suspendedUntil, termsVersion } = await updateSession(request)
+
+  // Inject Rate Limit headers into the response for visibility/observability
+  supabaseResponse.headers.set('X-RateLimit-Limit', limit.toString())
+  supabaseResponse.headers.set('X-RateLimit-Remaining', remaining.toString())
+  supabaseResponse.headers.set('X-RateLimit-Reset', reset.toString())
 
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||

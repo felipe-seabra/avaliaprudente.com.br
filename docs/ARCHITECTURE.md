@@ -185,6 +185,16 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Authorization:** API Routes perform validation and then use the `service_role` key to perform the database write, bypassing restricted RLS policies safely.
 - **Benefits:** Prevents automated spam, protects PII integrity, and ensures that abuse-prevention triggers (fingerprinting, cooldowns) cannot be bypassed by direct PostgREST calls.
 
+### Distributed Rate Limiting (Abuse Protection)
+- **Architecture:** Leveraging Upstash Redis (Serverless SDK) within Next.js Middleware.
+- **Why Upstash:** Designed for Edge Runtimes, offering sub-millisecond global latency and HTTP-based connectivity that avoids the overhead of persistent TCP connections in serverless environments.
+- **Tiers:**
+  - `global`: Default limit for general browsing (100 requests per minute).
+  - `api`: Stricter limits for data mutation endpoints (30 requests per 10 seconds).
+  - `auth`: High-security limits for Login, Register, and Password Recovery to prevent brute-force attacks (5 attempts per minute).
+- **Observability:** Injects standardized `X-RateLimit-*` headers into all responses, allowing clients and administrators to monitor usage and handle throttling gracefully.
+- **Resilience:** Includes a secure in-memory fallback for local development, ensuring no external dependencies are required for standard development workflows.
+
 ### Cache Invalidation & Consistency Strategy
 - **Goal:** Ensure immediate propagation of moderation actions while preserving the performance benefits of ISR.
 - **Stable Tags:** Programmatic invalidation via `revalidateTag` using stable patterns:
