@@ -16,13 +16,18 @@ import { AlertTriangle, Trash2, Loader2 } from 'lucide-react'
 import { deactivateAccount } from '@/app/account/settings/actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useSudo } from '@/components/shared/sudo-dialog'
 
 export function DangerZone() {
   const [isDeactivating, setIsDeactivating] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
+  const { executeWithSudo, SudoModal } = useSudo(
+    'Autenticação Necessária',
+    'Para desativar sua conta, confirme sua senha.'
+  )
 
-  const handleDeactivate = async () => {
+  const executeDeactivation = async () => {
     setIsDeactivating(true)
     try {
       const result = await deactivateAccount()
@@ -39,6 +44,11 @@ export function DangerZone() {
       console.error(error)
       setIsDeactivating(false)
     }
+  }
+
+  const handleDeactivate = () => {
+    setIsOpen(false)
+    executeWithSudo(executeDeactivation)
   }
 
   return (
@@ -108,6 +118,7 @@ export function DangerZone() {
             </DialogContent>
           </Dialog>
         </div>
+        {SudoModal}
       </CardContent>
     </Card>
   )

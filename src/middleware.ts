@@ -3,6 +3,7 @@ import { updateSession } from '@/lib/supabase/middleware'
 import { APP_CONFIG } from '@/lib/constants'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { generatePrivacyFingerprint } from '@/lib/privacy'
+import { validateCSRF, generateSecurityHeaders } from '@/lib/security'
 
 export async function middleware(request: NextRequest) {
   // 1. Precise IP Extraction (Safe X-Forwarded-For handling)
@@ -41,6 +42,13 @@ export async function middleware(request: NextRequest) {
     })
   }
 
+  // 5. CSRF Protection and Webhook Boundaries
+  const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
+  
+  if (!isWebhook && !validateCSRF(request)) {
+    return new NextResponse('Invalid CSRF Token or Origin', { status: 403 })
+  }
+
   // Canonical Domain Normalization (non-www -> www)
   // This prevents session inconsistencies and auth mismatches in production
   const host = request.headers.get('host')
@@ -56,6 +64,12 @@ export async function middleware(request: NextRequest) {
   supabaseResponse.headers.set('X-RateLimit-Limit', limit.toString())
   supabaseResponse.headers.set('X-RateLimit-Remaining', remaining.toString())
   supabaseResponse.headers.set('X-RateLimit-Reset', reset.toString())
+
+  // Apply Security Headers (CSP, X-Frame-Options, etc.)
+  const securityHeaders = generateSecurityHeaders()
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    supabaseResponse.headers.set(key, value)
+  })
 
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||
@@ -88,7 +102,9 @@ export async function middleware(request: NextRequest) {
       if (process.env.NODE_ENV === 'development') {
         console.log('Middleware: Admin at Auth Page -> Redirecting to /admin/dashboard')
       }
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+      const response = NextResponse.redirect(new URL('/admin/dashboard', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
     // Allow admin to access anything (dashboard or admin panel)
     return supabaseResponse
@@ -99,7 +115,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log('Middleware: User needs terms re-acceptance -> Redirecting to /terms-reaccept')
     }
-    return NextResponse.redirect(new URL('/terms-reaccept', request.url))
+    const response = NextResponse.redirect(new URL('/terms-reaccept', request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 3. Permanent Block / Ban / Deactivation check (Regular users only)
@@ -108,7 +126,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log(`Middleware: Blocked/Banned/Deleted User (${type}) -> Redirecting to /blocked`)
     }
-    return NextResponse.redirect(new URL(`/blocked${type !== 'blocked' ? `?type=${type}` : ''}`, request.url))
+    const response = NextResponse.redirect(new URL(`/blocked${type !== 'blocked' ? `?type=${type}` : ''}`, request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 4. Temporary Suspension check (Regular users only)
@@ -116,7 +136,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log('Middleware: Suspended User -> Redirecting to /blocked?type=suspended')
     }
-    return NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
+    const response = NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 5. Redirect away from /blocked if not actually blocked
@@ -125,7 +147,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log(`Middleware: Not Blocked User at /blocked -> Redirecting to ${target}`)
     }
-    return NextResponse.redirect(new URL(target, request.url))
+    const response = NextResponse.redirect(new URL(target, request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 6. Redirect logged in users away from auth pages
@@ -134,7 +158,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log(`Middleware: Logged in User at Auth Page -> Redirecting to ${target}`)
     }
-    return NextResponse.redirect(new URL(target, request.url))
+    const response = NextResponse.redirect(new URL(target, request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 7. Protect dashboard and enforce reviewer restrictions
@@ -143,14 +169,18 @@ export async function middleware(request: NextRequest) {
       if (process.env.NODE_ENV === 'development') {
         console.log('Middleware: Anonymous User at Dashboard -> Redirecting to /login')
       }
-      return NextResponse.redirect(new URL('/login', request.url))
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
 
     if (isReviewer) {
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Middleware: Reviewer user ${user.id} attempted to access dashboard -> Redirecting to /account`)
       }
-      return NextResponse.redirect(new URL('/account', request.url))
+      const response = NextResponse.redirect(new URL('/account', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
   }
 
@@ -160,14 +190,18 @@ export async function middleware(request: NextRequest) {
       if (process.env.NODE_ENV === 'development') {
         console.log('Middleware: Anonymous User at Admin Page -> Redirecting to /login')
       }
-      return NextResponse.redirect(new URL('/login', request.url))
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
 
     if (!isAdmin) {
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Middleware: Non-admin user ${user.id} attempted to access ${request.nextUrl.pathname} -> Redirecting to /dashboard`)
       }
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      const response = NextResponse.redirect(new URL('/dashboard', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
   }
 

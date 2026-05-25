@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Privileged Operation Security (Sudo Mode):**
+  - **Sudo Session Management:** Implemented an encrypted `sudo_session` token using Web Crypto API to elevate privileges temporarily.
+  - **Sudo Modal:** Added a reusable `<SudoDialog />` and `useSudo` hook to enforce re-authentication before sensitive operations.
+  - **Secured Actions:** Business deletion and account deactivation now require a recent password verification.
+- **Audit Logging Foundation:**
+  - **`audit_logs` Table:** Added a tamper-resistant database table for tracking sensitive operations.
+  - **Database Triggers:** Implemented automatic audit triggers for `business_deleted` and `account_deactivation`.
+  - **Service Logger:** Added a server-side `logAuditEvent` utility using the `service_role` key to securely capture events (e.g. profile updates, billing actions).
+- **Billing Security Boundaries:**
+  - **Service Abstraction:** Created `BillingService` to act as an isolated boundary for future payment gateway integrations.
+  - **Secure Webhooks:** Implemented a structured `POST /api/webhooks/billing` handler that enforces cryptographic signature validation.
+- **Session Security & CSRF Hardening:**
+  - **CSRF Protection:** Implemented robust `Origin` vs `Host` validation in middleware for all state-changing API Route Handlers.
+  - **Security Headers:** Added comprehensive headers including a strict Content Security Policy (CSP), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, and `Referrer-Policy` to the Next.js middleware.
+  - **Webhook Trust Boundaries:** Established isolated routing for external webhooks (e.g., Stripe) with explicit bypasses for CSRF, requiring cryptographic signature validation instead.
+  - **Session Hardening:** Explicitly enforced `Secure` and `SameSite=Lax` configurations for all Supabase SSR cookies to protect authentication flows.
 - **RLS Hardening & Anonymous Insert Protection:**
   - **Revoked Public Inserts:** Revoked `INSERT` grants on `reviews` and `analytics_events` for `anon` and `authenticated` roles.
   - **Trusted Write Boundaries:** Enforced that all database writes for these tables MUST go through Next.js API Routes using the `service_role` key.

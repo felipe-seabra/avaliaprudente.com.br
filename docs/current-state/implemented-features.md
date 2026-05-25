@@ -20,6 +20,8 @@
 - [x] **Role Transition Auditing:** Detailed logging of all role changes in `role_change_logs`.
 - [x] **OAuth Branding Compliance:** Google-aligned authentication assets and flows.
 - [x] **Distributed Rate Limiting (Edge Compatible):** Multi-tier protection using Upstash Redis to prevent DDoS, brute force, and API abuse across serverless instances.
+- [x] **Session Security & CSRF Hardening:** Strict `Origin` vs `Host` validation for all API route handlers, paired with robust Security Headers (CSP, X-Frame-Options).
+- [x] **Trusted Webhook Boundaries:** Architected `/api/webhooks/stripe` bypasses for CSRF with requirements for cryptographic signature validation.
 - [x] Middleware session hardening & central routing.
 - [x] Blocked user detection (suspended, banned, deleted).
 - [x] Infinite recursion RLS protections (`is_admin` security definer).
@@ -90,3 +92,9 @@
 - [x] Critical E2E and Unit Flow tests (Middleware, Utils, Env Validation).
 - [x] Type Safety Hardening (`any` usage reduced, Supabase Types regenerated).
 - [x] Safeguards against schema drift and missing profiles.
+
+## Payment Readiness & Advanced Security (Phase 10)
+- [x] **Sudo Mode:** Sensitive mutations (e.g., deleting a business, deactivating an account) require a recent password confirmation, utilizing an ephemeral signed `sudo_session` token.
+- [x] **Audit Logging:** Tamper-resistant `audit_logs` foundation via `service_role` APIs and robust PostgreSQL triggers for critical `DELETE` and `UPDATE` operations.
+- [x] **Billing Abstraction:** `BillingService` encapsulates future payment gateway operations, establishing clear trust boundaries before Stripe integration.
+- [x] **Webhook Security:** Dedicated placeholder endpoints configured to enforce cryptographic signature validation, bypassing CSRF only for fully authenticated server-to-server webhook events.

@@ -25,6 +25,7 @@ import {
 import { AlertTriangle, Trash2, ShieldCheck, Loader2, CheckCircle2, XCircle, Wand2 } from 'lucide-react'
 import { Business } from '@/core/domain/entities'
 import { VerificationRequestModal } from '@/components/dashboard/verification-request-modal'
+import { useSudo } from '@/components/shared/sudo-dialog'
 
 const settingsSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -42,6 +43,10 @@ export default function SettingsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false)
   const repository = useMemo(() => new BusinessRepository(), [])
+  const { executeWithSudo, SudoModal } = useSudo(
+    'Ação Crítica',
+    'Para excluir sua empresa, confirme sua senha atual.'
+  )
 
   const form = useForm<SettingsInput>({
     resolver: zodResolver(settingsSchema),
@@ -123,7 +128,7 @@ export default function SettingsPage() {
     }
   }
 
-  async function onDeleteBusiness() {
+  async function executeDeleteBusiness() {
     if (!currentBusiness) return
     setIsDeleting(true)
     try {
@@ -138,6 +143,11 @@ export default function SettingsPage() {
     } finally {
       setIsDeleting(false)
     }
+  }
+
+  function onDeleteBusiness() {
+    setIsDialogOpen(false)
+    executeWithSudo(executeDeleteBusiness)
   }
 
   if (!currentBusiness) {
@@ -340,6 +350,7 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      {SudoModal}
     </div>
   )
 }

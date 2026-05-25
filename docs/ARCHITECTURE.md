@@ -202,6 +202,17 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Sanitized Analytics:** User Agents are stripped of unique build versions and specific identifiers before storage. Only general signals (Browser Name, OS) are preserved for legitimate business analytics.
 - **Zero Raw PII Policy:** The system is architected to never persist raw IP addresses. Rate limiting and anti-fraud systems operate exclusively on hashed, anonymous identifiers.
 
+### Middleware Security & Trust Boundaries
+- **CSRF Protection:** State-changing requests to API Route Handlers (POST, PUT, PATCH, DELETE) undergo strict `Origin` versus `Host` validation to prevent Cross-Site Request Forgery.
+- **Security Headers:** A strict Content Security Policy (CSP), along with `X-Frame-Options` and `X-Content-Type-Options`, is injected globally into all Next.js responses, preventing XSS and clickjacking.
+- **Session Hardening:** All Supabase SSR cookies enforce `Secure` (in production) and `SameSite=Lax` parameters to prevent session leaks and maintain OAuth integrity.
+- **Webhook Isolation:** Payment and external webhook routes (e.g., `/api/webhooks/billing`) are explicitly bypassed from CSRF origin checks but require cryptographic signature validation before trusting any payloads.
+
+### Privileged Operations & Audit
+- **Sudo Mode:** Highly sensitive operations (e.g., account deactivation, business deletion) require recent password verification (Sudo Mode). A short-lived, cryptographically signed token (`sudo_session`) is used to manage this elevated privilege window.
+- **Audit Logging:** Tamper-resistant audit trails (`audit_logs`) are maintained for all privileged actions, combining database triggers (as the final source of truth) and API-level logging (for user intent and contextual metadata).
+- **Billing Security:** Billing logic is abstracted via `BillingService`, isolating webhook handlers and customer portal sessions from unauthorized roles.
+
 ### Cache Invalidation & Consistency Strategy
 - **Goal:** Ensure immediate propagation of moderation actions while preserving the performance benefits of ISR.
 - **Stable Tags:** Programmatic invalidation via `revalidateTag` using stable patterns:
