@@ -133,3 +133,4 @@ Optimized for **Vercel + Supabase Cloud**:
   <p>© 2026 Avalia Prudente. All rights reserved.</p>
 </div>
 
+
