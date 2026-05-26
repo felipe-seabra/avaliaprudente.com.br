@@ -5,13 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- **Production-Grade CI/CD Pipeline:**
-  - **GitHub Actions Workflow:** Implemented a robust CI pipeline (`.github/workflows/ci.yml`) with isolated jobs for Install, Security Audit, Lint, Typecheck, Tests, and Build.
-  - **Branch Protection Readiness:** Configured professional status checks ("CI / Lint", "CI / Build", etc.) to support GitHub Ruleset enforcement for the `main` branch.
-  - **Security Hardening:** Enforced `permissions: contents: read` (principle of least privilege) and integrated `npm audit --audit-level=high` into the automated flow.
-  - **Performance Optimization:** Implemented dependency caching and concurrency cancellation to reduce CI wait times and resource consumption.
-  - **Type Safety Enforcement:** Added a mandatory `typecheck` script (`tsc --noEmit`) to the CI pipeline to prevent merging type regressions.
-  - **Build Integrity:** Automated production build validation with simulated environment variables to ensure zero-deployment-failure deployments.
+- **Production-Grade CI/CD Pipeline (Hardened):**
+  - **Clean GitHub Check Names:** Refactored the workflow to produce professional, non-redundant check names (Install, Lint, Typecheck, Tests, Build, Security Audit) compatible with GitHub Rulesets.
+  - **Dependency Resilience:** Hardened all CI jobs to independently and safely install dependencies using `npm ci` with optimized global caching.
+  - **Security Audit Integration:** Integrated automated security auditing into the CI flow, configured to fail only on high or critical vulnerabilities.
+  - **Stability & Performance:** Implemented concurrency controls to cancel redundant runs and ensured minimal GITHUB_TOKEN permissions (`contents: read`).
+  - **Validated Edge Compatibility:** Verified that the middleware and security headers continue to compile correctly for the Edge Runtime during the CI build phase.
 
 - **AI & Security Governance Hardening:**
   - **Operational AI Guides:** Updated `AGENTS.md`, `GPT.md`, `GEMINI.md`, and `CODEX.md` to reflect the current hardened platform architecture.

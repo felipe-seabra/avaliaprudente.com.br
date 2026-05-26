@@ -36,13 +36,14 @@ The platform enforces a high-trust development lifecycle through automated guard
 
 - **CI Pipeline (GitHub Actions):** 
   - Every Pull Request and push to `main` triggers a multi-stage validation workflow.
-  - **Security First:** Minimal permissions (`contents: read`) and automated vulnerability auditing (`npm audit`).
+  - **Clean & Stable Checks:** Produces professional, stable check names (Install, Lint, Typecheck, Tests, Build, Security Audit) that map 1:1 to required status checks in GitHub Rulesets.
+  - **Security First:** Minimal permissions (`contents: read`) and automated high-severity vulnerability auditing (`npm audit`).
   - **Strict Quality:** Zero-tolerance for Lint errors, Type mismatches, or failing Tests.
   - **Build Verification:** Mandatory production build simulation to ensure Edge compatibility and compilation success.
+  - **Performance Optimized:** Uses `npm ci` with dependency caching and concurrency cancellation to maintain a fast feedback loop.
 - **Branch Protection (GitHub Rulesets):**
-  - **Required Status Checks:** Merging into `main` is blocked unless all CI jobs pass.
+  - **Required Status Checks:** Merging into `main` is blocked unless all clean CI jobs pass.
   - **Linear History:** Forced rebase or squash to maintain a clean and traceable commit log.
-  - **Review Mandate:** (Configured in GitHub) Ensures code is never merged without peer or lead oversight.
 
 ## Layers
 

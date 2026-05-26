@@ -98,9 +98,10 @@
 - [x] **Webhook Security:** Dedicated placeholder endpoints configured to enforce cryptographic signature validation, bypassing CSRF only for fully authenticated server-to-server webhook events.
 
 ## Infrastructure & CI/CD
-- [x] **Professional CI Pipeline:** Automated GitHub Actions workflow with granular jobs (Install, Audit, Lint, Typecheck, Test, Build).
+- [x] **Professional Hardened CI Pipeline:** Automated GitHub Actions workflow with clean, non-redundant job names (Install, Audit, Lint, Typecheck, Test, Build).
 - [x] **Branch Protection Readiness:** Pipeline compatible with GitHub Rulesets to enforce quality and security before merging.
 - [x] **Automated Security Audit:** Integration of `npm audit` with high-severity failure triggers in the CI flow.
 - [x] **Strict Typecheck Enforcement:** Automated validation of TypeScript types to prevent compilation regressions.
 - [x] **Least Privilege CI:** GitHub Actions configured with minimal permissions (`contents: read`).
-- [x] **Concurrency & Performance:** Automated cancellation of redundant runs and efficient dependency caching.
+- [x] **Concurrency & Performance:** Automated cancellation of redundant runs and efficient dependency caching using `npm ci`.
+- [x] **Validated Edge Compatibility:** Verified build success for middleware and security headers on every CI run.
