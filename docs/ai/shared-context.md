@@ -9,6 +9,28 @@ Este arquivo contém as regras de governança universal, fluxos de trabalho comp
 - **Arquitetura:** Clean Architecture (`Domain` -> `Application` -> `Infrastructure` -> `UI`).
 - **Limites de Confiança:** NUNCA confie em dados de autorização vindos do cliente. Use apenas o contexto de autenticação do servidor via Supabase SSR.
 
+----------------------------------------------------
+MAIN BRANCH SAFETY (NON-NEGOTIABLE)
+----------------------------------------------------
+A branch `main` local é IMUTÁVEL para desenvolvimento.
+
+NUNCA:
+- Implementar features diretamente na `main` local.
+- Realizar commits diretamente na `main` local.
+- Gerar migrações na `main` local.
+- Realizar mudanças arquiteturais ou hotfixes na `main` local.
+
+SEMPRE:
+1. Sincronizar a `main` local com `origin/main` (`git checkout main && git pull origin main`).
+2. Criar uma branch de feature dedicada (`git checkout -b feat/nome-da-feature`).
+3. Implementar mudanças EXCLUSIVAMENTE na branch de feature.
+4. Abrir PR para merge via workflow protegido no GitHub.
+
+RECOVERY PROCEDURE (Se cometer o erro de commitar na main):
+1. Criar branch de feature a partir do HEAD atual: `git checkout -b feat/recovery-branch`.
+2. Push da branch de feature: `git push origin feat/recovery-branch`.
+3. Resetar `main` local para o estado de produção: `git checkout main && git fetch origin && git reset --hard origin/main`.
+
 ## 2. Governança de Segurança (Mandatória)
 - **Zero-Trust Client:** Proibido expor `service_role` ou chaves privadas no lado do cliente.
 - **Sudo Mode:** Operações privilegiadas (mudança de billing, exclusão de conta, alteração de permissões) EXIGEM reautenticação consciente do provedor (OAuth-aware sudo mode).

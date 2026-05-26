@@ -3,9 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-
 ### Added
+- **Strict AI Feature Branch Workflow:**
+  - **Immutable Local Main:** Enforced a project-wide mandate making the local `main` branch immutable for all AI agents and developers.
+  - **Feature Branch Mandate:** Formalized the requirement that all implementation, migrations, and fixes must occur on dedicated feature branches.
+  - **Governance Sync:** Updated `shared-context.md`, `AGENTS.md`, `GEMINI.md`, `GPT.md`, and `CODEX.md` with explicit operational rules for branch safety.
+  - **Recovery Procedures:** Documented concrete recovery steps for accidental commits on the local `main` branch to ensure workspace integrity.
+  - **Audit Alignment:** Integrated branch protection checks into the standard AI validation lifecycle and review checklists.
+
 - **Production-Grade CI/CD Pipeline (Hardened):**
+...
   - **Clean GitHub Check Names:** Refactored the workflow to produce professional, non-redundant check names (Install, Lint, Typecheck, Tests, Build, Security Audit) compatible with GitHub Rulesets.
   - **Dependency Resilience:** Hardened all CI jobs to independently and safely install dependencies using `npm ci` with optimized global caching.
   - **Security Audit Integration:** Integrated automated security auditing into the CI flow, configured to fail only on high or critical vulnerabilities.

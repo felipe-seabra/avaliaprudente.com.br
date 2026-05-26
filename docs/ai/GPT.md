@@ -24,6 +24,7 @@ Este documento consolida a arquitetura endurecida e as lições aprendidas do pr
 - **Middleware Safety:** Qualquer mudança no `middleware.ts` deve ser validada contra loops de redirecionamento.
 
 ## 4. Guia de Implementação para IAs
+- **Branch Protection (Hard Rule):** É terminantemente PROIBIDO commitar na branch `main` local. Crie sempre uma feature branch antes de iniciar qualquer implementação.
 - **Incrementalismo:** Estabilize o núcleo de segurança antes de expandir funcionalidades.
 - **Validação Total:** `npm run lint` && `npm run build` && `npm run test` são obrigatórios.
 - **Admin Dashboard Check:** Alterações de Auth/Middleware exigem teste manual de login admin.
@@ -31,5 +32,6 @@ Este documento consolida a arquitetura endurecida e as lições aprendidas do pr
 
 ## 5. Operação de Banco de Dados
 - **Safety Guard:** Comandos destrutivos exigem execução via `npm run` para ativar `scripts/db-safety.sh`.
+- **Branch-Based Migrations:** Gere e teste migrações apenas em feature branches. NUNCA a partir da `main`.
 - **Migrações:** Use `npm run supabase:migration` para qualquer alteração de esquema.
 - **RLS Audit:** Toda nova tabela deve obrigatoriamente ter políticas RLS definidas.

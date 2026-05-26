@@ -41,9 +41,12 @@ The platform enforces a high-trust development lifecycle through automated guard
   - **Strict Quality:** Zero-tolerance for Lint errors, Type mismatches, or failing Tests.
   - **Build Verification:** Mandatory production build simulation to ensure Edge compatibility and compilation success.
   - **Performance Optimized:** Uses `npm ci` with dependency caching and concurrency cancellation to maintain a fast feedback loop.
-- **Branch Protection (GitHub Rulesets):**
+- **Branch Protection & Feature Workflow:**
+  - **Immutable Main:** Direct commits to the local `main` branch are strictly forbidden for all AI agents and developers.
+  - **Feature Branch Mandate:** All development, including features, bug fixes, and migrations, must occur on dedicated feature branches.
   - **Required Status Checks:** Merging into `main` is blocked unless all clean CI jobs pass.
   - **Linear History:** Forced rebase or squash to maintain a clean and traceable commit log.
+  - **Recovery Procedure:** Accidental commits on local `main` must be moved to a feature branch and the local `main` reset to `origin/main` immediately.
 
 ## Layers
 

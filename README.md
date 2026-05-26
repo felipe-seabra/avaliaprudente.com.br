@@ -132,3 +132,5 @@ Optimized for **Vercel + Supabase Cloud**:
   <p>Built with ❤️ for a more transparent local commerce.</p>
   <p>© 2026 Avalia Prudente. All rights reserved.</p>
 </div>
+
+
