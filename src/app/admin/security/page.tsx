@@ -36,13 +36,7 @@ async function getSecurityLogs(params: { action?: string, resource_type?: string
   
   let query = supabase
     .from('audit_logs')
-    .select(`
-      *,
-      profiles:actor_id (
-        email,
-        full_name
-      )
-    `)
+    .select('*')
     .order('created_at', { ascending: false })
     .limit(100)
 
@@ -59,14 +53,37 @@ async function getSecurityLogs(params: { action?: string, resource_type?: string
     query = query.lte('created_at', params.to)
   }
 
-  const { data, error } = await query
+  const { data: logs, error: logsError } = await query
 
-  if (error) {
-    console.error('[Security Dashboard] Failed to fetch logs:', error)
+  if (logsError) {
+    console.error('[Security Dashboard] Failed to fetch logs:', logsError)
     return []
   }
 
-  return data || []
+  if (!logs || logs.length === 0) return []
+
+  // Fetch profiles separately to avoid implicit relationship errors (no FK)
+  const actorIds = [...new Set(logs.map(l => l.actor_id).filter(Boolean))] as string[]
+  
+  if (actorIds.length === 0) return logs
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('id, email, full_name')
+    .in('id', actorIds)
+
+  if (profilesError) {
+    console.error('[Security Dashboard] Failed to fetch actor profiles:', profilesError)
+    return logs
+  }
+
+  // Map profiles back to logs
+  const profileMap = new Map(profiles.map(p => [p.id, p]))
+  
+  return logs.map(log => ({
+    ...log,
+    profiles: log.actor_id ? profileMap.get(log.actor_id) : undefined
+  }))
 }
 
 function getSeverity(action: string): 'info' | 'low' | 'medium' | 'high' | 'critical' {
