@@ -2,18 +2,24 @@
 
 import { useState } from 'react'
 import { adminAssignSubscription } from '@/app/actions/subscriptions'
-import { SubscriptionPlan, SubscriptionStatus } from '@/lib/subscriptions'
+import { SubscriptionStatus } from '@/lib/subscriptions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
+interface Plan {
+  id: string
+  slug: string
+  name: string
+}
+
 interface SubscriptionManagerProps {
   userId: string
   currentPlanId?: string
   currentStatus?: SubscriptionStatus
-  plans: SubscriptionPlan[]
+  plans: Plan[]
 }
 
 export function SubscriptionManager({

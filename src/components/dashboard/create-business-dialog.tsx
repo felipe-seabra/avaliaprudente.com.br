@@ -22,12 +22,13 @@ import { InputField } from '@/components/shared/input-field'
 import { ImageUpload } from '@/components/shared/image-upload'
 import { BusinessRepository } from '@/core/infrastructure/repositories/supabase-business-repository'
 import { useBusiness } from '@/providers/business-provider'
+import { useSubscription } from '@/providers/subscription-provider'
 import { parseError, logError } from '@/lib/error-handler'
-import { PRICING_PLANS, APP_CONFIG } from '@/lib/constants'
+import { APP_CONFIG } from '@/lib/constants'
+import { QUOTAS } from '@/lib/subscriptions'
 import { createClient } from '@/lib/supabase/client'
 import { slugify, isValidSlug } from '@/lib/utils'
 import { optimizeImage } from '@/lib/image-utils'
-import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
 
 const createBusinessSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -42,22 +43,13 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
   const [isLoading, setIsLoading] = useState(false)
   const [isCheckingSlug, setIsCheckingSlug] = useState(false)
   const [slugStatus, setSlugStatus] = useState<'available' | 'unavailable' | 'idle'>('idle')
-  const [userRole, setUserRole] = useState('customer')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  
   const { businesses, refreshBusinesses, setCurrentBusiness } = useBusiness()
+  const { getQuota, isSuperAdmin, subscription } = useSubscription()
+  
   const repository = useMemo(() => new BusinessRepository(), [])
   const supabase = useMemo(() => createClient(), [])
-
-  useEffect(() => {
-    async function getRole() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-        if (profile) setUserRole(profile.role)
-      }
-    }
-    getRole()
-  }, [supabase])
 
   const form = useForm<CreateBusinessInput>({
     resolver: zodResolver(createBusinessSchema),
@@ -110,7 +102,8 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
     return () => clearTimeout(timer)
   }, [watchedSlug, repository])
 
-  const canCreate = checkIsAdmin(userRole) || businesses.length < PRICING_PLANS.FREE.maxBusinesses
+  const businessLimit = getQuota(QUOTAS.BUSINESS_LIMIT)
+  const canCreate = isSuperAdmin || businesses.length < businessLimit
 
   async function uploadLogo(businessId: string, file: File): Promise<string> {
     const { webp, png } = await optimizeImage(file)
@@ -260,7 +253,7 @@ export function CreateBusinessDialog({ children }: { children?: React.ReactNode 
                 <div className="space-y-1">
                   <p className="text-sm font-bold text-yellow-800">Limite Atingido</p>
                   <p className="text-xs text-yellow-700 leading-relaxed">
-                    No plano **Gratuito**, você pode gerenciar apenas {PRICING_PLANS.FREE.maxBusinesses} empresa.
+                    No seu plano atual (**{subscription?.plan.name || 'Gratuito'}**), você pode gerenciar apenas {businessLimit} {businessLimit === 1 ? 'empresa' : 'empresas'}.
                   </p>
                 </div>
              </div>

@@ -1,3 +1,5 @@
+import { SUBSCRIPTION_PLANS as TECH_PLANS, PLAN_SLUGS } from './subscription-config'
+
 const getProductionUrl = () => {
   const envUrl = process.env.NEXT_PUBLIC_APP_URL
   if (envUrl && envUrl.includes('avaliaprudente.com.br') && !envUrl.includes('www.avaliaprudente.com.br')) {
@@ -17,26 +19,26 @@ export const APP_CONFIG = {
 
 export const PRICING_PLANS = {
   FREE: {
-    name: 'Gratuito',
-    price: 0,
-    maxBusinesses: 1,
+    name: TECH_PLANS[PLAN_SLUGS.FREE].name,
+    price: TECH_PLANS[PLAN_SLUGS.FREE].price,
+    maxBusinesses: TECH_PLANS[PLAN_SLUGS.FREE].quotas.business_limit,
     features: ['1 empresa', 'Acesso via QR Code', 'Página pública', 'Avaliações básicas', 'Analytics básico'],
-    enabled: true,
+    enabled: TECH_PLANS[PLAN_SLUGS.FREE].enabled,
   },
   PRO: {
-    name: 'Pro',
-    price: 9.90,
-    maxBusinesses: 4,
+    name: TECH_PLANS[PLAN_SLUGS.PRO].name,
+    price: TECH_PLANS[PLAN_SLUGS.PRO].price,
+    maxBusinesses: TECH_PLANS[PLAN_SLUGS.PRO].quotas.business_limit,
     features: ['Até 4 empresas', 'Analytics avançado', 'Customização avançada', 'Tags vendidas separadamente'],
-    enabled: false, // Coming soon
+    enabled: TECH_PLANS[PLAN_SLUGS.PRO].enabled,
   },
   BUSINESS: {
-    name: 'Business',
-    price: 19.90, // Recurring
-    setupFee: 69.90, // One-time (Activation + 1st Tag)
-    maxBusinesses: 10,
+    name: TECH_PLANS[PLAN_SLUGS.BUSINESS].name,
+    price: TECH_PLANS[PLAN_SLUGS.BUSINESS].price,
+    setupFee: TECH_PLANS[PLAN_SLUGS.BUSINESS].setupFee,
+    maxBusinesses: TECH_PLANS[PLAN_SLUGS.BUSINESS].quotas.business_limit,
     features: ['Até 10 empresas', 'Incluso 1 Tag NFC (ativação)', 'Premium Analytics', 'Destaque na Home', 'Suporte VIP'],
-    enabled: false, // Coming soon
+    enabled: TECH_PLANS[PLAN_SLUGS.BUSINESS].enabled,
   }
 }
 

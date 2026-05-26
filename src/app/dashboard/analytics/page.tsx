@@ -5,8 +5,11 @@ import { useBusiness } from '@/providers/business-provider'
 import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase-analytics-repository'
 import { AnalyticsEvent } from '@/core/domain/entities'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { BarChart3, Users, MousePointer2, TrendingUp } from 'lucide-react'
+import { BarChart3, Users, MousePointer2, TrendingUp, Download, PieChart } from 'lucide-react'
 import { toast } from 'sonner'
+import { ClientFeatureGate } from '@/components/shared/entitlements/client-feature-gate'
+import { FEATURES } from '@/lib/subscriptions'
+import { Button } from '@/components/ui/button'
 
 export default function AnalyticsPage() {
   const { currentBusiness } = useBusiness()
@@ -45,11 +48,28 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-8 pb-12">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gradient">Analytics</h1>
-        <p className="text-muted-foreground">
-          Acompanhe o desempenho de <strong>{currentBusiness.name}</strong> em tempo real.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gradient">Analytics</h1>
+          <p className="text-muted-foreground">
+            Acompanhe o desempenho de <strong>{currentBusiness.name}</strong> em tempo real.
+          </p>
+        </div>
+        
+        <ClientFeatureGate 
+          feature={FEATURES.DATA_EXPORT}
+          fallback={
+            <Button variant="outline" disabled className="gap-2">
+              <Download className="h-4 w-4" />
+              Exportar (Premium)
+            </Button>
+          }
+        >
+          <Button variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Exportar Dados
+          </Button>
+        </ClientFeatureGate>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -90,6 +110,25 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ClientFeatureGate
+        feature={FEATURES.ADVANCED_ANALYTICS}
+        title="Analytics Avançado"
+        description="Gráficos de tendência, origem detalhada e heatmaps estão disponíveis nos planos Pro e Business."
+      >
+        <Card className="border-none shadow-xl rounded-3xl overflow-hidden">
+          <CardHeader className="bg-primary/5 border-b border-primary/10">
+            <CardTitle className="flex items-center gap-2">
+              <PieChart className="h-5 w-5 text-primary" />
+              Distribuição e Tendências (Premium)
+            </CardTitle>
+            <CardDescription>Visualizações detalhadas do comportamento dos seus clientes.</CardDescription>
+          </CardHeader>
+          <CardContent className="p-12 text-center text-muted-foreground">
+            <p>Os gráficos avançados serão renderizados aqui para assinantes Pro/Business.</p>
+          </CardContent>
+        </Card>
+      </ClientFeatureGate>
 
       <Card className="border-none shadow-xl rounded-3xl overflow-hidden">
         <CardHeader className="bg-muted/50 border-b">

@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { QRCodeCanvas } from 'qrcode.react'
-import { Download, Copy, Check, Info, SmartphoneNfc } from 'lucide-react'
+import { Download, Copy, Check, Info, SmartphoneNfc, FileCode } from 'lucide-react'
 import { toast } from 'sonner'
 import { APP_CONFIG } from '@/lib/constants'
 import Image from 'next/image'
+import { ClientFeatureGate } from '@/components/shared/entitlements/client-feature-gate'
+import { FEATURES } from '@/lib/subscriptions'
 
 export default function QRCodesPage() {
   const { currentBusiness } = useBusiness()
@@ -117,60 +119,76 @@ export default function QRCodesPage() {
         </Card>
 
         <div className="md:col-span-2 space-y-6">
-          <Card className="border-none shadow-lg rounded-3xl">
-            <CardHeader>
-              <CardTitle>Personalização</CardTitle>
-              <CardDescription>Ajuste as cores do seu código.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <Label className="text-xs uppercase tracking-wider font-bold opacity-70">Cor Principal</Label>
-                <div className="flex gap-3">
-                  <div className="relative">
+          <ClientFeatureGate
+            feature={FEATURES.CUSTOM_COLORS}
+            title="Cores Personalizadas"
+            description="Escolha a cor que melhor combina com a identidade visual da sua marca."
+          >
+            <Card className="border-none shadow-lg rounded-3xl">
+              <CardHeader>
+                <CardTitle>Personalização</CardTitle>
+                <CardDescription>Ajuste as cores do seu código.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label className="text-xs uppercase tracking-wider font-bold opacity-70">Cor Principal</Label>
+                  <div className="flex gap-3">
+                    <div className="relative">
+                      <Input 
+                        type="color" 
+                        value={qrColor} 
+                        onChange={(e) => setQrColor(e.target.value)}
+                        className="w-14 h-12 p-1 cursor-pointer rounded-xl border-2"
+                      />
+                    </div>
                     <Input 
-                      type="color" 
+                      type="text" 
                       value={qrColor} 
                       onChange={(e) => setQrColor(e.target.value)}
-                      className="w-14 h-12 p-1 cursor-pointer rounded-xl border-2"
+                      className="flex-1 font-mono uppercase h-12 rounded-xl"
+                      placeholder="#000000"
                     />
                   </div>
-                  <Input 
-                    type="text" 
-                    value={qrColor} 
-                    onChange={(e) => setQrColor(e.target.value)}
-                    className="flex-1 font-mono uppercase h-12 rounded-xl"
-                    placeholder="#000000"
-                  />
+                  <div className="flex gap-2 flex-wrap pt-2">
+                    {['#000000', '#7c3aed', '#2563eb', '#db2777', '#059669'].map(c => (
+                      <button 
+                        key={c}
+                        className="w-8 h-8 rounded-full border-2 border-background shadow-sm transition-transform hover:scale-110 cursor-pointer"
+                        style={{ backgroundColor: c }}
+                        onClick={() => setQrColor(c)}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="flex gap-2 flex-wrap pt-2">
-                  {['#000000', '#7c3aed', '#2563eb', '#db2777', '#059669'].map(c => (
-                    <button 
-                      key={c}
-                      className="w-8 h-8 rounded-full border-2 border-background shadow-sm transition-transform hover:scale-110 cursor-pointer"
-                      style={{ backgroundColor: c }}
-                      onClick={() => setQrColor(c)}
-                    />
-                  ))}
-                </div>
-              </div>
 
-              <div className="pt-6 border-t space-y-4">
-                <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-2xl border border-primary/10">
-                  <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="text-sm font-semibold">Impressão Profissional</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Para adesivos ou tags, utilize o formato **SVG** para garantir que o código não perca qualidade.
-                    </p>
+                <div className="pt-6 border-t space-y-4">
+                  <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                    <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold">Impressão Profissional</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Para adesivos ou tags, utilize o formato **SVG** para garantir que o código não perca qualidade.
+                      </p>
+                    </div>
                   </div>
+                  
+                  <ClientFeatureGate
+                    feature={FEATURES.DATA_EXPORT}
+                    fallback={
+                      <Button variant="outline" className="w-full h-12 rounded-xl opacity-50 cursor-not-allowed" disabled>
+                        Exportar SVG (Premium)
+                      </Button>
+                    }
+                  >
+                    <Button variant="outline" className="w-full h-12 rounded-xl gap-2 font-bold">
+                       <FileCode className="h-4 w-4" />
+                       Exportar SVG
+                    </Button>
+                  </ClientFeatureGate>
                 </div>
-                
-                <Button variant="outline" className="w-full h-12 rounded-xl opacity-50 cursor-not-allowed" disabled>
-                  Exportar SVG (Breve)
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </ClientFeatureGate>
 
           <Card className="bg-muted/30 border-dashed rounded-3xl shadow-none">
             <CardHeader className="pb-3">
