@@ -2,7 +2,9 @@
 
 Este checklist deve ser utilizado por desenvolvedores e IAs antes de qualquer merge ou deploy.
 
-## 1. Regressões e Segurança
+## 1. Workflow e Governança
+- [ ] A alteração foi feita em uma branch de feature dedicada (NÃO na main)?
+- [ ] O workflow de sincronização da `main` foi respeitado?
 - [ ] A alteração afeta o `middleware.ts` ou políticas de RLS? Se sim, foram testados cenários de acesso não autorizado?
 - [ ] O isolamento de multi-tenant (`owner_id`) foi preservado?
 - [ ] Existe algum risco de loop de redirecionamento?

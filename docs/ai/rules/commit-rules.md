@@ -14,3 +14,9 @@
 
 ## 4. Documentação
 - Commits que alteram lógica de negócio devem atualizar o `CHANGELOG.md` e, se necessário, os registros de memória do projeto.
+
+## 5. Branch Enforcement
+- **Local Main is Protected:** NUNCA realize commits diretamente na branch `main` local.
+- **Feature Branches Required:** Todo trabalho deve ser realizado em branches de feature ou fix (`feat/...`, `fix/...`).
+- **Synchronized Main:** Mantenha a branch `main` local sempre sincronizada com `origin/main`.
+- **Merge via PR:** O merge para `main` deve ocorrer exclusivamente através de Pull Requests validados pelo CI.
