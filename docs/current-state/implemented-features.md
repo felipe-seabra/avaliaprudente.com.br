@@ -58,15 +58,15 @@
 - [x] **Slug Uniqueness & Reservation:** Protection against collisions and reserved routes.
 - [x] **Quality Enforcement:** Database-level checks for business profile completeness.
 
-## Public Flow
-- [x] 1-5 Star Rating system.
-- [x] Authenticated review submission with Google OAuth and Magic Link fallback.
-- [x] LGPD-safe public review attribution via `display_name` only.
-- [x] **Reviewer Reputation & Badges:** Multi-tier dynamic reputation system (Recurrent, Active, Specialist, Elite, Reference) based on verified review counts.
-- [x] **Admin Reputation Badge:** Automatic "Equipe Avalia Prudente" trusted badge for platform administrators.
-- [x] **Premium Google Review Flow:** Non-invasive, optional CTA in a new tab for positive reviews to maximize retention (Improved from automatic redirect).
-- [x] Private feedback capture.
-- [x] Logo & branding uploads.
+## Monetization & Entitlements
+- [x] **Subscription System (Foundation)**
+    - [x] **Single Source of Truth:** Centralized plan definitions in `src/lib/subscription-config.ts`.
+    - [x] **Entitlement Layer:** Server-side and client-side resolution of features and quotas.
+    - [x] **Super Admin Bypass:** Unrestricted access for platform operators.
+    - [x] **Feature Gating:** Consistent UI/UX for premium feature restrictions.
+    - [x] **Admin Management:** Tools for manual subscription overrides and status management.
+    - [x] **Quota Enforcement:** Hard limits for businesses and reviews based on plans.
+    - [x] **Audit Logging:** Comprehensive logging for all subscription and entitlement changes.
 
 ## Operational Governance
 - [x] **Security Observability Dashboard:** Production-safe internal dashboard for `super_admin` users to monitor audit logs, security violations, and privileged actions.
@@ -76,41 +76,3 @@
 - [x] **Completion Workflows:** Explicitly defined lifecycle (Implement -> Lint -> Build -> Test -> Docs -> Commit) in `CODEX.md` (Primary) and `GEMINI.md`.
 - [x] **Shared Governance:** Centralized rules in `docs/ai/shared-context.md` covering all documentation types (current-state, architecture, security, onboarding).
 - [x] **Self-Documenting Repository:** Institutionalized the requirement to evaluate documentation impact before finishing any task.
-
-## Monetization & Plans (UI/UX Foundation)
-- [x] **Billing-Agnostic Subscription Foundation:** Production-grade normalized schema (`subscription_plans`, `user_subscriptions`) for robust entitlement management.
-- [x] **Centralized Entitlement Layer:** Decoupled resolution of features (`canUseFeature`) and quotas (`getQuota`) from billing providers.
-- [x] **Feature Gating System:** Reusable `FeatureGate` component for managing premium access with consistent upgrade UX.
-- [x] **Automatic Plan Provisioning:** Database triggers to assign the "Free" plan to every new profile automatically.
-- [x] **Admin Subscription Governance:** Server actions and UI for super_admins to manually manage user plans and statuses.
-- [x] **Consolidated Plan Indicators:** High-visibility "Plano Gratuito" / "Plano Business" badges in the Dashboard Header.
-- [x] **Contextual Upgrade CTA:** "Fazer Upgrade" button integrated directly into the `PlanBadge` for Free plans, removing sidebar redundancy.
-- [x] **Subscription Schema Readiness:** Multi-tier support (Free, Starter, Pro, Enterprise) with defined feature sets and quotas.
-- [x] **Subscription Audit Trail:** Tamper-resistant logging of all plan changes and administrative overrides.
-
-## SEO & Discovery
-- [x] **Native Next.js 15 Metadata Routes:** Implemented `robots.ts` and `sitemap.ts`.
-- [x] **Dynamic Sitemap Generation:** Automated indexing of public businesses and legal pages.
-- [x] **Crawler Visibility Infrastructure:** SSR-optimized rankings and above-the-fold content.
-- [x] **Visibility Guardrails:** Explicit filtering of frozen, draft, and private businesses from search engines.
-- [x] **Discovery Showcase:** Inclusion of demo routes in the sitemap for better product indexing.
-- [x] **Localization Cleanup:** Optimized "Explorar" terminology for search intent.
-
-## Testing & Stability (Phase 4)
-- [x] Automated Testing Infrastructure (Vitest & React Testing Library).
-- [x] Critical E2E and Unit Flow tests (Middleware, Utils, Env Validation).
-- [x] Type Safety Hardening (`any` usage reduced, Supabase Types regenerated).
-- [x] Safeguards against schema drift and missing profiles.
-
-## Payment Readiness & Advanced Security (Phase 10)
-...
-- [x] **Webhook Security:** Dedicated placeholder endpoints configured to enforce cryptographic signature validation, bypassing CSRF only for fully authenticated server-to-server webhook events.
-
-## Infrastructure & CI/CD
-- [x] **Professional Hardened CI Pipeline:** Automated GitHub Actions workflow with clean, non-redundant job names (Install, Audit, Lint, Typecheck, Test, Build).
-- [x] **Branch Protection Readiness:** Pipeline compatible with GitHub Rulesets to enforce quality and security before merging.
-- [x] **Automated Security Audit:** Integration of `npm audit` with high-severity failure triggers in the CI flow.
-- [x] **Strict Typecheck Enforcement:** Automated validation of TypeScript types to prevent compilation regressions.
-- [x] **Least Privilege CI:** GitHub Actions configured with minimal permissions (`contents: read`).
-- [x] **Concurrency & Performance:** Automated cancellation of redundant runs and efficient dependency caching using `npm ci`.
-- [x] **Validated Edge Compatibility:** Verified build success for middleware and security headers on every CI run.
