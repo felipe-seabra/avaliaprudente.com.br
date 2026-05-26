@@ -20,7 +20,9 @@ Este documento consolida a arquitetura endurecida e as lições aprendidas do pr
 ## 3. Prevenção de Regressões Críticas
 - **RLS Infinite Loop:** NUNCA consulte `profiles` dentro de políticas RLS. Use apenas funções `security definer`.
 - **Tenant Leakage:** SEMPRE valide `owner_id` em mutações e aplique filtros de `is_frozen` em queries públicas.
-- **Billing Boundary:** NUNCA confie no estado de faturamento do cliente; valide via `BillingService` no servidor.
+- **Billing Boundary:** NUNCA confie no estado de faturamento do cliente. Valide sempre via `canUseFeature` ou `getQuota` no servidor. O banco de dados é a única fonte de verdade para autorização (Internal Authorization State).
+- **Entitlement Governance:** Proibido hardcoding de planos. Verificações devem ser baseadas em features ou quotas.
+- **Super Admin Bypass:** Garantir que `super_admin` ignore todas as travas comerciais no nível de resolver.
 - **Middleware Safety:** Qualquer mudança no `middleware.ts` deve ser validada contra loops de redirecionamento.
 
 ## 4. Guia de Implementação para IAs

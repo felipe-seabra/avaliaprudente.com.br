@@ -32,6 +32,8 @@ Toda tarefa deve seguir rigorosamente:
 Antes de concluir qualquer tarefa:
 - [ ] Você está em uma feature branch (NÃO na main)?
 - [ ] O Admin ainda consegue acessar `/admin/dashboard`?
+- [ ] O super_admin continua com bypass total de restrições comerciais?
+- [ ] Novas features estão protegidas por `canUseFeature` ou `FeatureGate`?
 - [ ] As políticas RLS foram testadas contra vazamento de tenant?
 - [ ] Nenhum IP ou dado sensível está sendo logado/persistido em texto puro?
 - [ ] O `CHANGELOG.md` foi atualizado?

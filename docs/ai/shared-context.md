@@ -35,7 +35,17 @@ RECOVERY PROCEDURE (Se cometer o erro de commitar na main):
 - **Zero-Trust Client:** Proibido expor `service_role` ou chaves privadas no lado do cliente.
 - **Sudo Mode:** Operações privilegiadas (mudança de billing, exclusão de conta, alteração de permissões) EXIGEM reautenticação consciente do provedor (OAuth-aware sudo mode).
 - **Isolamento de Cache SSR:** NUNCA utilize `cookies()` ou `headers()` dentro de `unstable_cache`. O cache público deve ser alimentado apenas por clientes anônimos para evitar vazamento de dados entre usuários.
+- **Assinaturas & Entitlements:**
+    - Toda autorização de recursos deve usar helpers centralizados (`canUseFeature`, `getQuota`).
+    - NUNCA codifique verificações de plano (ex: `if (plan === 'pro')`). Verifique sempre a FEATURE.
+    - O banco de dados é a fonte da verdade para autorização (Internal Authorization State).
+    - Provedores de pagamento são apenas fontes de eventos de transição de estado.
+- **Super Admin & Comercial:**
+    - `super_admin` possui bypass total de restrições comerciais no nível do resolver de entitlements.
+    - O bypass de super_admin NUNCA deve depender de planos "enterprise" falsos.
+    - O comportamento de super_admin é ilimitado por definição arquitetural.
 - **Rate Limiting Distribuído:** Implementado via Upstash Redis. Novas rotas sensíveis (Auth, Reviews, API) DEVEM registrar o rate limit.
+
 - **Privacidade & LGPD:**
     - NUNCA persista endereços IP ou User-Agent em texto puro.
     - Use apenas **Anonymized Fingerprints** (SHA-256) para detecção de abuso.

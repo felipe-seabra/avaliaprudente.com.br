@@ -11,6 +11,7 @@ import {
   ShieldAlert,
   ExternalLink,
   ShoppingBag,
+  CreditCard,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -65,6 +66,11 @@ const data = {
       title: 'Analytics',
       url: '/dashboard/analytics',
       icon: BarChart3,
+    },
+    {
+      title: 'Faturamento & Planos',
+      url: '/dashboard/billing',
+      icon: CreditCard,
     },
     {
       title: 'Transparência',

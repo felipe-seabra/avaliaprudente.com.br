@@ -12,6 +12,10 @@ Este checklist deve ser utilizado por desenvolvedores e IAs antes de qualquer me
 ## 2. Arquitetura e Código
 - [ ] O código segue os princípios de Clean Architecture?
 - [ ] A lógica de negócio está no domínio/repositório e não diretamente no componente de UI?
+- [ ] **Assinaturas:** O acesso a novas features premium está protegido por `canUseFeature` ou `FeatureGate`?
+- [ ] **Entitlements:** Foram evitadas verificações de plano codificadas (`if (plan === 'pro'`) em favor de features?
+- [ ] **Quotas:** Novas mutações de criação validam os limites de cota no servidor?
+- [ ] **Super Admin:** O bypass de super_admin foi testado e permanece funcional?
 - [ ] Foram detectadas lógicas duplicadas que poderiam ser abstraídas?
 - [ ] O código introduz complexidade desnecessária?
 

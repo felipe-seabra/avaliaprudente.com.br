@@ -57,28 +57,6 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  // 5. CSRF Protection and Webhook Boundaries
-  const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
-  
-  if (!isWebhook && !validateCSRF(request)) {
-    await logger.security('CSRF validation failure', {
-      origin: request.headers.get('origin'),
-      referer: request.headers.get('referer'),
-    }, request)
-
-    // Log to DB for persistent audit
-    await logAuditEvent({
-      action: 'security/csrf-violation',
-      resourceType: 'request',
-      metadata: { 
-        origin: request.headers.get('origin'),
-        referer: request.headers.get('referer')
-      }
-    })
-
-    return new NextResponse('Invalid CSRF Token or Origin', { status: 403 })
-  }
-
   // Canonical Domain Normalization (non-www -> www)
   // This prevents session inconsistencies and auth mismatches in production
   const host = request.headers.get('host')
@@ -100,6 +78,28 @@ export async function middleware(request: NextRequest) {
   Object.entries(securityHeaders).forEach(([key, value]) => {
     supabaseResponse.headers.set(key, value)
   })
+
+  // Log CSRF failure if occurred (now with user if available)
+  const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
+  if (!isWebhook && !validateCSRF(request)) {
+    await logger.security('CSRF validation failure', {
+      origin: request.headers.get('origin'),
+      referer: request.headers.get('referer'),
+    }, request)
+
+    // Log to DB for persistent audit
+    await logAuditEvent({
+      action: 'security/csrf-violation',
+      resourceType: 'request',
+      actorId: user?.id,
+      metadata: { 
+        origin: request.headers.get('origin'),
+        referer: request.headers.get('referer')
+      }
+    })
+
+    return new NextResponse('Invalid CSRF Token or Origin', { status: 403 })
+  }
 
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||

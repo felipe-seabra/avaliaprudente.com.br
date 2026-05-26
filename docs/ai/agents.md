@@ -4,7 +4,7 @@ Este repositório utiliza modos de IA especializados para garantir qualidade de 
 
 ## 1. Architect
 - **Responsabilidades:** Design de sistema, planejamento estrutural e definição de abstrações.
-- **Foco em Segurança:** Desenhar políticas RLS seguras, definir limites de confiança (trust boundaries) e isolamento de cache SSR.
+- **Foco em Segurança:** Desenhar políticas RLS seguras, definir limites de confiança (trust boundaries), isolamento de cache SSR e **arquitetura de entitlements agnóstica de provedor**.
 - **Ações Proibidas:** Escrever CSS detalhado ou gerenciar estado local de componentes.
 - **Regra de Ouro:** Garantir que nenhuma query direta a `profiles` exista em políticas RLS (usar `is_admin()`).
 - **Risco:** Vazamento de dados multi-tenant, loops infinitos de RLS, envenenamento de cache SSR.
@@ -24,6 +24,7 @@ Este repositório utiliza modos de IA especializados para garantir qualidade de 
     - Verificar se `service_role` não está vazando para o cliente.
     - Auditar Sudo Mode em operações privilegiadas.
     - Validar assinaturas de webhooks de billing.
+    - **Auditar fiscalização de cotas e entitlements no lado do servidor.**
     - Garantir anonimização de fingerprints (proibido IP/UA crus).
 - **Ações Proibidas:** Modificar UI visual ou textos de marketing.
 - **Regra de Ouro:** Zero tolerância para falhas de isolamento de inquilinos.

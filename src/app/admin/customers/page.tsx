@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck, RotateCcw, Clock, UserX, Crown, UserCheck, Shield } from 'lucide-react'
+import { Users, Search, Loader2, Calendar, User, MoreHorizontal, Ban, ShieldAlert, AlertTriangle, BadgeCheck, RotateCcw, Clock, UserX, Crown, UserCheck, Shield, CreditCard } from 'lucide-react'
 import { AdminRepository } from '@/core/infrastructure/repositories/supabase-admin-repository'
 import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -20,6 +20,7 @@ import { ModerationSuspensionDialog } from '@/components/admin/moderation/modera
 import { ModerationBanDialog } from '@/components/admin/moderation/moderation-ban-dialog'
 import { ModerationDeactivationDialog } from '@/components/admin/moderation/moderation-deactivation-dialog'
 import { RoleManagementDialog } from '@/components/admin/governance/role-management-dialog'
+import { SubscriptionManagementDialog } from '@/components/admin/subscriptions/subscription-management-dialog'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
 
@@ -45,6 +46,7 @@ export default function AdminCustomersPage() {
   const [isBanDialogOpen, setIsBanDialogOpen] = useState(false)
   const [isDeactivationDialogOpen, setIsDeactivationDialogOpen] = useState(false)
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false)
+  const [isSubscriptionDialogOpen, setIsSubscriptionDialogOpen] = useState(false)
   const [selectedUserRole, setSelectedUserRole] = useState<string>('')
   const [selectedUser, setSelectedUser] = useState<{ id: string, name: string } | null>(null)
   
@@ -105,6 +107,11 @@ export default function AdminCustomersPage() {
     setSelectedUser({ id, name })
     setSelectedUserRole(role)
     setIsRoleDialogOpen(true)
+  }
+
+  const handleOpenSubscriptionDialog = (id: string, name: string) => {
+    setSelectedUser({ id, name })
+    setIsSubscriptionDialogOpen(true)
   }
 
   const handleOpenWarningDialog = (id: string, name: string) => {
@@ -373,6 +380,15 @@ export default function AdminCustomersPage() {
                                   <Shield className="h-4 w-4 mr-2" />
                                   Gerenciar Papel
                                 </DropdownMenuItem>
+                                {isSuperAdmin && (
+                                  <DropdownMenuItem 
+                                    className="cursor-pointer text-primary font-bold" 
+                                    onClick={() => handleOpenSubscriptionDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
+                                  >
+                                    <CreditCard className="h-4 w-4 mr-2" />
+                                    Gerenciar Assinatura
+                                  </DropdownMenuItem>
+                                )}
                               </>
                             )}
                           </DropdownMenuContent>
@@ -425,6 +441,13 @@ export default function AdminCustomersPage() {
             userName={selectedUser.name}
             currentRole={selectedUserRole}
             adminRole={currentAdminRole || ''}
+            onSuccess={loadCustomers}
+          />
+          <SubscriptionManagementDialog
+            open={isSubscriptionDialogOpen}
+            onOpenChange={setIsSubscriptionDialogOpen}
+            userId={selectedUser.id}
+            userName={selectedUser.name}
             onSuccess={loadCustomers}
           />
         </>
