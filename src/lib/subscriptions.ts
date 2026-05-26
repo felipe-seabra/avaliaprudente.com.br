@@ -1,16 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { cache } from 'react'
-import { PlanDefinition } from './subscription-config'
-
-export type SubscriptionStatus = 'active' | 'suspended' | 'expired' | 'trial' | 'lifetime'
-
-export interface UserSubscription {
-  id: string
-  user_id: string
-  plan_id: string
-  status: SubscriptionStatus
-  plan: PlanDefinition
-}
+import { UserSubscription } from './subscription-config'
 
 /**
  * Fetch current user's subscription with plan details and user role.
@@ -102,9 +92,3 @@ export async function getQuota(quotaKey: string): Promise<number> {
   const quotas = subscription.plan.quotas as Record<string, number>
   return quotas[quotaKey] ?? 0
 }
-
-/**
- * Feature keys constants to avoid typos.
- * Re-exporting from config for convenience.
- */
-export { FEATURE_KEYS as FEATURES, QUOTA_KEYS as QUOTAS } from './subscription-config'

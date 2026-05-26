@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import { APP_CONFIG } from '@/lib/constants'
 import Image from 'next/image'
 import { ClientFeatureGate } from '@/components/shared/entitlements/client-feature-gate'
-import { FEATURES } from '@/lib/subscriptions'
+import { FEATURE_KEYS as FEATURES } from '@/lib/subscription-config'
 
 export default function QRCodesPage() {
   const { currentBusiness } = useBusiness()

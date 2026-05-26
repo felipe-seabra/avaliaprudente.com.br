@@ -60,13 +60,15 @@
 
 ## Monetization & Entitlements
 - [x] **Subscription System (Foundation)**
+    - [x] **Provider-Agnostic Architecture:** Decoupled billing from authorization logic.
+    - [x] **Internal Authorization State:** Database-driven entitlements as the source of truth.
     - [x] **Single Source of Truth:** Centralized plan definitions in `src/lib/subscription-config.ts`.
-    - [x] **Entitlement Layer:** Server-side and client-side resolution of features and quotas.
-    - [x] **Super Admin Bypass:** Unrestricted access for platform operators.
-    - [x] **Feature Gating:** Consistent UI/UX for premium feature restrictions.
-    - [x] **Admin Management:** Tools for manual subscription overrides and status management.
-    - [x] **Quota Enforcement:** Hard limits for businesses and reviews based on plans.
-    - [x] **Audit Logging:** Comprehensive logging for all subscription and entitlement changes.
+    - [x] **Entitlement Layer:** Centralized server-side (`canUseFeature`) and client-side (`useSubscription`) resolution.
+    - [x] **Super Admin Bypass:** Model-level bypass in the entitlement resolver (unlimited access).
+    - [x] **Feature Gating:** Consistent UI/UX components for premium feature restrictions.
+    - [x] **Admin Subscription Management:** Sudo-protected tools for manual plan overrides and status control.
+    - [x] **Quota Enforcement:** Hard limits for businesses and monthly review volume.
+    - [x] **Entitlement Auditing:** Tamper-resistant logs for all commercial state changes.
 
 ## Operational Governance
 - [x] **Security Observability Dashboard:** Production-safe internal dashboard for `super_admin` users to monitor audit logs, security violations, and privileged actions.

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { UserSubscription } from '@/lib/subscriptions'
+import { UserSubscription } from '@/lib/subscription-config'
 
 interface SubscriptionContextType {
   subscription: UserSubscription | null

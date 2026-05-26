@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { logAuditEvent } from '@/lib/audit-logger'
 import { revalidatePath } from 'next/cache'
-import { SubscriptionStatus } from '@/lib/subscriptions'
+import { SubscriptionStatus } from '@/lib/subscription-config'
 
 /**
  * Assign or update a user's subscription.

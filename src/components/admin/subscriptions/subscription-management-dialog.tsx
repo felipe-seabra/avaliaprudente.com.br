@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 import { CreditCard, ShieldAlert, Loader2 } from 'lucide-react'
 import { getSubscriptionPlans, adminAssignSubscription } from '@/app/actions/subscriptions'
 import { createClient } from '@/lib/supabase/client'
-import { SubscriptionStatus } from '@/lib/subscriptions'
+import { SubscriptionStatus } from '@/lib/subscription-config'
 
 interface Plan {
   id: string

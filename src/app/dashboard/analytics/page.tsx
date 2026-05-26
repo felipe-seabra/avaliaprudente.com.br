@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart3, Users, MousePointer2, TrendingUp, Download, PieChart } from 'lucide-react'
 import { toast } from 'sonner'
 import { ClientFeatureGate } from '@/components/shared/entitlements/client-feature-gate'
-import { FEATURES } from '@/lib/subscriptions'
+import { FEATURE_KEYS as FEATURES } from '@/lib/subscription-config'
 import { Button } from '@/components/ui/button'
 
 export default function AnalyticsPage() {

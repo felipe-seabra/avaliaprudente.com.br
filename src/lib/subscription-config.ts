@@ -10,6 +10,8 @@ export const PLAN_SLUGS = {
   ENTERPRISE: 'enterprise',
 } as const
 
+export type SubscriptionStatus = 'active' | 'suspended' | 'expired' | 'trial' | 'lifetime'
+
 export const FEATURE_KEYS = {
   BASIC_ANALYTICS: 'basic_analytics',
   ADVANCED_ANALYTICS: 'advanced_analytics',
@@ -37,6 +39,14 @@ export interface PlanDefinition {
   quotas: Record<string, number>
   isPublic: boolean
   enabled: boolean
+}
+
+export interface UserSubscription {
+  id: string
+  user_id: string
+  plan_id: string
+  status: SubscriptionStatus
+  plan: PlanDefinition
 }
 
 export const SUBSCRIPTION_PLANS: Record<string, PlanDefinition> = {

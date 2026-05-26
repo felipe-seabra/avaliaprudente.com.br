@@ -5,15 +5,18 @@ All notable changes to this project will be documented in this file.
 ## [0.21.0] - 2026-05-28
 
 ### Added
-- **Centralized Subscription Config:** Established `src/lib/subscription-config.ts` as the Single Source of Truth (SSOT) for all plans, features, and quotas.
+- **Subscription Foundation:** Implemented a provider-agnostic entitlement architecture decoupled from billing event sources.
+- **Internal Authorization Authority:** Established the internal database as the primary source of truth for platform permissions.
 - **Entitlement Governance:** Hardened the entitlement resolver with explicit `super_admin` bypass for unlimited operational access.
-- **Feature Gating:** Implemented `ClientFeatureGate` and applied it to Advanced Analytics, Data Export, and Custom Branding.
-- **Admin Subscription Management:** Added administrative tools to assign, update, and suspend user subscriptions directly from the admin panel.
-- **Quota Enforcement:** Real-time enforcement of business limits based on the user's active plan.
+- **Centralized Subscription Config:** Established `src/lib/subscription-config.ts` as the Single Source of Truth (SSOT) for all plans, features, and quotas.
+- **Feature Gating System:** Implemented unified SSR and client-side feature enforcement with graceful upgrade prompts.
+- **Admin Subscription Management:** Added administrative tools to assign, update, and suspend user subscriptions directly from the admin panel with full audit logging.
+- **Quota Enforcement Model:** Real-time enforcement of business limits and monthly review volumes.
 
 ### Fixed
+- **Build Integrity:** Resolved architectural violation where Client Components were importing server-only dependencies from `subscriptions.ts`.
 - **Commercial Inconsistency:** Resolved mismatches between landing page promises and technical plan definitions.
-- **Plan Type Safety:** Standardized subscription and plan types across the entire application.
+- **Plan Type Safety:** Standardized subscription and plan types across the entire application by centralizing them in `subscription-config.ts`.
 - **Admin UX:** Enhanced the billing page with super_admin badges and clear plan status indicators.
 
 ## [0.20.0] - 2026-05-27

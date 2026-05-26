@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { adminAssignSubscription } from '@/app/actions/subscriptions'
-import { SubscriptionStatus } from '@/lib/subscriptions'
+import { SubscriptionStatus } from '@/lib/subscription-config'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

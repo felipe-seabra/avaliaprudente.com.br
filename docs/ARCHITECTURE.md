@@ -25,17 +25,31 @@ The platform employs a hybrid architecture to balance SEO, performance, and inte
 
 ## Monetization & Entitlements
 
-The platform uses a provider-agnostic entitlement system.
+The platform employs a decoupled, provider-agnostic entitlement architecture designed for high stability and commercial flexibility.
 
-- **Single Source of Truth:** Plan definitions (slugs, features, quotas) are centralized in `src/lib/subscription-config.ts`.
-- **Entitlement Resolver:** The `canUseFeature(feature)` and `getQuota(quota)` helpers in `src/lib/subscriptions.ts` resolve access server-side.
-- **Super Admin Bypass:** Super admins bypass all commercial restrictions and quotas to allow unrestricted platform operation.
-- **Feature Gating:** Both server-side (`FeatureGate`) and client-side (`ClientFeatureGate`) components are used to manage premium access.
-- **Admin Management:** Platform operators (Super Admins) can manually adjust subscriptions via the administrative interface.
-- **Normalized Schema:** 
-  - `subscription_plans`: Defines static features and quotas.
-  - `user_subscriptions`: Tracks the active state and source of the entitlement.
-  - `subscription_audit_logs`: Maintains a tamper-resistant history of all plan changes.
+### Core Philosophy
+- **Internal Authorization Authority:** Subscriptions and entitlements are the **primary source of truth** for platform authorization. The database state, not an external API, determines user capabilities.
+- **Provider-Agnostic Core:** The platform logic is completely isolated from specific billing providers (Stripe, Paddle). External providers are treated solely as **event sources** that trigger internal state transitions.
+- **Commercial Alignment:** Features and quotas are grouped into logical plans, but authorization checks always target specific features or quota keys, never plan names.
+
+### Entitlement Architecture
+1. **Centralized Plan Definitions:** All plan properties (slugs, prices, feature lists, and quotas) are defined in `src/lib/subscription-config.ts`. This is the single source of truth for commercial logic.
+2. **Entitlement Resolver:** Access is resolved via centralized helpers:
+   - **Server-Side:** `canUseFeature(feature)` and `getQuota(quota)` in `src/lib/subscriptions.ts`.
+   - **Client-Side:** `useSubscription()` hook provided by `SubscriptionProvider`.
+3. **Super Admin Bypass:** The entitlement resolver layer contains a hardcoded bypass for the `super_admin` role. These users have unlimited access and bypass all commercial restrictions without needing a fake "enterprise" plan.
+4. **Quota Enforcement:** Hard limits are enforced at the Application layer. The system validates current usage against plan quotas before allowing mutations (e.g., creating a new business page).
+
+### Feature Gating Strategy
+- **SSR Enforcement:** Server components use the entitlement resolver to prevent rendering premium sections to unauthorized users.
+- **Middleware Integration:** Critical premium routes can be protected at the edge (planned).
+- **Graceful Degradation:** UI components (e.g., `FeatureGate`) provide consistent "Upgrade" prompts when a feature is locked.
+
+### Administrative Management
+Platform operators (Super Admins) manage commercial state via the Admin Dashboard:
+- **Manual Overrides:** Capability to manually assign plans or extend trial periods.
+- **Status Control:** Ability to suspend or expire subscriptions regardless of billing state.
+- **Audit Logging:** Every change to a user's subscription or entitlement status is recorded in `subscription_audit_logs` with a reference to the acting admin.
 
 ## Layers
 

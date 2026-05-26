@@ -34,6 +34,8 @@ Este documento define os padrões de execução autônoma do Codex CLI, focando 
 
 ## 5. Checklist de Verificação Final
 - [ ] O Admin mantém acesso total?
+- [ ] O super_admin possui bypass total de restrições de assinatura?
+- [ ] Novas funcionalidades premium utilizam o sistema de `canUseFeature`?
 - [ ] O isolamento de inquilinos (tenant isolation) está íntegro?
 - [ ] O build passa sem erros de tipo ou cache?
 - [ ] `CHANGELOG.md` reflete as mudanças?
