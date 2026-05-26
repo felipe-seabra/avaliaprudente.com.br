@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0] - 2026-05-28
+
+### Added
+- **Subscription & Entitlement Foundation:** Implemented a production-grade, billing-agnostic foundation for plans and feature gating.
+- **Normalized Schema:** Created `subscription_plans`, `user_subscriptions`, and `subscription_audit_logs` tables with strict RLS policies.
+- **Entitlement Layer:** Centralized logic for feature and quota resolution (`canUseFeature`, `getQuota`).
+- **Subscription Context:** Added `SubscriptionProvider` to manage and react to entitlement state globally on the frontend.
+- **Feature Gating Components:** Created `FeatureGate` component for easy UI-level access control with upgrade prompts.
+- **Admin Management:** Implemented `SubscriptionManager` component and Server Actions for manual plan assignments by super_admins.
+- **Dashboard Integration:** Added `PlanBadge` to the TopNav and a dedicated `Billing & Plans` page for users.
+- **Seed Data:** Initial plans (Free, Starter, Pro, Enterprise) with defined features and quotas.
+- **Automated Provisioning:** Database trigger to automatically assign the "Free" plan to new users upon profile creation.
+
+### Fixed
+- **UI Composition:** Resolved `asChild` vs `render` property conflicts in Base UI components (Tooltip, Button).
+- **Type Safety:** Manually synchronized Supabase types to support the new subscription schema without compromising strict typing.
+
 ## [Unreleased]
 ### Added
 - **Security Observability Dashboard:** Implemented a production-safe internal security dashboard at `/admin/security` for `super_admin` users, providing visibility into audit logs, security violations, and privileged actions with automatic metadata sanitization.

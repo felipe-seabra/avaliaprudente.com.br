@@ -78,9 +78,15 @@
 - [x] **Self-Documenting Repository:** Institutionalized the requirement to evaluate documentation impact before finishing any task.
 
 ## Monetization & Plans (UI/UX Foundation)
+- [x] **Billing-Agnostic Subscription Foundation:** Production-grade normalized schema (`subscription_plans`, `user_subscriptions`) for robust entitlement management.
+- [x] **Centralized Entitlement Layer:** Decoupled resolution of features (`canUseFeature`) and quotas (`getQuota`) from billing providers.
+- [x] **Feature Gating System:** Reusable `FeatureGate` component for managing premium access with consistent upgrade UX.
+- [x] **Automatic Plan Provisioning:** Database triggers to assign the "Free" plan to every new profile automatically.
+- [x] **Admin Subscription Governance:** Server actions and UI for super_admins to manually manage user plans and statuses.
 - [x] **Consolidated Plan Indicators:** High-visibility "Plano Gratuito" / "Plano Business" badges in the Dashboard Header.
 - [x] **Contextual Upgrade CTA:** "Fazer Upgrade" button integrated directly into the `PlanBadge` for Free plans, removing sidebar redundancy.
-- [x] **Subscription Schema Readiness:** `plan_type` support in the `businesses` table.
+- [x] **Subscription Schema Readiness:** Multi-tier support (Free, Starter, Pro, Enterprise) with defined feature sets and quotas.
+- [x] **Subscription Audit Trail:** Tamper-resistant logging of all plan changes and administrative overrides.
 
 ## SEO & Discovery
 - [x] **Native Next.js 15 Metadata Routes:** Implemented `robots.ts` and `sitemap.ts`.

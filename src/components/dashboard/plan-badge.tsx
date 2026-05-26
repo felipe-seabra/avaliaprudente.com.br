@@ -1,18 +1,17 @@
 'use client'
 
-import React, { useContext, useEffect, useState } from 'react'
+import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { BusinessContext } from '@/providers/business-provider'
-import { Sparkles, ShieldCheck, Zap } from 'lucide-react'
+import { Sparkles, Zap, AlertTriangle } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { createClient } from '@/lib/supabase/client'
-import { isAdmin as checkIsAdmin } from '@/lib/auth-utils'
+import { useSubscription } from '@/providers/subscription-provider'
+import Link from 'next/link'
 
 interface PlanBadgeProps {
   showIcon?: boolean
@@ -21,56 +20,29 @@ interface PlanBadgeProps {
 }
 
 /**
- * PlanBadge component that safely renders the business plan status.
- * Admins are automatically shown as 'Business Plan' to reflect their operator status.
+ * PlanBadge component that safely renders the user's current subscription plan.
  */
 export function PlanBadge({ 
   showIcon = true, 
   showUpgradeAction = true,
   className 
 }: PlanBadgeProps) {
-  const context = useContext(BusinessContext);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const supabase = React.useMemo(() => createClient(), []);
+  const { subscription, isLoading } = useSubscription()
 
-  useEffect(() => {
-    async function checkRole() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-        
-        if (checkIsAdmin(profile?.role)) {
-          setIsAdmin(true);
-        }
-      }
-    }
-    checkRole();
-  }, [supabase]);
-  
-  // If we're outside the provider (context is undefined) or no business is selected, 
-  // we only show something if we are an admin (general platform context).
-  if (!context || !context.currentBusiness) {
-    if (isAdmin) {
-      return (
-        <Badge variant="default" className={`cursor-default gap-1.5 px-3 py-1 font-bold uppercase tracking-wider text-[10px] bg-primary/10 text-primary border-primary/20 ${className}`}>
-           <ShieldCheck className="h-3 w-3 fill-current" />
-           Plano Business
-        </Badge>
-      );
-    }
-    return null;
+  if (isLoading) {
+    return <Badge variant="outline" className="animate-pulse">Carregando...</Badge>
   }
 
-  const { currentBusiness } = context;
-  const plan = currentBusiness.plan_type || 'free'
-  const isFree = plan === 'free' && !isAdmin;
-  
-  const label = isAdmin ? 'Plano Business' : (isFree ? 'Plano Gratuito' : plan);
-  const variant = isFree ? 'secondary' : 'default';
+  if (!subscription) {
+    return null
+  }
+
+  const { plan, status } = subscription
+  const isFree = plan.slug === 'free'
+  const isSuspended = status === 'suspended'
+  const isExpired = status === 'expired'
+
+  const variant = isFree ? 'secondary' : 'default'
   
   return (
     <div className="flex items-center gap-3">
@@ -81,15 +53,15 @@ export function PlanBadge({
               <Button 
                 size="sm" 
                 variant="outline"
-                className="h-7 px-3 text-[10px] font-bold gap-1.5 opacity-60 cursor-not-allowed border-dashed"
-                disabled
+                render={<Link href="/dashboard/billing" />}
+                className="h-7 px-3 text-[10px] font-bold gap-1.5 border-dashed hover:bg-primary/5 hover:text-primary hover:border-primary/50 transition-all"
               >
                 <Zap className="h-3.5 w-3.5 fill-primary text-primary" />
                 Fazer Upgrade
               </Button>
             } />
             <TooltipContent side="bottom">
-              <p className="text-xs font-medium">Planos Pro & Enterprise em breve!</p>
+              <p className="text-xs font-medium">Libere recursos avançados!</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -99,23 +71,26 @@ export function PlanBadge({
         <Tooltip>
           <TooltipTrigger render={
             <Badge 
-              variant={variant} 
-              className={`cursor-default gap-1.5 px-3 py-1 font-bold uppercase tracking-wider text-[10px] ${isAdmin ? 'bg-primary/10 text-primary border-primary/20' : ''} ${className}`}
+              variant={isSuspended || isExpired ? 'destructive' : variant} 
+              className={`cursor-default gap-1.5 px-3 py-1 font-bold uppercase tracking-wider text-[10px] ${!isFree && !isSuspended && !isExpired ? 'bg-primary/10 text-primary border-primary/20' : ''} ${className}`}
             >
-              {showIcon && isAdmin && <ShieldCheck className="h-3 w-3 fill-current" />}
-              {showIcon && !isAdmin && !isFree && <Sparkles className="h-3 w-3 fill-current" />}
-              {label}
+              {showIcon && (isSuspended || isExpired) && <AlertTriangle className="h-3 w-3" />}
+              {showIcon && !isFree && !isSuspended && !isExpired && <Sparkles className="h-3 w-3 fill-current" />}
+              {plan.name}
+              {isSuspended && ' (Suspenso)'}
+              {isExpired && ' (Expirado)'}
             </Badge>
           } />
           <TooltipContent>
-            <p className="text-xs">
-              {isAdmin 
-                ? 'Você tem acesso total como administrador da plataforma.' 
-                : isFree 
-                  ? 'Você está usando a versão gratuita do Avalia Prudente.' 
-                  : `Sua empresa está no plano ${plan}.`
-              }
-            </p>
+            <div className="text-xs space-y-1">
+              <p className="font-bold">{plan.name}</p>
+              <p>{plan.description}</p>
+              {(isSuspended || isExpired) && (
+                <p className="text-destructive font-bold mt-1">
+                  Sua assinatura está {isSuspended ? 'suspensa' : 'expirada'}.
+                </p>
+              )}
+            </div>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

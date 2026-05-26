@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient as defaultQueryClient } from '@/lib/query-client'
+import { SubscriptionProvider } from './subscription-provider'
 
 export function RootProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -26,8 +27,10 @@ export function RootProvider({ children }: { children: React.ReactNode }) {
         disableTransitionOnChange
       >
         <TooltipProvider>
-          {children}
-          <Toaster position="top-right" richColors />
+          <SubscriptionProvider>
+            {children}
+            <Toaster position="top-right" richColors />
+          </SubscriptionProvider>
         </TooltipProvider>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />

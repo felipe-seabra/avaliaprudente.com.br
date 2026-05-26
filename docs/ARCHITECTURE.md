@@ -195,6 +195,28 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **New Tab Strategy:** External navigation to Google Reviews is always performed in a new tab (`_blank`) to ensure the user remains active on the Avalia Prudente platform.
 - **UX Logic:** Subtle, non-invasive modals/cards are used to maintain a premium feel and prevent abandonment.
 
+## Monetization & Entitlements
+
+The platform implements a **Billing-Agnostic Subscription Foundation** that decouples business logic from specific payment providers (Stripe, Paddle, etc.).
+
+### 1. Architecture Principles
+- **Provider-Independent:** Entitlements are resolved internally based on the database state, not directly from third-party webhook events.
+- **Centralized Resolution:** All feature checks must use the `canUseFeature(feature)` and `getQuota(quota)` helpers in `src/lib/subscriptions.ts`.
+- **Normalized Schema:** 
+  - `subscription_plans`: Defines static features and quotas.
+  - `user_subscriptions`: Tracks the active state and source of the entitlement.
+  - `subscription_audit_logs`: Maintains a tamper-resistant history of all plan changes.
+
+### 2. Entitlement Layer
+- **Feature Gating:** Implemented via the `FeatureGate` server component, which wraps premium features with consistent upgrade prompts.
+- **Quota Management:** Business logic (e.g., number of businesses, monthly reviews) is enforced via `getQuota` checks and database-level triggers.
+- **Global Context:** The `SubscriptionProvider` ensures that the user's plan and rights are reactive and available throughout the frontend.
+
+### 3. Lifecycle & Provisioning
+- **Automatic Onboarding:** All new users are automatically provisioned with the "Free" plan via database triggers.
+- **Admin Governance:** Super Admins can manually override subscriptions, grant lifetime access, or suspend accounts via the administrative portal.
+- **Future Integration:** Designed to allow future payment providers to act only as "Event Sources" that update the internal subscription state.
+
 ### Centralized Moderation Scope Architecture
 - **Goal:** Eliminate duplicate filtering logic and prevent public moderation leakage.
 - **Database Layer:** Views like `public.active_businesses` and `public.active_reviews` provide a canonical "active only" data source.
