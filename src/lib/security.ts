@@ -66,7 +66,7 @@ export function generateSecurityHeaders(): Record<string, string> {
     // Allow styles from self and inline (required by standard UI libraries/Next.js)
     "style-src 'self' 'unsafe-inline'",
     // Allow images from self, data URIs, and our Supabase storage
-    "img-src 'self' blob: data: https://*.supabase.co",
+    "img-src 'self' blob: data: https://*.supabase.co https://lh3.googleusercontent.com",
     // Allow fonts from self and data URIs
     "font-src 'self' data:",
     // Allow connections to self, Supabase API, and our domain

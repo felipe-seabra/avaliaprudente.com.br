@@ -8,6 +8,7 @@ import {
   Settings,
   Users,
   ShieldAlert,
+  Shield,
   ArrowLeft,
   MessageSquare,
 } from 'lucide-react'
@@ -60,12 +61,25 @@ const data = {
       url: '/admin/stats',
       icon: BarChart3,
     },
+    {
+      title: 'Segurança',
+      url: '/admin/security',
+      icon: Shield,
+      superAdminOnly: true,
+    },
   ],
 }
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const [role, setRole] = React.useState<string>('admin')
+
+  const filteredNavMain = data.navMain.filter(item => {
+    if (item.superAdminOnly) {
+      return role === 'super_admin'
+    }
+    return true
+  })
 
   React.useEffect(() => {
     async function getRole() {
@@ -124,7 +138,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             Administração
           </div>
 
-          {data.navMain.map((item) => (
+          {filteredNavMain.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 render={<Link href={item.url} className="cursor-pointer" />}

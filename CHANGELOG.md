@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- **Security Observability Dashboard:** Implemented a production-safe internal security dashboard at `/admin/security` for `super_admin` users, providing visibility into audit logs, security violations, and privileged actions with automatic metadata sanitization.
+### Added
 - **Strict AI Feature Branch Workflow:**
   - **Immutable Local Main:** Enforced a project-wide mandate making the local `main` branch immutable for all AI agents and developers.
   - **Feature Branch Mandate:** Formalized the requirement that all implementation, migrations, and fixes must occur on dedicated feature branches.
