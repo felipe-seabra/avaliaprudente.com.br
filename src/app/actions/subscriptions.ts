@@ -61,6 +61,7 @@ export async function adminAssignSubscription(
     action: 'ADMIN_ASSIGN_SUBSCRIPTION',
     resourceType: 'user_subscription',
     resourceId: userId,
+    actorId: actor.id,
     metadata: {
       planId,
       status,

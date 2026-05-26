@@ -50,6 +50,7 @@ export async function updateProfile(data: z.infer<typeof profileSchema>) {
     action: 'profile_update',
     resourceType: 'profiles',
     resourceId: user.id,
+    actorId: user.id,
   })
 
   revalidatePath('/account/settings')
@@ -120,6 +121,7 @@ export async function deactivateAccount() {
     action: 'account_deactivation',
     resourceType: 'profiles',
     resourceId: user.id,
+    actorId: user.id,
   })
 
   await supabase.auth.signOut()

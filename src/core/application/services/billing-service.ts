@@ -27,6 +27,7 @@ export class BillingService {
       action: 'checkout_session_created',
       resourceType: 'billing',
       resourceId: context.businessId || context.userId,
+      actorId: context.userId,
       metadata: { planId }
     })
 
