@@ -235,13 +235,14 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Session Hardening:** All Supabase SSR cookies enforce `Secure` (in production) and `SameSite=Lax` parameters to prevent session leaks and maintain OAuth integrity.
 - **Webhook Isolation:** Payment and external webhook routes (e.g., `/api/webhooks/billing`) are explicitly bypassed from CSRF origin checks but require cryptographic signature validation before trusting any payloads.
 
-### Privileged Operations & Audit
-- **Sudo Mode:** Highly sensitive operations (e.g., account deactivation, business deletion) require recent identity verification (Sudo Mode).
-  - **Provider-Aware:** Supports traditional password confirmation and secure OAuth re-authentication.
-  - **OAuth Re-auth:** For social auth users, Sudo triggers a fresh login flow with the provider (e.g., `prompt=login` for Google) to ensure recent authentication.
-  - **Sudo Token:** A short-lived, cryptographically signed token (`sudo_session`) or a fresh `last_sign_in_at` timestamp (within 15 minutes) is used to manage this elevated privilege window.
-- **Audit Logging:** Tamper-resistant audit trails (`audit_logs`) are maintained for all privileged actions, combining database triggers (as the final source of truth) and API-level logging (for user intent and contextual metadata).
-- **Billing Security:** Billing logic is abstracted via `BillingService`, isolating webhook handlers and customer portal sessions from unauthorized roles.
+### Security Observability & Audit
+- **Centralized Audit Trail:** Tamper-resistant audit logs (`audit_logs`) are maintained for all privileged actions, combining database triggers (as the final source of truth) and API-level logging.
+- **Security Dashboard (`/admin/security`):** A dedicated, read-only internal dashboard for `super_admin` users providing visibility into:
+  - **Security Violations:** Rate-limit breaches, CSRF failures, and webhook signature anomalies.
+  - **Privileged Activity:** Sudo elevation, role changes, and account deactivations.
+  - **Infrastructure Health:** Real-time visibility into the system's security posture and RLS effectiveness.
+- **Metadata Sanitization:** The observability layer automatically redacts sensitive PII (tokens, secrets, raw identifiers) before rendering audit metadata to administrators.
+- **Authorization Boundary:** Strictly enforced at the database level (RLS) and server-side (Next.js), ensuring security data never leaks to non-privileged accounts.
 
 ### Cache Invalidation & Consistency Strategy
 - **Goal:** Ensure immediate propagation of moderation actions while preserving the performance benefits of ISR.
