@@ -1,35 +1,82 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import { APP_CONFIG } from '@/lib/constants'
-
-// Basic rate limiting configuration
-const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
-const MAX_REQUESTS = 100 // 100 requests per minute
-
-// Simple in-memory storage for rate limiting
-const ipCache = new Map<string, { count: number; lastReset: number }>()
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now()
-  const stats = ipCache.get(ip) || { count: 0, lastReset: now }
-
-  if (now - stats.lastReset > RATE_LIMIT_WINDOW) {
-    stats.count = 1
-    stats.lastReset = now
-  } else {
-    stats.count++
-  }
-
-  ipCache.set(ip, stats)
-  return stats.count > MAX_REQUESTS
-}
+import { checkRateLimit } from '@/lib/rate-limit'
+import { generatePrivacyFingerprint } from '@/lib/privacy'
+import { validateCSRF, generateSecurityHeaders } from '@/lib/security'
+import { logger } from '@/lib/logger'
+import { logAuditEvent } from '@/lib/audit-logger'
 
 export async function middleware(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for') || '127.0.0.1'
+  // 1. Precise IP Extraction (Safe X-Forwarded-For handling)
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  const ip = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
+  const userAgent = request.headers.get('user-agent') || ''
   
-  // Rate limiting check
-  if (isRateLimited(ip)) {
-    return new NextResponse('Too Many Requests', { status: 429 })
+  // 2. Generate Privacy-safe identifier (Daily rotation)
+  const identifier = await generatePrivacyFingerprint(ip, userAgent, 'daily')
+
+  // 3. Determine Rate Limit Tier
+  let limitType: 'global' | 'api' | 'auth' = 'global'
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    limitType = 'api'
+  }
+  if (
+    request.nextUrl.pathname.startsWith('/login') || 
+    request.nextUrl.pathname.startsWith('/register') ||
+    request.nextUrl.pathname.startsWith('/forgot-password')
+  ) {
+    limitType = 'auth'
+  }
+
+  // 4. Distributed Rate Limiting Check
+  const { success, limit, remaining, reset } = await checkRateLimit(identifier, limitType)
+
+  if (!success) {
+    await logger.security('Rate limit violation', {
+      limitType,
+      limit,
+      fingerprint: identifier,
+    }, request)
+
+    // Log to DB for persistent audit
+    await logAuditEvent({
+      action: 'security/rate-limit-violation',
+      resourceType: 'system',
+      metadata: { limitType, limit, fingerprint: identifier }
+    })
+
+    return new NextResponse('Too Many Requests', { 
+      status: 429,
+      headers: {
+        'X-RateLimit-Limit': limit.toString(),
+        'X-RateLimit-Remaining': remaining.toString(),
+        'X-RateLimit-Reset': reset.toString(),
+        'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString(),
+      }
+    })
+  }
+
+  // 5. CSRF Protection and Webhook Boundaries
+  const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
+  
+  if (!isWebhook && !validateCSRF(request)) {
+    await logger.security('CSRF validation failure', {
+      origin: request.headers.get('origin'),
+      referer: request.headers.get('referer'),
+    }, request)
+
+    // Log to DB for persistent audit
+    await logAuditEvent({
+      action: 'security/csrf-violation',
+      resourceType: 'request',
+      metadata: { 
+        origin: request.headers.get('origin'),
+        referer: request.headers.get('referer')
+      }
+    })
+
+    return new NextResponse('Invalid CSRF Token or Origin', { status: 403 })
   }
 
   // Canonical Domain Normalization (non-www -> www)
@@ -42,6 +89,17 @@ export async function middleware(request: NextRequest) {
   }
 
   const { supabaseResponse, user, role, isBlocked, isDeleted, accountStatus, suspendedUntil, termsVersion } = await updateSession(request)
+
+  // Inject Rate Limit headers into the response for visibility/observability
+  supabaseResponse.headers.set('X-RateLimit-Limit', limit.toString())
+  supabaseResponse.headers.set('X-RateLimit-Remaining', remaining.toString())
+  supabaseResponse.headers.set('X-RateLimit-Reset', reset.toString())
+
+  // Apply Security Headers (CSP, X-Frame-Options, etc.)
+  const securityHeaders = generateSecurityHeaders()
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    supabaseResponse.headers.set(key, value)
+  })
 
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||
@@ -74,7 +132,9 @@ export async function middleware(request: NextRequest) {
       if (process.env.NODE_ENV === 'development') {
         console.log('Middleware: Admin at Auth Page -> Redirecting to /admin/dashboard')
       }
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+      const response = NextResponse.redirect(new URL('/admin/dashboard', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
     // Allow admin to access anything (dashboard or admin panel)
     return supabaseResponse
@@ -85,7 +145,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log('Middleware: User needs terms re-acceptance -> Redirecting to /terms-reaccept')
     }
-    return NextResponse.redirect(new URL('/terms-reaccept', request.url))
+    const response = NextResponse.redirect(new URL('/terms-reaccept', request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 3. Permanent Block / Ban / Deactivation check (Regular users only)
@@ -94,7 +156,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log(`Middleware: Blocked/Banned/Deleted User (${type}) -> Redirecting to /blocked`)
     }
-    return NextResponse.redirect(new URL(`/blocked${type !== 'blocked' ? `?type=${type}` : ''}`, request.url))
+    const response = NextResponse.redirect(new URL(`/blocked${type !== 'blocked' ? `?type=${type}` : ''}`, request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 4. Temporary Suspension check (Regular users only)
@@ -102,7 +166,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log('Middleware: Suspended User -> Redirecting to /blocked?type=suspended')
     }
-    return NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
+    const response = NextResponse.redirect(new URL('/blocked?type=suspended', request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 5. Redirect away from /blocked if not actually blocked
@@ -111,7 +177,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log(`Middleware: Not Blocked User at /blocked -> Redirecting to ${target}`)
     }
-    return NextResponse.redirect(new URL(target, request.url))
+    const response = NextResponse.redirect(new URL(target, request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 6. Redirect logged in users away from auth pages
@@ -120,7 +188,9 @@ export async function middleware(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log(`Middleware: Logged in User at Auth Page -> Redirecting to ${target}`)
     }
-    return NextResponse.redirect(new URL(target, request.url))
+    const response = NextResponse.redirect(new URL(target, request.url))
+    Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+    return response
   }
 
   // 7. Protect dashboard and enforce reviewer restrictions
@@ -129,14 +199,18 @@ export async function middleware(request: NextRequest) {
       if (process.env.NODE_ENV === 'development') {
         console.log('Middleware: Anonymous User at Dashboard -> Redirecting to /login')
       }
-      return NextResponse.redirect(new URL('/login', request.url))
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
 
     if (isReviewer) {
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Middleware: Reviewer user ${user.id} attempted to access dashboard -> Redirecting to /account`)
       }
-      return NextResponse.redirect(new URL('/account', request.url))
+      const response = NextResponse.redirect(new URL('/account', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
   }
 
@@ -146,14 +220,18 @@ export async function middleware(request: NextRequest) {
       if (process.env.NODE_ENV === 'development') {
         console.log('Middleware: Anonymous User at Admin Page -> Redirecting to /login')
       }
-      return NextResponse.redirect(new URL('/login', request.url))
+      const response = NextResponse.redirect(new URL('/login', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
 
     if (!isAdmin) {
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Middleware: Non-admin user ${user.id} attempted to access ${request.nextUrl.pathname} -> Redirecting to /dashboard`)
       }
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      const response = NextResponse.redirect(new URL('/dashboard', request.url))
+      Object.entries(securityHeaders).forEach(([key, value]) => response.headers.set(key, value))
+      return response
     }
   }
 

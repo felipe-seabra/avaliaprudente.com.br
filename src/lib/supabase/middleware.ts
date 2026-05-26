@@ -21,9 +21,16 @@ export async function updateSession(request: NextRequest) {
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          cookiesToSet.forEach(({ name, value, options }) => {
+            // Strictly enforce secure cookies in production and SameSite=Lax for OAuth to work
+            const secureOptions = {
+              ...options,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'lax' as const,
+              // Cannot enforce HttpOnly=true globally because supabase-js in the browser needs it
+            }
+            supabaseResponse.cookies.set(name, value, secureOptions)
+          })
         },
       },
     }

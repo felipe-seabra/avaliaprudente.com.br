@@ -19,6 +19,9 @@
 - [x] **Secure Role Management API:** Server-side role transition logic with explicit hierarchy validation and audit logging.
 - [x] **Role Transition Auditing:** Detailed logging of all role changes in `role_change_logs`.
 - [x] **OAuth Branding Compliance:** Google-aligned authentication assets and flows.
+- [x] **Distributed Rate Limiting (Edge Compatible):** Multi-tier protection using Upstash Redis to prevent DDoS, brute force, and API abuse across serverless instances.
+- [x] **Session Security & CSRF Hardening:** Strict `Origin` vs `Host` validation for all API route handlers, paired with robust Security Headers (CSP, X-Frame-Options).
+- [x] **Trusted Webhook Boundaries:** Architected `/api/webhooks/stripe` bypasses for CSRF with requirements for cryptographic signature validation.
 - [x] Middleware session hardening & central routing.
 - [x] Blocked user detection (suspended, banned, deleted).
 - [x] Infinite recursion RLS protections (`is_admin` security definer).
@@ -89,3 +92,16 @@
 - [x] Critical E2E and Unit Flow tests (Middleware, Utils, Env Validation).
 - [x] Type Safety Hardening (`any` usage reduced, Supabase Types regenerated).
 - [x] Safeguards against schema drift and missing profiles.
+
+## Payment Readiness & Advanced Security (Phase 10)
+...
+- [x] **Webhook Security:** Dedicated placeholder endpoints configured to enforce cryptographic signature validation, bypassing CSRF only for fully authenticated server-to-server webhook events.
+
+## Infrastructure & CI/CD
+- [x] **Professional Hardened CI Pipeline:** Automated GitHub Actions workflow with clean, non-redundant job names (Install, Audit, Lint, Typecheck, Test, Build).
+- [x] **Branch Protection Readiness:** Pipeline compatible with GitHub Rulesets to enforce quality and security before merging.
+- [x] **Automated Security Audit:** Integration of `npm audit` with high-severity failure triggers in the CI flow.
+- [x] **Strict Typecheck Enforcement:** Automated validation of TypeScript types to prevent compilation regressions.
+- [x] **Least Privilege CI:** GitHub Actions configured with minimal permissions (`contents: read`).
+- [x] **Concurrency & Performance:** Automated cancellation of redundant runs and efficient dependency caching using `npm ci`.
+- [x] **Validated Edge Compatibility:** Verified build success for middleware and security headers on every CI run.

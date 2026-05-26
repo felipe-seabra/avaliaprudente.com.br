@@ -1,46 +1,35 @@
-# GPT.md — Avalia Prudente: Portable Project Intelligence & Primary Memory
+# GPT.md — Avalia Prudente: AI Architectural Memory & Intelligence
 
-Este documento é a camada de inteligência primária e memória de longo prazo do projeto. Ele consolida toda a arquitetura atual, lições aprendidas em estabilização e regras críticas para garantir a continuidade entre diferentes sessões de IA.
+Este documento consolida a arquitetura endurecida e as lições aprendidas do projeto **Avalia Prudente**. Ele serve como a memória de longo prazo para garantir que qualquer IA (ChatGPT, Claude, Gemini) mantenha a integridade do sistema.
 
-> **Regras Universais:** Todas as interações devem respeitar `docs/ai/shared-context.md`.
+> **Regras Universais:** Todas as interações DEVEM respeitar `docs/ai/shared-context.md`.
 
-## 1. Arquitetura Atual & Tech Stack
-- **Framework:** Next.js 15 (App Router / React 19). Uso intensivo de Server Components e Server Actions.
-- **Database/Auth:** Supabase (PostgreSQL) com SSR e políticas RLS rigorosas.
-- **Estilização:** Tailwind CSS 4 + shadcn/ui (OKLCH Colors).
-- **Clean Architecture:** Camadas estritas: `Domain` (Entidades/Interfaces) -> `Application` (Use Cases) -> `Infrastructure` (Repositórios/Supabase) -> `UI` (Components/Hooks).
-- **Workflow Docker:** `npm run supabase:start` para ambiente local. Use `scripts/docker-maintenance.sh` para auditoria e limpeza de disco.
-- **Segurança de DB:** Todos os comandos destrutivos são protegidos por `scripts/db-safety.sh`. Nunca ignore os avisos de "REMOTE" em logs.
-- **Testing:** Vitest + React Testing Library. Foco em lógica de domínio, middleware e componentes críticos.
+## 1. Arquitetura de Segurança Endurecida
+- **Auth Boundary:** Supabase SSR com validação rigorosa no `middleware.ts`.
+- **Sudo Mode:** Operações críticas (billing, deletes, roles) exigem reautenticação OAuth-aware.
+- **Isolamento de Cache:** O cache SSR (`unstable_cache`) é estritamente isolado de cookies/headers para evitar vazamento de dados privados.
+- **Rate Limiting:** Sistema distribuído via Upstash Redis protegendo rotas sensíveis.
+- **Privacidade LGPD:** Fingerprinting anônimo SHA-256 para controle de abuso; proibido persistir IPs ou User-Agents crus.
 
 ## 2. Sistemas Core & Inteligência
-- **Moderation Lifecycle:** Motor progressivo com Advertências (Warnings), Suspensão (Temporary), Banimento (Permanent), Desativação (Soft Delete) e Congelamento de Empresa (Frozen Business).
-- **Transparency Center:** Localizado em `/dashboard/moderation`, permite visualização de status e submissão de **Appeals (Contestações)** via `moderation_appeals`.
-- **Ranking System (Bayesian Average):** Localizado em `src/core/application/use-cases/get-public-rankings.ts`. Calcula o score ponderado baseado em volume de avaliações e média. Empresas **Verificadas** e **Featured** recebem multiplicadores de visibilidade.
-- **Anti-Spam & Abuse Prevention:** Sistema híbrido de fingerprinting anônimo (SHA-256) e cooldowns no banco de dados (`tr_enforce_review_abuse_protection`).
-- **Analytics Anti-Inflation:** Deduplicação de sinais de analytics via triggers (`tr_enforce_analytics_deduplication`) com janela de 15 minutos.
-- **Onboarding de Qualidade:** Fluxo rigoroso que exige dados completos da empresa antes da ativação pública. Protegido contra spam e duplicidade de slugs.
-- **OG Image System:** Localizado em `src/app/opengraph-image.tsx`. Utiliza `next/og` no Edge Runtime. Layouts dinâmicos baseados no branding da empresa (logo/cores).
-- **Slug Validation:** Proteção de unicidade via RPC `is_slug_available`. Slugs são normalizados e nomes de rotas do sistema são reservados.
+- **Moderation Engine:** Ciclo progressivo de Warnings -> Suspensions -> Bans. Admins possuem bypass total (`is_admin()`).
+- **Bayesian Ranking:** Cálculo ponderado de visibilidade para empresas verificado e featured.
+- **Anti-Spam:** Proteção de triggers no DB contra abuso de reviews e analytics deduplication (janela de 15 min).
+- **Branding Isolation:** Carregamento dinâmico de logos e cores via Edge Runtime (`opengraph-image.tsx`).
 
-## 3. Estabilização de Admin & Auth (Lições Críticas)
-- **Admin Master Bypass:** Administradores (`role = 'admin'`) DEVEM contornar todas as restrições de moderação. Isso é garantido no `middleware.ts` e na função de banco de dados `is_admin()`.
-- **Middleware Sensitivity:** O `src/middleware.ts` gerencia Rate Limiting, Session Refresh, Bloqueios de Moderação, Re-aceite de Termos e Redirecionamentos de Onboarding.
-- **Auth Stability:** Sessões são validadas em tempo real. Erros de "JWT expired" ou "Profile not found" são tratados via redirecionamento seguro para logout ou re-onboarding.
+## 3. Prevenção de Regressões Críticas
+- **RLS Infinite Loop:** NUNCA consulte `profiles` dentro de políticas RLS. Use apenas funções `security definer`.
+- **Tenant Leakage:** SEMPRE valide `owner_id` em mutações e aplique filtros de `is_frozen` em queries públicas.
+- **Billing Boundary:** NUNCA confie no estado de faturamento do cliente; valide via `BillingService` no servidor.
+- **Middleware Safety:** Qualquer mudança no `middleware.ts` deve ser validada contra loops de redirecionamento.
 
-## 4. Prevenção de Regressões (Regressions History)
-- **RLS Recursion:** NUNCA faça queries diretas a `profiles` dentro de políticas RLS. Use SEMPRE a função `SECURITY DEFINER` `is_admin()`. Falha nisso causa erro 500 infinito.
-- **Public Visibility:** Repositórios públicos DEVEM validar `is_frozen = false` explicitamente para evitar vazamento de dados de empresas suspensas.
-- **Review-Link UX:** O link de avaliação (`/r/[slug]`) deve carregar o branding da empresa de forma rápida e segura, tratando estados de erro (empresa não encontrada ou congelada) com elegância.
+## 4. Guia de Implementação para IAs
+- **Incrementalismo:** Estabilize o núcleo de segurança antes de expandir funcionalidades.
+- **Validação Total:** `npm run lint` && `npm run build` && `npm run test` são obrigatórios.
+- **Admin Dashboard Check:** Alterações de Auth/Middleware exigem teste manual de login admin.
+- **Logs Estruturados:** Use apenas logs estruturados (severidade, correlation ID) e evite logar PII.
 
-## 5. Regras para Desenvolvimento Futuro
-- **Incrementalismo:** Estabilize o núcleo antes de expandir. Verifique sempre o impacto no Admin.
-- **Validação Obrigatória:** `npm run lint` && `npm run build` && `npm run test` após QUALQUER mudança.
-- **Admin Dashboard Test:** Qualquer alteração em Auth ou Middleware exige teste manual de login como Admin.
-- **Commit Discipline:** Use Conventional Commits em inglês. Mensagens curtas e assertivas.
-
-## 6. Guia Operacional (Codex CLI)
-- **Safe Reset:** `npm run supabase:reset` limpa o estado local de forma segura.
-- **Docker Maintenance:** `npm run docker:audit` e `npm run docker:clean` para evitar estouro de disco.
-- **Production Guard:** Nunca rode comandos `supabase db push` ou `reset` sem ler os avisos do Safety Guard.
-- **Codex CLI Workflow:** O Codex CLI é o agente primário. Siga as instruções em `docs/ai/CODEX.md` para execução autônoma e segura.
+## 5. Operação de Banco de Dados
+- **Safety Guard:** Comandos destrutivos exigem execução via `npm run` para ativar `scripts/db-safety.sh`.
+- **Migrações:** Use `npm run supabase:migration` para qualquer alteração de esquema.
+- **RLS Audit:** Toda nova tabela deve obrigatoriamente ter políticas RLS definidas.

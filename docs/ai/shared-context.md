@@ -1,69 +1,52 @@
 # Shared AI Context
 
-This file contains the universal governance rules, shared workflows, and operational standards that apply to ALL AI agents (Codex CLI, Aider, Gemini, ChatGPT, etc.) working on the Avalia Prudente repository. **Codex CLI and Aider are the primary operational agents for this repository.**
+Este arquivo contém as regras de governança universal, fluxos de trabalho compartilhados e padrões operacionais que se aplicam a TODOS os agentes de IA (Codex CLI, Aider, Gemini, etc.) e colaboradores humanos.
 
-## 1. Universal Repository Rules
-- **Primary Agents:** Codex CLI (IDE/focused features) and Aider (refactoring/large context) are the official runtime agents.
-- **Language:** Code, variables, and commits MUST be in English. Terminal responses/explanations MUST be in Brazilian Portuguese.
-- **Frameworks:** Next.js 15 (App Router), Supabase, Tailwind CSS 4, shadcn/ui.
-- **Architecture:** Clean Architecture (`Domain` -> `Application` -> `Infrastructure` -> `UI`).
-- **Dependencies:** Do NOT install new dependencies without explicit permission.
-- **Business Logic:** Do NOT modify core business logic or database schemas unless specifically instructed. Use `npm run supabase:migration` for any schema changes.
+## 1. Regras Universais do Repositório
+- **Agentes Primários:** Codex CLI (IDE/implementação) e Aider (refactoring/contexto amplo).
+- **Linguagem:** Código, variáveis e commits DEVEM ser em Inglês. Respostas e explicações no terminal DEVEM ser em Português Brasileiro.
+- **Stack:** Next.js 15 (App Router), Supabase (SSR), Tailwind CSS 4, shadcn/ui.
+- **Arquitetura:** Clean Architecture (`Domain` -> `Application` -> `Infrastructure` -> `UI`).
+- **Limites de Confiança:** NUNCA confie em dados de autorização vindos do cliente. Use apenas o contexto de autenticação do servidor via Supabase SSR.
 
-## 2. Shared Workflows (Mandatory Lifecycle)
-Every task executed by ANY agent MUST follow this sequence:
-1. **Branch Isolation:** Create a feature branch before major changes. Never work directly on `main`.
-2. **Implement:** Perform the technical change.
-3. **Lint:** Run `npm run lint`.
-4. **Build:** Run `npm run build`.
-5. **Test:** Run `npm run test -- --run`.
-6. **Update Docs:** Evaluate and update `CHANGELOG.md`, `docs/current-state/*`, and other relevant docs.
-7. **Commit:** Commit ONLY after all previous steps pass.
+## 2. Governança de Segurança (Mandatória)
+- **Zero-Trust Client:** Proibido expor `service_role` ou chaves privadas no lado do cliente.
+- **Sudo Mode:** Operações privilegiadas (mudança de billing, exclusão de conta, alteração de permissões) EXIGEM reautenticação consciente do provedor (OAuth-aware sudo mode).
+- **Isolamento de Cache SSR:** NUNCA utilize `cookies()` ou `headers()` dentro de `unstable_cache`. O cache público deve ser alimentado apenas por clientes anônimos para evitar vazamento de dados entre usuários.
+- **Rate Limiting Distribuído:** Implementado via Upstash Redis. Novas rotas sensíveis (Auth, Reviews, API) DEVEM registrar o rate limit.
+- **Privacidade & LGPD:**
+    - NUNCA persista endereços IP ou User-Agent em texto puro.
+    - Use apenas **Anonymized Fingerprints** (SHA-256) para detecção de abuso.
+    - Respeite o princípio da minimização de dados.
+- **Billing Trust Boundary:** Toda lógica de faturamento deve passar exclusivamente pelo `BillingService`. Webhooks devem ter assinatura verificada antes de qualquer processamento.
+- **CSP & Headers:** Proibido habilitar `unsafe-eval` em produção. Mudanças no CSP exigem revisão de segurança.
 
-- **Analyze First:** Always read relevant code and documentation before suggesting or making changes.
-- **Explain Current Flow:** Demonstrate understanding of the current implementation before altering it.
-- **Minimal Change Philosophy:** Apply surgical, minimal modifications. Avoid unnecessary refactoring or "cleanups" outside the task scope.
+## 3. Fluxo de Trabalho Compartilhado (Ciclo de Vida Mandatório)
+Toda tarefa deve seguir rigorosamente:
+1. **Branch Isolation:** Nunca trabalhe diretamente na `main`. Use branches de feature/fix.
+2. **Research & Strategy:** Use ferramentas de busca para mapear o impacto antes de codificar.
+3. **Implement:** Mudanças cirúrgicas e idiomáticas.
+4. **Validation Pipeline:**
+    - `npm run lint` (estilo e segurança estática).
+    - `npm run build` (integridade de tipos e SSR).
+    - `npm run test` (validação comportamental).
+5. **Documentation Sync:** Atualizar `CHANGELOG.md`, `docs/current-state/*` e arquivos de governança se houver mudança arquitetural.
+6. **Commit:** Apenas após passar em TODA a validação.
 
-## 3. Architecture Preservation & Regression Prevention
-- Maintain strict multi-tenant isolation (`owner_id` with RLS).
-- Do not bypass Middlewares or RLS policies for convenience.
-- Ensure that updates to the UI do not break SSR/Server Component compatibility.
-- **RLS Safety:** Use `is_admin()` or `is_super_admin()` security definer to avoid infinite recursion.
-- **Public Visibility:** Filter out `is_frozen = true` items in public lookups.
-- **Review Ownership & Anti-Spam:** Reviews are identity-owned (UNIQUE `user_id` and `business_id`). The API enforces UPSERT behavior. Respect the per-business cooldowns implemented via database triggers. Ensure fingerprints are generated on the client-side for all new reviews.
+## 4. Preservação Arquitetural & Regressão
+- **RLS Safety:** Use apenas funções `security definer` como `is_admin()` para evitar recursão RLS (Error 500).
+- **Public Visibility:** Filtre SEMPRE `is_frozen = true` em consultas públicas.
+- **Anti-Spam:** Valide fingerprints e cooldowns no lado do servidor (Triggers/Edge Functions).
+- **Observabilidade:** Use apenas logs estruturados. NUNCA logue segredos, tokens, cookies ou PII (Personally Identifiable Information).
 
-## 4. Machine-Specific State & Repository Hygiene
-To maintain a clean repository, AI agents must ensure that local session artifacts are NEVER committed.
-- **Tracked AI Files (Shareable):**
-  - Project guides: `docs/ai/*.md` (e.g., `AIDER.md`, `CODEX.md`).
-  - Architecture docs: `docs/ARCHITECTURE.md`, `docs/adr/*.md`.
-  - Current state: `docs/current-state/*.md`.
-  - Operational logic: `docs/ai/rules/*.md`, `docs/ai/workflows/*.md`.
-- **Ignored AI Files (Local-Only):**
-  - Chat/input histories: `.aider.chat.history.md`, `.aider.input.history`, `.cursor/history`.
-  - Cache/indexes: `.aider.tags.cache.v4/`, `.cursor/cache`, `.claude/`.
-  - Temporary artifacts: `.codex/tmp`, `.gemini/tmp`.
-- **Action:** Always verify `git status` before committing to ensure no machine-specific artifacts are leaking into the history.
+## 5. Áreas Protegidas
+Modificações nestas áreas exigem cautela extrema:
+- `src/middleware.ts` e `src/lib/supabase/*` (Auth & Segurança).
+- `supabase/migrations/*.sql` (Esquema & RLS).
+- `src/core/application/services/billing-service.ts` (Faturamento).
+- Lógica de privacidade e termos de uso.
 
-## 5. Protected Areas
-Any modification to the following areas requires extreme caution and a mandatory security review:
-- `src/middleware.ts` & `src/lib/supabase/*` (Authentication, Sessions, Account Status).
-- `supabase/migrations/*.sql` (RLS & Database Schema).
-- `src/providers/root-provider.tsx` & `src/providers/business-provider.tsx` (Global Contexts).
-- LGPD / Privacy logic (Terms of Use, Cookie consent, data handling, display name usage).
-
-## 6. Synchronization & Documentation Updates (Mandatory)
-ALL AI agents MUST keep the documentation up-to-date. Every implementation or change must evaluate if updates are required for:
-- **`CHANGELOG.md`:** Update upon completing any feature, fix, or architectural change.
-- **`docs/current-state/*`:** Keep features, tech debt, and known bugs updated to reflect the reality after the change.
-- **`docs/generated/project-memory.md` & `system-map.md`:** Update when architectural patterns, new modules, or significant logic changes occur.
-- **Operational Docs:** Update runtime guides (`docs/ai/AIDER.md`, `docs/ai/CODEX.md`) or operational procedures if workflows change.
-- **Architecture & Design:** Update `docs/ARCHITECTURE.md` or ADRs if new patterns are introduced.
-- **Onboarding & Security:** Update `docs/ai/onboarding/flows.md` or `docs/ai/rules/security-rules.md` if business flows or security constraints are modified.
-
-**Goal:** The repository must be self-documenting. Never finish implementation without evaluating documentation impact.
-
-## 7. Commit Standards
-- Use Conventional Commits (`type(scope): description`) in English.
-- Provide atomic commits. Never create generic or broken commits.
-- Commit messages should be short and assertive.
+## 6. Padrões de Commit
+- Use **Conventional Commits** em Inglês.
+- Mensagens curtas, assertivas e focadas no "porquê".
+- Comite apenas arquivos relevantes para a tarefa.

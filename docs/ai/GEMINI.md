@@ -1,55 +1,40 @@
-# GEMINI.md — Avalia Prudente: Gemini CLI Operational Guide (Secondary)
+# GEMINI.md — Avalia Prudente: Gemini CLI Operational Guide
 
-> **AVISO:** O Codex CLI e o Aider são agora os agentes operacionais primários deste repositório. Para o fluxo de trabalho oficial e atualizado, consulte **`docs/ai/AI_WORKFLOWS.md`**, **`docs/ai/CODEX.md`** e **`docs/ai/AIDER.md`**.
+Este documento define os padrões operacionais para o Gemini CLI neste repositório, garantindo que suas ações estejam alinhadas com a arquitetura de segurança endurecida da plataforma.
 
-Este documento é mantido para compatibilidade e referência histórica dos fluxos de trabalho do Gemini CLI, que agora atua primariamente como ferramenta de pesquisa e documentação.
+> **Regras Universais:** Todas as ações DEVEM aderir estritamente a `docs/ai/shared-context.md`.
 
-> **Regras Universais:** Todas as ações devem aderir estritamente a `docs/ai/shared-context.md`.
+## 1. Ciclo de Execução e Validação (Mandatório)
+Toda tarefa deve seguir rigorosamente:
+1. **Research:** Mapear o código e entender os limites de confiança antes de editar.
+2. **Strategy:** Propor uma abordagem que preserve a segurança (RLS, Cache, Privacy).
+3. **Implement:** Aplicação de mudanças cirúrgicas.
+4. **Validation:**
+    - `npm run lint` && `npm run build` && `npm run test`.
+    - Verificar acesso Admin se houver mudanças em Middleware/Auth.
+5. **Sync Docs:** Atualizar `CHANGELOG.md` e `docs/current-state/*`.
 
-## 1. Fluxo de Execução do Repositório (Mandatório)
-Toda tarefa deve seguir rigorosamente este ciclo de vida:
-1. **Implement:** Realizar a alteração técnica.
-2. **Lint:** Executar `npm run lint`.
-3. **Build:** Executar `npm run build`.
-4. **Test:** Executar `npm run test -- --run`.
-5. **Update Docs:** Avaliar e atualizar `CHANGELOG.md`, `docs/current-state/*` e outros documentos relevantes (ver Seção 5 de `shared-context.md`).
-6. **Commit:** Realizar o commit apenas após todos os passos acima passarem.
+## 2. Governança de Segurança Específica
+- **Context Awareness:** Antes de sugerir mudanças, use `grep_search` para verificar se a área é uma **Protected Area** definida no `shared-context.md`.
+- **RLS Safety:** NUNCA escreva políticas RLS que consultem `profiles` diretamente. Use as funções security definer `is_admin()`.
+- **Public Data Protection:** Sempre adicione filtros para `is_frozen = true` em qualquer nova consulta pública.
+- **Sudo Mode:** Ao implementar ações administrativas, garanta que elas exijam `sudo` (reautenticação).
+- **Cache Isolation:** Certifique-se de que novos componentes SSR não vazem dados privados via cache público.
 
-- **Topic Updates:** Sempre use `update_topic` para informar o progresso de tarefas complexas.
-- **Análise Local:** Use `grep_search`, `list_directory` e `read_file` para mapear a base de código antes de executar mudanças.
-- **Validação Empírica:** Priorize a reprodução de bugs ou a validação do estado atual localmente.
+## 3. Eficiência de Contexto e Ferramentas
+- **Leitura Cirúrgica:** Use `start_line` e `end_line` para evitar leitura de arquivos gigantes.
+- **Paralelismo:** Execute buscas e leituras independentes no mesmo turno.
+- **Topic Updates:** Mantenha o usuário informado sobre o progresso e decisões arquiteturais via `update_topic`.
 
-## 2. Fluxo de Commit e Memória do Projeto
-- **Changelog Mandatório:** Atualize o `CHANGELOG.md` sob a tag `[Unreleased]` ou a versão atual antes de cada commit que altere o comportamento ou estrutura do sistema.
-- **Sincronização de Documentação:** Se a arquitetura, dívida técnica ou funcionalidades implementadas mudarem, é OBRIGATÓRIO atualizar os arquivos correspondentes em `docs/current-state/` e `docs/generated/`.
-- **Git Commit:** Adicione apenas os arquivos específicos modificados para a tarefa, incluindo as atualizações de documentação. Use Conventional Commits em inglês. NÃO faça push para o remoto, a menos que solicitado explicitamente.
+## 4. Checklist de Finalização (Checklist)
+Antes de concluir qualquer tarefa:
+- [ ] O Admin ainda consegue acessar `/admin/dashboard`?
+- [ ] As políticas RLS foram testadas contra vazamento de tenant?
+- [ ] Nenhum IP ou dado sensível está sendo logado/persistido em texto puro?
+- [ ] O `CHANGELOG.md` foi atualizado?
+- [ ] `npm run build` passou sem erros de tipo ou cache?
 
-## 3. Estratégia de Uso de Ferramentas
-- **Edições Cirúrgicas:** Use `replace` para edições direcionadas. Garanta que `old_string` corresponda exatamente.
-- **Eficiência de Leitura:** Evite ler arquivos inteiros se apenas uma seção específica for necessária (use `start_line` e `end_line`).
-- **Paralelismo:** Execute ferramentas de leitura/busca independentes simultaneamente para economizar turnos.
-- **Sub-agentes:** Use sub-agentes para tarefas repetitivas ou de alto volume para manter o histórico da sessão limpo.
-
-## 4. Áreas Protegidas e Restrições Arquiteturais
-- **Modificadores de Banco de Dados:** Não execute scripts bash arbitrários que modifiquem esquemas de banco de dados sem verificar `docs/ai/rules/database-rules.md`. Use `npm run supabase:migration`.
-- **Guarda de Segurança do DB:** SEMPRE use os comandos prefixados com `npm run` para Supabase (ex: `npm run supabase:reset`) para disparar o script de proteção (`scripts/db-safety.sh`).
-- **Recursão RLS:** NUNCA escreva políticas RLS que consultem `profiles` diretamente. SEMPRE use a função security definer `is_admin()` ou `is_super_admin()` para evitar loops infinitos (Erro 500).
-- **Bypass de Moderação:** Admins (`role = 'admin'`) DEVEM ignorar todos os bloqueios de moderação. Esta lógica está centralizada em `src/middleware.ts` e na camada de banco de dados.
-- **Visibilidade Pública:** SEMPRE filtre itens com `is_frozen = true` em consultas públicas e políticas RLS públicas.
-- **Integridade de Slugs:** Qualquer atualização de slug deve ser validada via `is_slug_available` e verificar rotas reservadas do sistema. Slugs devem ser normalizados para minúsculas.
-- **Renderização OG:** Tenha cuidado ao editar `src/app/opengraph-image.tsx`. Ele roda no runtime Edge e possui limitações estritas (sem bibliotecas pesadas, sem acesso ao FS local).
-
-## 5. Verificação e Sincronização Final (Checklist)
-Antes de considerar uma tarefa como concluída, verifique:
-- [ ] O Admin ainda consegue acessar `/admin/dashboard` (se houve mudança em auth/middleware)?
-- [ ] `npm run lint`, `npm run build` e `npm run test` passam sem erros?
-- [ ] O `CHANGELOG.md` foi atualizado com as mudanças?
-- [ ] Os documentos em `docs/current-state/` refletem o novo estado (funcionalidades, bugs, dívida)?
-- [ ] Se houve mudança arquitetural, `docs/ARCHITECTURE.md` ou ADRs foram atualizados?
-- [ ] Empresas com `is_frozen` continuam inacessíveis via rotas públicas?
-
-## 6. Melhores Práticas Operacionais do Gemini
-- **Estratégia de Commit Isolado:** Comite as mudanças em lotes pequenos e lógicos.
-- **Evolução Incremental:** Não realize reescritas amplas. Evolua a arquitetura incrementalmente.
-- **Disciplina de Migração Segura:** Sempre valide migrações localmente com `npm run supabase:reset` antes de prosseguir.
-- **Segurança em Produção:** Nunca use `--force` or flags destrutivas similares em ambientes remotos.
+## 5. Estratégia de Commit
+- **Conventional Commits** em Inglês.
+- Comites atômicos (não misture fix com refactor).
+- Nunca faça push para o remoto sem solicitação.

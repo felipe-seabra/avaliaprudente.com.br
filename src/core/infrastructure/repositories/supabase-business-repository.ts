@@ -119,6 +119,13 @@ export class BusinessRepository {
       .single()
 
     if (error) throw error
+
+    // Note: We use fetch to a server action or API route for audit logging if client-side,
+    // or just let the database handle audit logs if it's done via database triggers.
+    // In our case, since this repository is used client-side and server-side,
+    // we should make sure we're logging only when we can, or rely on a wrapper.
+    // Given the task is about security boundaries, the audit log should ideally be server-side.
+    // We'll leave the repo as-is and rely on the UI/API to log or create a trigger.
     return data
   }
 

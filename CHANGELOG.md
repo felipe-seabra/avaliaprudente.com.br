@@ -4,6 +4,78 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **Production-Grade CI/CD Pipeline (Hardened):**
+  - **Clean GitHub Check Names:** Refactored the workflow to produce professional, non-redundant check names (Install, Lint, Typecheck, Tests, Build, Security Audit) compatible with GitHub Rulesets.
+  - **Dependency Resilience:** Hardened all CI jobs to independently and safely install dependencies using `npm ci` with optimized global caching.
+  - **Security Audit Integration:** Integrated automated security auditing into the CI flow, configured to fail only on high or critical vulnerabilities.
+  - **Stability & Performance:** Implemented concurrency controls to cancel redundant runs and ensured minimal GITHUB_TOKEN permissions (`contents: read`).
+  - **Validated Edge Compatibility:** Verified that the middleware and security headers continue to compile correctly for the Edge Runtime during the CI build phase.
+
+- **AI & Security Governance Hardening:**
+  - **Operational AI Guides:** Updated `AGENTS.md`, `GPT.md`, `GEMINI.md`, and `CODEX.md` to reflect the current hardened platform architecture.
+  - **Shared AI Context:** Centralized security rules, trust boundaries, and operational guardrails in `docs/ai/shared-context.md`.
+  - **Security Architecture Reference:** Created `docs/SECURITY_ARCHITECTURE.md` as the technical source of truth for platform defense layers.
+  - **Security Guardrails:** Added `docs/SECURITY_GUARDRAILS.md` with explicit "Do/Don't" rules for developers and AI agents.
+  - **Architecture Governance:** Integrated AI governance into the primary `docs/ARCHITECTURE.md`.
+  - **Enforced Rules:** Documented mandatory rules for SSR cache isolation, Redis-based rate limiting, privacy-safe fingerprinting, and sudo mode awareness.
+
+- **Legal & Compliance Modernization:**
+  - **Production-Grade Legal Documents:** Rewrote Privacy Policy and Terms of Service with specific SaaS, LGPD, and OAuth compliance language.
+  - **OAuth Transparency:** Added detailed disclosures regarding Google OAuth data usage, purposes, and revocation procedures.
+  - **Operational Disclosures:** Integrated transparent explanations for antifraud rate limiting, security logging, and privacy-safe fingerprinting.
+  - **UGC Responsibility:** Clarified boundaries regarding User-Generated Content and the platform's role as a routing infrastructure (not a direct publisher to Google).
+  - **LGPD Rights:** Explicitly outlined user rights and data retention principles in alignment with Brazilian legislation.
+  - **SSR & SEO Optimized:** Ensured legal pages are fully static, accessible, and correctly indexed with proper metadata.
+- **Full Platform Observability & Security Monitoring:**
+  - **Structured JSON Logging:** Implemented a new isomorphic `Logger` (`src/lib/logger.ts`) for Edge and Server-side structured logging.
+  - **Middleware Security Visibility:** Added real-time logging for Rate Limit (429) and CSRF (403) violations.
+  - **Sudo Mode Auditing:** Instrumented Sudo elevation and verification flows with structured security events.
+  - **Request Correlation:** Automated injection of `requestId`, `path`, and `fingerprint` into all system logs.
+  - **Incident Readiness:** Integrated `error-handler` with the new logger to categorize and track critical failures with appropriate severity.
+  - **Webhook Observability:** Hardened the Stripe webhook handler with structured tracking for event lifecycles and signature failures.
+  - **Hybrid Audit Trail:** Critical security violations are now mirrored to both JSON logs (operational) and the database `audit_logs` (tamper-resistant governance).
+
+### Added
+- **Provider-Aware Sudo Mode:****
+  - **OAuth Re-authentication:** Enabled Google OAuth users to complete privileged operations via secure provider-side re-authentication (`prompt=login`).
+  - **Provider Detection:** Automated detection of the current user's auth provider to show context-relevant sudo options.
+  - **Security Hardening:** Maintained 15-minute elevation window while allowing non-password users to fulfill security requirements without compromising UX.
+- **Privileged Operation Security (Sudo Mode):**
+  - **Sudo Session Management:** Implemented an encrypted `sudo_session` token using Web Crypto API to elevate privileges temporarily.
+  - **Sudo Modal:** Added a reusable `<SudoDialog />` and `useSudo` hook to enforce re-authentication before sensitive operations.
+  - **Secured Actions:** Business deletion and account deactivation now require a recent password verification.
+- **Audit Logging Foundation:**
+  - **`audit_logs` Table:** Added a tamper-resistant database table for tracking sensitive operations.
+  - **Database Triggers:** Implemented automatic audit triggers for `business_deleted` and `account_deactivation`.
+  - **Service Logger:** Added a server-side `logAuditEvent` utility using the `service_role` key to securely capture events (e.g. profile updates, billing actions).
+- **Billing Security Boundaries:**
+  - **Service Abstraction:** Created `BillingService` to act as an isolated boundary for future payment gateway integrations.
+  - **Secure Webhooks:** Implemented a structured `POST /api/webhooks/billing` handler that enforces cryptographic signature validation.
+- **Session Security & CSRF Hardening:**
+  - **CSRF Protection:** Implemented robust `Origin` vs `Host` validation in middleware for all state-changing API Route Handlers.
+  - **Security Headers:** Added comprehensive headers including a strict Content Security Policy (CSP), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, and `Referrer-Policy` to the Next.js middleware.
+  - **Webhook Trust Boundaries:** Established isolated routing for external webhooks (e.g., Stripe) with explicit bypasses for CSRF, requiring cryptographic signature validation instead.
+  - **Session Hardening:** Explicitly enforced `Secure` and `SameSite=Lax` configurations for all Supabase SSR cookies to protect authentication flows.
+- **RLS Hardening & Anonymous Insert Protection:**
+  - **Revoked Public Inserts:** Revoked `INSERT` grants on `reviews` and `analytics_events` for `anon` and `authenticated` roles.
+  - **Trusted Write Boundaries:** Enforced that all database writes for these tables MUST go through Next.js API Routes using the `service_role` key.
+  - **Privacy Hardening:** Revoked `SELECT` access on `analytics_events` for anonymous users to prevent raw data exposure.
+  - **Admin & Owner Maintenance:** Preserved `UPDATE` and `DELETE` grants for authenticated users to allow legitimate review management via the API.
+  - **RLS Defense-in-Depth:** Dropped overly permissive "Anyone can insert" policies as a secondary security layer.
+- **Distributed Rate Limiting (Edge Compatible):**
+  - **Upstash Redis Integration:** Replaced the ineffective in-memory middleware rate limiter with a distributed solution using `@upstash/ratelimit`.
+  - **Multi-Tier Protection:** Implemented specialized limits for `global` traffic, `api` endpoints, and `auth` (login/register) flows.
+  - **Edge Runtime Hardening:** Optimized for Vercel Edge Runtime with HTTP-based Redis connectivity.
+  - **Observability:** Added `X-RateLimit-*` and `Retry-After` headers to all responses for transparent abuse prevention.
+  - **Development Fallback:** Maintained a local in-memory fallback for development environments to ensure "zero-config" startup for new contributors.
+- **Privacy Hardening & LGPD Compliance (Fingerprinting):**
+  - **Cryptographic Pepper Strategy:** Implemented a non-reversible hashing mechanism using a secure server-side pepper to prevent IP reverse-engineering.
+  - **Ephemeral Rotation:** Introduced daily and weekly rotation for fingerprints, ensuring they do not become permanent identifiers.
+  - **User Agent Sanitization:** Implemented a sanitization layer for analytics that extracts only high-level browser/OS signals, minimizing unique data collection.
+  - **Zero Raw PII Persistence:** Enforced a strict policy of never persisting raw IP addresses or User Agents in the database or distributed cache.
+  - **Privacy-Safe Rate Limiting:** Updated the middleware to use hashed identifiers, protecting user identity even in transient security stores.
+
 ### Changed
 - **Compliance & Transparency Refactor:** Updated homepage and product copy to accurately reflect platform functionality and adhere to external platform policies.
   - **Accurate Flow Description:** Clarified that positive experiences are redirected to external platforms (like Google) while negative experiences remain internal, ensuring transparency for businesses and consumers.

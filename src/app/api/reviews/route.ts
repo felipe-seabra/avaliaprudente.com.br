@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
-import crypto from 'crypto'
 import { z } from 'zod'
+import { generatePrivacyFingerprint } from '@/lib/privacy'
 import { PublicScopes } from '@/core/infrastructure/repositories/public-scopes'
 import { SupabaseClient } from '@supabase/supabase-js'
 
@@ -78,12 +78,9 @@ export async function POST(request: Request) {
     const forwardedFor = headerList.get('x-forwarded-for')
     const clientIp = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
     
-    // 2. Generate a trusted server-side fingerprint based on IP + User Agent
+    // 2. Generate a trusted server-side fingerprint based on IP + User Agent (Weekly rotation)
     const userAgent = headerList.get('user-agent') || ''
-    const serverFingerprint = crypto
-      .createHash('sha256')
-      .update(`${clientIp}-${userAgent}`)
-      .digest('hex')
+    const serverFingerprint = await generatePrivacyFingerprint(clientIp, userAgent, 'weekly')
 
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')

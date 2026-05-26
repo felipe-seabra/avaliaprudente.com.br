@@ -31,6 +31,20 @@ The platform employs a hybrid architecture to balance SEO, performance, and inte
   - A dedicated `CrawlerComplianceSection` provides an explicit platform description above the fold in the initial SSR payload.
 - **Sitemap & Robots:** Dynamically generated using `APP_CONFIG.url` to maintain 100% consistency with the canonical domain.
 
+### 4. CI/CD & Branch Protection Strategy
+The platform enforces a high-trust development lifecycle through automated guardrails:
+
+- **CI Pipeline (GitHub Actions):** 
+  - Every Pull Request and push to `main` triggers a multi-stage validation workflow.
+  - **Clean & Stable Checks:** Produces professional, stable check names (Install, Lint, Typecheck, Tests, Build, Security Audit) that map 1:1 to required status checks in GitHub Rulesets.
+  - **Security First:** Minimal permissions (`contents: read`) and automated high-severity vulnerability auditing (`npm audit`).
+  - **Strict Quality:** Zero-tolerance for Lint errors, Type mismatches, or failing Tests.
+  - **Build Verification:** Mandatory production build simulation to ensure Edge compatibility and compilation success.
+  - **Performance Optimized:** Uses `npm ci` with dependency caching and concurrency cancellation to maintain a fast feedback loop.
+- **Branch Protection (GitHub Rulesets):**
+  - **Required Status Checks:** Merging into `main` is blocked unless all clean CI jobs pass.
+  - **Linear History:** Forced rebase or squash to maintain a clean and traceable commit log.
+
 ## Layers
 
 ### 1. Domain (`src/core/domain`)
@@ -125,7 +139,17 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - **Throttling:** Enforced via `tr_enforce_review_abuse_protection` trigger.
 - **Cooldowns:** 60-minute window per business; 10-minute window for identical content.
 
+### Review Abuse Prevention System
+...
+### Observability & Incident Readiness
+- **Structured Logging:** Centralized `Logger` utility using JSON output for seamless ingestion by Vercel Logs, Datadog, or CloudWatch.
+- **Security Event Model:** Standardized events for Rate Limiting, CSRF, Auth Anomaly, and Sudo elevation.
+- **Privacy-Safe Telemetry:** Fingerprinting using cryptographic peppers to track sessions without persisting raw PII.
+- **Request Tracing:** Correlation IDs injected at Middleware to trace requests through the entire stack.
+- **Incident Response:** Standardized error normalization (`parseError`) with severity-aware logging.
+
 ### Analytics Anti-Inflation System
+...
 - **Deduplication:** Prevents metric manipulation via rapid refreshes or click spam.
 - **Trigger-based Throttling:** `tr_enforce_analytics_deduplication` silently drops duplicate events.
 - **Cooldown Window:** 15 minutes per business/session/event-type.
@@ -178,6 +202,44 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
   2. **Database Views:** High-level abstraction for public queries.
   3. **Application Scopes:** Code-level consistency for repositories and use cases.
 
+### Trusted Write Boundaries (RLS Hardening)
+- **Goal:** Prevent direct database manipulation and ensure all writes are validated by server-side logic.
+- **Restricted Tables:** `reviews` and `analytics_events` have all direct `INSERT` permissions revoked for `anon` and `authenticated` roles.
+- **Enforcement:** All writes to these tables MUST go through Next.js API Routes (e.g., `/api/reviews`).
+- **Authorization:** API Routes perform validation and then use the `service_role` key to perform the database write, bypassing restricted RLS policies safely.
+- **Benefits:** Prevents automated spam, protects PII integrity, and ensures that abuse-prevention triggers (fingerprinting, cooldowns) cannot be bypassed by direct PostgREST calls.
+
+### Distributed Rate Limiting (Abuse Protection)
+- **Architecture:** Leveraging Upstash Redis (Serverless SDK) within Next.js Middleware.
+- **Why Upstash:** Designed for Edge Runtimes, offering sub-millisecond global latency and HTTP-based connectivity that avoids the overhead of persistent TCP connections in serverless environments.
+- **Tiers:**
+  - `global`: Default limit for general browsing (100 requests per minute).
+  - `api`: Stricter limits for data mutation endpoints (30 requests per 10 seconds).
+  - `auth`: High-security limits for Login, Register, and Password Recovery to prevent brute-force attacks (5 attempts per minute).
+- **Observability:** Injects standardized `X-RateLimit-*` headers into all responses, allowing clients and administrators to monitor usage and handle throttling gracefully.
+- **Resilience:** Includes a secure in-memory fallback for local development, ensuring no external dependencies are required for standard development workflows.
+
+### Privacy Engineering (LGPD Compliance)
+- **Goal:** Protect user identity while maintaining effective anti-fraud and analytics capabilities.
+- **Non-Reversible Fingerprinting:** All server-side fingerprints are generated using SHA-256 combined with a high-entropy server-side `pepper`. This prevents "rainbow table" attacks where common IPs could be reverse-engineered from their hashes.
+- **Ephemeral Identifiers:** Fingerprints are rotated automatically using a daily or weekly seed. This ensures that an anonymous user cannot be tracked as a permanent identifier across long periods, adhering to the "Right to be Forgotten" and data minimization principles.
+- **Sanitized Analytics:** User Agents are stripped of unique build versions and specific identifiers before storage. Only general signals (Browser Name, OS) are preserved for legitimate business analytics.
+- **Zero Raw PII Policy:** The system is architected to never persist raw IP addresses. Rate limiting and anti-fraud systems operate exclusively on hashed, anonymous identifiers.
+
+### Middleware Security & Trust Boundaries
+- **CSRF Protection:** State-changing requests to API Route Handlers (POST, PUT, PATCH, DELETE) undergo strict `Origin` versus `Host` validation to prevent Cross-Site Request Forgery.
+- **Security Headers:** A strict Content Security Policy (CSP), along with `X-Frame-Options` and `X-Content-Type-Options`, is injected globally into all Next.js responses, preventing XSS and clickjacking.
+- **Session Hardening:** All Supabase SSR cookies enforce `Secure` (in production) and `SameSite=Lax` parameters to prevent session leaks and maintain OAuth integrity.
+- **Webhook Isolation:** Payment and external webhook routes (e.g., `/api/webhooks/billing`) are explicitly bypassed from CSRF origin checks but require cryptographic signature validation before trusting any payloads.
+
+### Privileged Operations & Audit
+- **Sudo Mode:** Highly sensitive operations (e.g., account deactivation, business deletion) require recent identity verification (Sudo Mode).
+  - **Provider-Aware:** Supports traditional password confirmation and secure OAuth re-authentication.
+  - **OAuth Re-auth:** For social auth users, Sudo triggers a fresh login flow with the provider (e.g., `prompt=login` for Google) to ensure recent authentication.
+  - **Sudo Token:** A short-lived, cryptographically signed token (`sudo_session`) or a fresh `last_sign_in_at` timestamp (within 15 minutes) is used to manage this elevated privilege window.
+- **Audit Logging:** Tamper-resistant audit trails (`audit_logs`) are maintained for all privileged actions, combining database triggers (as the final source of truth) and API-level logging (for user intent and contextual metadata).
+- **Billing Security:** Billing logic is abstracted via `BillingService`, isolating webhook handlers and customer portal sessions from unauthorized roles.
+
 ### Cache Invalidation & Consistency Strategy
 - **Goal:** Ensure immediate propagation of moderation actions while preserving the performance benefits of ISR.
 - **Stable Tags:** Programmatic invalidation via `revalidateTag` using stable patterns:
@@ -205,6 +267,13 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
   - **Visual Realism:** Uses advanced CSS techniques (shadow casting, depth-of-field blur, haptic vibration simulation) to bridge the gap between digital and physical interaction.
   - **Interactive Replay:** Animations are state-synced to trigger on viewport entry and user hover, ensuring accessibility and engagement.
 
+### Legal Compliance & Privacy
+- **LGPD Alignment:** Data handling is architected around "Privacy by Design" and "Data Minimization". Endpoints and API responses only expose the minimum required dataset for the requested operation.
+- **OAuth Transparency:** Google OAuth integration strictly uses basic profile scopes (`email`, `profile`). Legal documents provide clear guidance on how users can revoke access via their Google account settings.
+- **UGC Responsibility:** The platform acts as a routing infrastructure. Public pages and legal documents clearly distinguish between internal feedback (stored) and external redirection (e.g., Google Review Gate), where the platform is not a direct publisher.
+- **Anti-Abuse Transparency:** Operational systems explicitly disclose the use of technical fingerprints, rate limiting, and security logging as essential infrastructure protections required for platform integrity.
+- **Account Governance:** Secure "Soft Delete" flows ensure users can exercise their right to be forgotten while maintaining necessary audit trails for financial, security, and moderation compliance.
+
 ## Maintainability & Folder Structure
 
 ### Important Routes
@@ -219,3 +288,22 @@ Used in `src/core/application/use-cases/get-public-rankings.ts` to provide fair 
 - `src/lib/supabase/middleware.ts`: Session and account status synchronization.
 - `scripts/db-safety.sh`: Database operations safety guard.
 - `scripts/docker-maintenance.sh`: Local environment cleanup.
+
+## AI & Security Governance
+
+O projeto utiliza um modelo de **Governança AI-First** para garantir que o desenvolvimento assistido por inteligência artificial mantenha a integridade da plataforma.
+
+### 1. Instruções Operacionais (Operational Guides)
+- **`docs/ai/shared-context.md`:** Regras universais de segurança, limites de confiança e fluxo de trabalho mandatório.
+- **`docs/ai/agents.md`:** Definição de personas (Architect, Implementer, Security-Reviewer) e suas restrições.
+- **`docs/ai/GEMINI.md` / `CODEX.md` / `GPT.md`:** Manuais específicos para cada runtime de IA, focando em prevenção de regressões e eficiência de contexto.
+
+### 2. Guardrails de Segurança
+- **Trust Boundaries:** Todas as IAs devem validar limites de confiança (Zero-Trust no Cliente).
+- **Protected Areas:** Mudanças em `middleware.ts`, migrações SQL e lógica de faturamento exigem revisão de segurança manual.
+- **Validation Pipeline:** Nenhuma mudança é considerada completa sem passar por `lint`, `build` e `test`.
+
+### 3. Documentação Referencial
+- **`docs/SECURITY_ARCHITECTURE.md`:** Detalhamento técnico das camadas de defesa.
+- **`docs/SECURITY_GUARDRAILS.md`:** Checklist rápido de boas práticas e padrões proibidos.
+- **`docs/ai/rules/*.md`:** Regras granulares para backend, frontend e banco de dados.
