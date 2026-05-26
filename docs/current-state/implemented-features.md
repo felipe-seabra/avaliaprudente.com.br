@@ -94,7 +94,13 @@
 - [x] Safeguards against schema drift and missing profiles.
 
 ## Payment Readiness & Advanced Security (Phase 10)
-- [x] **Sudo Mode:** Sensitive mutations (e.g., deleting a business, deactivating an account) require a recent identity confirmation. Supports both password verification and OAuth re-authentication (Google), utilizing ephemeral signed tokens or fresh sign-in validation.
-- [x] **Audit Logging:** Tamper-resistant `audit_logs` foundation via `service_role` APIs and robust PostgreSQL triggers for critical `DELETE` and `UPDATE` operations.
-- [x] **Billing Abstraction:** `BillingService` encapsulates future payment gateway operations, establishing clear trust boundaries before Stripe integration.
+...
 - [x] **Webhook Security:** Dedicated placeholder endpoints configured to enforce cryptographic signature validation, bypassing CSRF only for fully authenticated server-to-server webhook events.
+
+## Infrastructure & CI/CD
+- [x] **Professional CI Pipeline:** Automated GitHub Actions workflow with granular jobs (Install, Audit, Lint, Typecheck, Test, Build).
+- [x] **Branch Protection Readiness:** Pipeline compatible with GitHub Rulesets to enforce quality and security before merging.
+- [x] **Automated Security Audit:** Integration of `npm audit` with high-severity failure triggers in the CI flow.
+- [x] **Strict Typecheck Enforcement:** Automated validation of TypeScript types to prevent compilation regressions.
+- [x] **Least Privilege CI:** GitHub Actions configured with minimal permissions (`contents: read`).
+- [x] **Concurrency & Performance:** Automated cancellation of redundant runs and efficient dependency caching.

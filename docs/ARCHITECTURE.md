@@ -31,6 +31,19 @@ The platform employs a hybrid architecture to balance SEO, performance, and inte
   - A dedicated `CrawlerComplianceSection` provides an explicit platform description above the fold in the initial SSR payload.
 - **Sitemap & Robots:** Dynamically generated using `APP_CONFIG.url` to maintain 100% consistency with the canonical domain.
 
+### 4. CI/CD & Branch Protection Strategy
+The platform enforces a high-trust development lifecycle through automated guardrails:
+
+- **CI Pipeline (GitHub Actions):** 
+  - Every Pull Request and push to `main` triggers a multi-stage validation workflow.
+  - **Security First:** Minimal permissions (`contents: read`) and automated vulnerability auditing (`npm audit`).
+  - **Strict Quality:** Zero-tolerance for Lint errors, Type mismatches, or failing Tests.
+  - **Build Verification:** Mandatory production build simulation to ensure Edge compatibility and compilation success.
+- **Branch Protection (GitHub Rulesets):**
+  - **Required Status Checks:** Merging into `main` is blocked unless all CI jobs pass.
+  - **Linear History:** Forced rebase or squash to maintain a clean and traceable commit log.
+  - **Review Mandate:** (Configured in GitHub) Ensures code is never merged without peer or lead oversight.
+
 ## Layers
 
 ### 1. Domain (`src/core/domain`)
