@@ -48,7 +48,7 @@ export default async function BillingPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {plans.map((plan) => {
-          const isCurrentPlan = subscription?.plan_id === plan.id
+          const isCurrentPlan = !isSuperAdmin && subscription?.plan_id === plan.id
           const config = SUBSCRIPTION_PLANS[plan.slug]
           
           return (
@@ -96,7 +96,7 @@ export default async function BillingPage() {
                   variant={isCurrentPlan ? 'outline' : 'default'}
                   disabled={isCurrentPlan || (plan.slug !== 'free' && !isSuperAdmin)}
                 >
-                  {isCurrentPlan ? 'Plano Atual' : (plan.slug === 'free' ? 'Selecionar' : 'Em Breve')}
+                  {isCurrentPlan ? 'Plano Atual' : (isSuperAdmin ? 'Incluído para Admin' : (plan.slug === 'free' ? 'Selecionar' : 'Em Breve'))}
                 </Button>
               </CardFooter>
             </Card>

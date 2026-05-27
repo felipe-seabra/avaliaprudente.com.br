@@ -49,6 +49,8 @@ export async function adminAssignSubscription(
       assigned_reason: reason,
       source: 'admin',
       updated_at: new Date().toISOString(),
+    }, {
+      onConflict: 'user_id'
     })
 
   if (error) {
