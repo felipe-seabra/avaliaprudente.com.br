@@ -3,7 +3,7 @@
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Zap, AlertTriangle } from 'lucide-react'
+import { Sparkles, Zap, AlertTriangle, ShieldCheck } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -27,10 +27,34 @@ export function PlanBadge({
   showUpgradeAction = true,
   className 
 }: PlanBadgeProps) {
-  const { subscription, isLoading } = useSubscription()
+  const { subscription, isSuperAdmin, isLoading } = useSubscription()
 
   if (isLoading) {
     return <Badge variant="outline" className="animate-pulse">Carregando...</Badge>
+  }
+
+  if (isSuperAdmin) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger render={
+            <Badge 
+              variant="default" 
+              className={`cursor-default gap-1.5 px-3 py-1 font-black uppercase tracking-widest text-[10px] bg-primary/10 text-primary border-primary/20 shadow-sm ${className}`}
+            >
+              {showIcon && <ShieldCheck className="h-3 w-3" />}
+              Super Admin
+            </Badge>
+          } />
+          <TooltipContent>
+            <div className="text-xs space-y-1">
+              <p className="font-bold">Acesso Ilimitado</p>
+              <p>Como Super Administrador, você possui privilégios totais na plataforma.</p>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
   }
 
   if (!subscription) {
