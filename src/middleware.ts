@@ -4,13 +4,13 @@ import { APP_CONFIG } from '@/lib/constants'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { generatePrivacyFingerprint } from '@/lib/privacy'
 import { validateCSRF, generateSecurityHeaders } from '@/lib/security'
+import { getClientIp } from '@/lib/request-utils'
 import { logger } from '@/lib/logger'
 import { logAuditEvent } from '@/lib/audit-logger'
 
 export async function middleware(request: NextRequest) {
   // 1. Precise IP Extraction (Safe X-Forwarded-For handling)
-  const forwardedFor = request.headers.get('x-forwarded-for')
-  const ip = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
+  const ip = getClientIp(request)
   const userAgent = request.headers.get('user-agent') || ''
   
   // 2. Generate Privacy-safe identifier (Daily rotation)
