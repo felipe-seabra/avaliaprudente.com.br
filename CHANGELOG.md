@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.1] - 2026-07-20
+
+### Fixed
+- **Public Business Page Data Fetching:** Switched the data-fetching client in `fetchPublicBusinessData` to use `createAdminClient` to query the database using the service role key. This bypasses select privilege restrictions on the `profiles` table for anonymous public users, resolving the 404 / "Página Indisponível" rendering errors while preserving public/frozen/unpublished page constraints in the application layer.
+
 ## [0.21.0] - 2026-05-28
 
 ### Added

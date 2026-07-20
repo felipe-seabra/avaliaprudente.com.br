@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { createClient as createAnonymousClient } from '@/lib/supabase/client'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { BusinessPageClient } from './business-page-client'
@@ -38,7 +38,8 @@ interface BusinessData {
  * This is safe to be used inside unstable_cache.
  */
 async function fetchPublicBusinessData(slug: string, pageNumber: number = 1) {
-  const supabase = createAnonymousClient()
+  console.log('[DEBUG FLOW 2] fetchPublicBusinessData called with slug:', slug, 'pageNumber:', pageNumber)
+  const supabase = createAdminClient()
   const pageRepo = new BusinessPageRepository(supabase)
   const linkRepo = new PageLinkRepository(supabase)
   const reviewRepo = new ReviewRepository(supabase)
@@ -47,15 +48,21 @@ async function fetchPublicBusinessData(slug: string, pageNumber: number = 1) {
   const offset = (pageNumber - 1) * limit
 
   // Resolve Business Page by slug
+  console.log('[DEBUG FLOW 3] Calling pageRepo.getBySlug with slug:', slug)
   const page = await pageRepo.getBySlug(slug) as PageWithBusiness | null
+  console.log('[DEBUG FLOW 5] pageRepo.getBySlug returned page:', page)
 
-  if (!page) return null
+  if (!page) {
+    console.log('[DEBUG FLOW 5a] pageRepo.getBySlug returned null, fetchPublicBusinessData returning null')
+    return null
+  }
 
   const [links, reviewsResponse] = await Promise.all([
     linkRepo.getByPageId(page.id),
     reviewRepo.getByBusinessId(page.business_id, limit, offset)
   ])
 
+  console.log('[DEBUG FLOW 5b] fetchPublicBusinessData successfully fetched page and links/reviews')
   return { 
     page, 
     links, 
@@ -112,9 +119,12 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page) : 1
   
   // Fetch public data (cached)
+  console.log('[DEBUG METADATA] generateMetadata calling getBusinessData with slug:', slug, 'pageParam:', pageParam)
   const data = await getBusinessData(slug, pageParam)
+  console.log('[DEBUG METADATA] generateMetadata getBusinessData returned data:', data)
 
   if (!data) {
+    console.log('[DEBUG METADATA] generateMetadata no data found for slug:', slug)
     return {
       title: 'Página Indisponível | Avalia Prudente',
     }
@@ -172,13 +182,17 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default async function BusinessPublicPage({ params, searchParams }: Props) {
   const { slug } = await params
+  console.log('[DEBUG FLOW 1] BusinessPublicPage entry. Slug from params:', slug)
   const sParams = await searchParams
   const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page) : 1
   
   // 1. Fetch public data (cached)
+  console.log('[DEBUG FLOW 1a] Calling getBusinessData with slug:', slug, 'pageParam:', pageParam)
   const publicData = await getBusinessData(slug, pageParam)
+  console.log('[DEBUG FLOW 6] getBusinessData returned publicData:', publicData)
 
   if (!publicData) {
+    console.log('[DEBUG FLOW 6a] publicData is null, calling notFound()')
     notFound()
   }
 
