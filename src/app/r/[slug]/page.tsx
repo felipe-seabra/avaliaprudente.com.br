@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { createClient as createAnonymousClient } from '@/lib/supabase/client'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { BusinessPageClient } from './business-page-client'
@@ -38,7 +38,7 @@ interface BusinessData {
  * This is safe to be used inside unstable_cache.
  */
 async function fetchPublicBusinessData(slug: string, pageNumber: number = 1) {
-  const supabase = createAnonymousClient()
+  const supabase = createAdminClient()
   const pageRepo = new BusinessPageRepository(supabase)
   const linkRepo = new PageLinkRepository(supabase)
   const reviewRepo = new ReviewRepository(supabase)

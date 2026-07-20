@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { generatePrivacyFingerprint } from '@/lib/privacy'
 import { PublicScopes } from '@/core/infrastructure/repositories/public-scopes'
 import { SupabaseClient } from '@supabase/supabase-js'
+import { getClientIp } from '@/lib/request-utils'
 
 const ReviewSubmissionSchema = z.object({
   business_id: z.string().uuid(),
@@ -75,8 +76,7 @@ export async function POST(request: Request) {
     const headerList = await headers()
     
     // 1. Extract client IP for trusted fingerprinting
-    const forwardedFor = headerList.get('x-forwarded-for')
-    const clientIp = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
+    const clientIp = getClientIp(request)
     
     // 2. Generate a trusted server-side fingerprint based on IP + User Agent (Weekly rotation)
     const userAgent = headerList.get('user-agent') || ''

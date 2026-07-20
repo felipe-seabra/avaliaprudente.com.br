@@ -38,10 +38,12 @@ export class BusinessPageRepository {
   }
 
   async getBySlug(slug: string): Promise<PageWithBusiness | null> {
+    const normalizedSlug = decodeURIComponent(slug).toLowerCase()
+
     // 💡 VIRTUAL DEMO PROFILE
     // This defines the business identity for "/r/demo". 
     // Logo, name and verification status are controlled here.
-    if (slug === 'demo' || slug === 'demonstracao') {
+    if (normalizedSlug === 'demo' || normalizedSlug === 'demonstracao') {
       const demoBusiness = {
         id: '00000000-0000-0000-0000-000000000000',
         name: 'Avalia Prudente Demo',
@@ -69,7 +71,7 @@ export class BusinessPageRepository {
     const { data: business, error: bError } = await this.supabase
       .from('businesses')
       .select('*, is_frozen')
-      .eq('slug', slug)
+      .eq('slug', normalizedSlug)
       .maybeSingle()
 
     if (bError || !business) {

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 import { generatePrivacyFingerprint, sanitizeUserAgent } from '@/lib/privacy'
+import { getClientIp } from '@/lib/request-utils'
 
 // Use service role for trusted server-side insertion
 const supabaseAdmin = createClient(
@@ -18,11 +19,10 @@ const supabaseAdmin = createClient(
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const headerList = await headers()
     
     // 1. Extract client IP for trusted fingerprinting
-    const forwardedFor = headerList.get('x-forwarded-for')
-    const clientIp = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
+    const clientIp = getClientIp(request)
+    const headerList = await headers()
     
     // 2. Generate a trusted server-side fingerprint based on IP + User Agent (Daily rotation)
     const userAgent = headerList.get('user-agent') || ''
