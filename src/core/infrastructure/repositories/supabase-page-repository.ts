@@ -38,10 +38,12 @@ export class BusinessPageRepository {
   }
 
   async getBySlug(slug: string): Promise<PageWithBusiness | null> {
+    const normalizedSlug = decodeURIComponent(slug).toLowerCase()
+
     // 💡 VIRTUAL DEMO PROFILE
     // This defines the business identity for "/r/demo". 
     // Logo, name and verification status are controlled here.
-    if (slug === 'demo' || slug === 'demonstracao') {
+    if (normalizedSlug === 'demo' || normalizedSlug === 'demonstracao') {
       const demoBusiness = {
         id: '00000000-0000-0000-0000-000000000000',
         name: 'Avalia Prudente Demo',
@@ -66,41 +68,29 @@ export class BusinessPageRepository {
     // 2. Resolve business by slug first (Publicly accessible)
     // Note: RLS policies will automatically filter frozen businesses for anonymous users.
     // We fetch everything here and let the Page Component decide based on auth status.
-    console.log('[DEBUG FLOW 4] getBySlug executing Supabase query: SELECT *, is_frozen FROM businesses WHERE slug =', slug)
     const { data: business, error: bError } = await this.supabase
       .from('businesses')
       .select('*, is_frozen')
-      .eq('slug', slug)
+      .eq('slug', normalizedSlug)
       .maybeSingle()
 
-    console.log('[DEBUG FLOW 4a] Supabase businesses query returned:', { business, bError })
-
     if (bError || !business) {
-       console.log('[DEBUG FLOW 4b] Query failed or business not found. bError:', bError, 'business:', business)
-       if (bError) console.error({
-         code: bError.code,
-         message: bError.message,
-         details: bError.details,
-         hint: bError.hint
-       })
+       if (bError) console.error('BusinessPageRepo: Error fetching business', bError)
        return null
     }
 
     const businessData = business as unknown as BusinessWithModeration
 
     // 3. Fetch the page for this business
-    console.log('[DEBUG FLOW 4c] Fetching page for business_id:', businessData.id)
-    const { data: page, error: pError } = await this.supabase
+    const { data: page } = await this.supabase
       .from('business_pages')
       .select('*')
       .eq('business_id', businessData.id)
       .maybeSingle()
 
-    console.log('[DEBUG FLOW 4d] Supabase business_pages query returned:', { page, pError })
-
     // 4. Handle newly created businesses without a page entry yet
     if (!page) {
-      const defaultPage = {
+      return {
         id: 'initial-page',
         business_id: businessData.id,
         description: `Bem-vindo à página oficial de ${businessData.name}. Em breve, mais informações e links úteis.`,
@@ -110,13 +100,9 @@ export class BusinessPageRepository {
         updated_at: new Date().toISOString(),
         businesses: businessData
       } as PageWithBusiness
-      console.log('[DEBUG FLOW 4e] No page found, returning defaultPage:', defaultPage)
-      return defaultPage
     }
 
-    const finalPage = { ...page, businesses: businessData } as PageWithBusiness
-    console.log('[DEBUG FLOW 4f] Page found, returning finalPage:', finalPage)
-    return finalPage
+    return { ...page, businesses: businessData } as PageWithBusiness
   }
 
   async create(businessId: string): Promise<BusinessPage> {
