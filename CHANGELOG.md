@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.0] - 2026-07-20
+
+### Fixed
+- **Database Security:** Applied critical RLS (Row Level Security) policy fixes (`20260720184110_fix_business_rls_policies.sql`) to production database, restoring platform stability and securing public and administrative business assets.
+
 ## [0.21.1] - 2026-07-20
 
 ### Fixed
