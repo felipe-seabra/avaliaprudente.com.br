@@ -102,7 +102,7 @@ The project follows a **Clean Architecture** approach with a **Hybrid Rendering 
 ## 💻 Local Development
 
 ### Prerequisites
-- Node.js >= 20.0.0
+- Node.js >= 24.0.0
 - Docker (for local Supabase instance)
 - Supabase CLI
 
