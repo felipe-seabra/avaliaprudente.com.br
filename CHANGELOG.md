@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.0] - 2026-09-03
+
+### Security
+- **SEC-04 Remediation (Protected Business Fields):** Enforced PostgreSQL database-level protection via BEFORE UPDATE trigger (`enforce_business_protected_fields_trigger`) and trigger function (`public.enforce_business_protected_fields()`) on `public.businesses` (`20260903100000_protect_business_privileged_fields.sql`). Prevents unauthorized non-admin users and business owners from directly manipulating privileged fields (`is_verified`, `verification_status`, `verified_at`, `verified_by`, `is_frozen`, `plan_type`) via client-side PostgREST APIs, while preserving administrative operations and legitimate business owner updates to non-protected fields.
+
+
 ## [0.22.0] - 2026-07-20
 
 ### Fixed
