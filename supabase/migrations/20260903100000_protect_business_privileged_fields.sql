@@ -1,6 +1,6 @@
 -- Migration: 20260903100000_protect_business_privileged_fields.sql
 -- Security Remediation: SEC-04 — Protect privileged fields in public.businesses
--- 
+--
 -- Description:
 -- Previously, column-level security was not enforced at the database level for public.businesses.
 -- The RLS policy "Owners can manage their businesses" allowed business owners (auth.uid() = owner_id)

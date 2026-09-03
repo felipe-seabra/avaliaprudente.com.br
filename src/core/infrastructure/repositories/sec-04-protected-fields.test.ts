@@ -360,7 +360,12 @@ describe('SEC-04: Protect Privileged Fields in public.businesses', () => {
       }
 
       const createUpdateHandler = (payload: Partial<Business>) => {
-        const applyUpdate = async () => {
+        type UpdateResult = {
+          data: Partial<Business> | null
+          error: TriggerError | null
+        }
+
+        const applyUpdate = async (): Promise<UpdateResult> => {
           const { data: userData } = await mockAuth.getUser()
           const currentRole = userData?.user?.user_metadata?.role || 'customer'
           const triggerResult = evaluateProtectedFieldsTrigger(
@@ -376,7 +381,7 @@ describe('SEC-04: Protect Privileged Fields in public.businesses', () => {
           if (!triggerResult.allowed) {
             return {
               data: null,
-              error: triggerResult.error,
+              error: triggerResult.error ?? null,
             }
           }
 
@@ -389,13 +394,13 @@ describe('SEC-04: Protect Privileged Fields in public.businesses', () => {
 
         return {
           then: (
-            resolve?: (value: { data: Partial<Business> | null; error: TriggerError | null }) => unknown,
-            reject?: (reason: unknown) => unknown
+            resolve?: ((value: UpdateResult) => unknown) | null,
+            reject?: ((reason: unknown) => unknown) | null
           ) => applyUpdate().then(resolve, reject),
           eq: () => ({
             then: (
-              resolve?: (value: { data: Partial<Business> | null; error: TriggerError | null }) => unknown,
-              reject?: (reason: unknown) => unknown
+              resolve?: ((value: UpdateResult) => unknown) | null,
+              reject?: ((reason: unknown) => unknown) | null
             ) => applyUpdate().then(resolve, reject),
             select: () => ({
               single: () => applyUpdate(),
