@@ -90,7 +90,9 @@ No dashboard do Supabase Cloud, vá em **Authentication -> URL Configuration**:
 | `NEXT_PUBLIC_APP_URL` | URL base do site (ex: https://www.avaliaprudente.com.br) |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL da API do Supabase de produção |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave pública anon do Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | Chave secreta de serviço (NUNCA expor no cliente) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Chave secreta de serviço do banco (NUNCA expor no cliente; não utilizada para assinar tokens de sessão) |
+| `SUDO_SECRET` | Chave secreta dedicada de assinatura HMAC para Sudo Mode (mínimo 32 caracteres, obrigatória em produção; totalmente independente da SUPABASE_SERVICE_ROLE_KEY) |
+| `FINGERPRINT_PEPPER` | Pepper criptográfico para anonimização LGPD e rate limit (mínimo 32 caracteres, obrigatório em produção) |
 
 ## Operação Real-World
 

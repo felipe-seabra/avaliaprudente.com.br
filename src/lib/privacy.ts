@@ -1,5 +1,42 @@
 import { env } from './env'
 
+// Ephemeral in-memory pepper for non-production environments when FINGERPRINT_PEPPER is not configured
+let devEphemeralPepper: string | null = null
+
+function getDevEphemeralPepper(): string {
+  if (!devEphemeralPepper) {
+    const array = new Uint8Array(32)
+    crypto.getRandomValues(array)
+    devEphemeralPepper = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+  }
+  return devEphemeralPepper
+}
+
+/**
+ * Reset dev ephemeral pepper (for test isolation only)
+ */
+export function resetDevEphemeralPepperForTesting(): void {
+  devEphemeralPepper = null
+}
+
+/**
+ * Resolves the cryptographic pepper for privacy fingerprinting.
+ * - Production: Requires FINGERPRINT_PEPPER (min 16 chars, 32 recommended); throws fatal error if missing
+ * - Dev/Test: Ephemeral cryptographically secure random pepper (never deterministic or hardcoded)
+ */
+export function resolvePrivacyPepper(): string {
+  const configuredPepper = process.env.FINGERPRINT_PEPPER || env.FINGERPRINT_PEPPER
+  if (configuredPepper && configuredPepper.trim().length >= 16) {
+    return configuredPepper.trim()
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('[Privacy] Critical Security Error: FINGERPRINT_PEPPER is required in production.')
+  }
+
+  return getDevEphemeralPepper()
+}
+
 /**
  * Privacy-hardened fingerprinting for anti-fraud and analytics.
  * 
@@ -13,7 +50,7 @@ export async function generatePrivacyFingerprint(
   userAgent: string,
   window: 'daily' | 'weekly' | 'permanent' = 'daily'
 ): Promise<string> {
-  const pepper = env.FINGERPRINT_PEPPER || 'fallback-secure-pepper-for-dev-only'
+  const pepper = resolvePrivacyPepper()
   
   // Create an ephemeral component for the hash based on the current window
   const now = new Date()

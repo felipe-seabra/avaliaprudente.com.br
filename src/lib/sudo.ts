@@ -30,8 +30,50 @@ function base64ToBuffer(base64: string): ArrayBuffer {
   return bytes.buffer
 }
 
+// Ephemeral in-memory key for non-production environments when no secret is configured
+let devEphemeralSecret: string | null = null
+
+function getDevEphemeralSecret(): string {
+  if (!devEphemeralSecret) {
+    const array = new Uint8Array(32)
+    crypto.getRandomValues(array)
+    devEphemeralSecret = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+  }
+  return devEphemeralSecret
+}
+
+/**
+ * Reset dev ephemeral secret (for test isolation only)
+ */
+export function resetDevEphemeralSecretForTesting(): void {
+  devEphemeralSecret = null
+}
+
+/**
+ * Resolves the signing secret for Sudo tokens.
+ * - Production: Requires dedicated SUDO_SECRET (minimum 32 characters); fails closed if missing.
+ * - Development/Test: Uses SUDO_SECRET if configured, otherwise falls back to a cryptographically
+ *   secure ephemeral random key generated in memory per process lifecycle (never hardcoded/deterministic).
+ * - SUPABASE_SERVICE_ROLE_KEY is NEVER used for application Sudo signing.
+ */
+export function resolveSudoSecret(): string {
+  const secret = process.env.SUDO_SECRET || env.SUDO_SECRET
+  if (secret && secret.trim().length >= 32) {
+    return secret.trim()
+  }
+
+  // Fail-closed in production if SUDO_SECRET is missing or insufficient length
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('[Sudo] Critical Security Error: SUDO_SECRET is required in production.')
+  }
+
+  // Non-deterministic ephemeral key for dev/test
+  return getDevEphemeralSecret()
+}
+
 async function getSigningKey() {
-  const secret = env.SUPABASE_SERVICE_ROLE_KEY || 'fallback-secret-for-dev'
+  const secret = resolveSudoSecret()
+
   const encoder = new TextEncoder()
   // Ensure the secret is at least 32 bytes by repeating it if necessary
   let paddedSecret = secret
