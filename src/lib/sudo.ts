@@ -30,8 +30,62 @@ function base64ToBuffer(base64: string): ArrayBuffer {
   return bytes.buffer
 }
 
+// Ephemeral in-memory key for non-production environments when no secret is configured
+let devEphemeralSecret: string | null = null
+
+function getDevEphemeralSecret(): string {
+  if (!devEphemeralSecret) {
+    const array = new Uint8Array(32)
+    crypto.getRandomValues(array)
+    devEphemeralSecret = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+  }
+  return devEphemeralSecret
+}
+
+/**
+ * Reset dev ephemeral secret (for test isolation only)
+ */
+export function resetDevEphemeralSecretForTesting(): void {
+  devEphemeralSecret = null
+}
+
+/**
+ * Resolves the signing secret for Sudo tokens.
+ * - Primary: Dedicated SUDO_SECRET (required in production, min 32 chars)
+ * - Secondary fallback: SUPABASE_SERVICE_ROLE_KEY (non-preferred legacy fallback, logs warning in prod)
+ * - Dev/Test: Ephemeral cryptographically secure random key (never deterministic or hardcoded)
+ * - Production missing: Fails closed by throwing a fatal error
+ */
+export function resolveSudoSecret(): string {
+  // 1. Preferred primary signing secret: dedicated SUDO_SECRET
+  const dedicatedSecret = process.env.SUDO_SECRET || env.SUDO_SECRET
+  if (dedicatedSecret && dedicatedSecret.trim().length >= 32) {
+    return dedicatedSecret.trim()
+  }
+
+  // 2. Non-preferred secondary fallback: SUPABASE_SERVICE_ROLE_KEY
+  const legacySecret = process.env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY
+  if (legacySecret && legacySecret.trim().length > 0) {
+    return legacySecret.trim()
+  }
+
+  // 3. Fail-closed in production if no valid secret is configured
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('[Sudo] Critical Security Error: SUDO_SECRET is required in production.')
+  }
+
+  // 4. Non-deterministic ephemeral key for dev/test
+  return getDevEphemeralSecret()
+}
+
 async function getSigningKey() {
-  const secret = env.SUPABASE_SERVICE_ROLE_KEY || 'fallback-secret-for-dev'
+  const secret = resolveSudoSecret()
+
+  const dedicatedSecret = process.env.SUDO_SECRET || env.SUDO_SECRET
+  if (!dedicatedSecret && process.env.NODE_ENV === 'production') {
+    await logger.warn('[Sudo] Using SUPABASE_SERVICE_ROLE_KEY as fallback for sudo tokens. Please configure dedicated SUDO_SECRET in production.')
+  }
+
   const encoder = new TextEncoder()
   // Ensure the secret is at least 32 bytes by repeating it if necessary
   let paddedSecret = secret

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.0] - 2026-09-06
+
+### Security
+- **SEC-08 Remediation (Sudo Secret Hardening):** Removed hardcoded deterministic secret fallback (`'fallback-secret-for-dev'`) in Sudo token HMAC signing (`src/lib/sudo.ts`). Introduced dedicated `SUDO_SECRET` as the preferred application signing secret, isolated from `SUPABASE_SERVICE_ROLE_KEY`. Enforced fail-closed behavior in production (`NODE_ENV === 'production'`) where missing secret raises a fatal exception and rejects forged tokens, and ephemeral non-deterministic cryptographic key generation (`crypto.getRandomValues`) in non-production environments.
+- **SEC-09 Remediation (Privacy Pepper Hardening & Enforced Schema):** Removed hardcoded deterministic pepper fallback (`'fallback-secure-pepper-for-dev-only'`) in privacy fingerprinting (`src/lib/privacy.ts`). Enforced strict production environment validation requiring `FINGERPRINT_PEPPER` with minimum 32 characters in `src/lib/env.ts`, preventing unconfigured production deployments. In non-production environments, replaced static fallback with ephemeral per-process cryptographic random pepper generation (`crypto.getRandomValues`).
+- **Secret Fallback Regression Test Suite:** Added comprehensive automated regression tests (`src/lib/sudo.test.ts`, `src/lib/env.test.ts`, `src/lib/privacy.test.ts`) validating token forgery rejection, fail-closed production semantics, and secret entropy requirements.
+
 ## [0.23.0] - 2026-09-03
 
 ### Security

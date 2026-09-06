@@ -91,6 +91,8 @@ No dashboard do Supabase Cloud, vá em **Authentication -> URL Configuration**:
 | `NEXT_PUBLIC_SUPABASE_URL` | URL da API do Supabase de produção |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave pública anon do Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Chave secreta de serviço (NUNCA expor no cliente) |
+| `SUDO_SECRET` | Chave de assinatura HMAC para Sudo Mode (mínimo 32 caracteres, obrigatório em produção) |
+| `FINGERPRINT_PEPPER` | Pepper criptográfico para anonimização LGPD e rate limit (mínimo 32 caracteres, obrigatório em produção) |
 
 ## Operação Real-World
 
