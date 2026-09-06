@@ -36,25 +36,37 @@ describe('SEC-08: Sudo Mode Security & Secret Hardening', () => {
   })
 
   describe('resolveSudoSecret', () => {
-    it('should prefer dedicated SUDO_SECRET when configured', () => {
+    it('should resolve dedicated SUDO_SECRET when configured with at least 32 chars', () => {
       const dedicatedSecret = 'dedicated-sudo-secret-32-chars-long-abc123'
       process.env.SUDO_SECRET = dedicatedSecret
-      process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key-should-not-be-preferred'
+      process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key-should-be-ignored'
 
       expect(resolveSudoSecret()).toBe(dedicatedSecret)
     })
 
-    it('should fallback to SUPABASE_SERVICE_ROLE_KEY if SUDO_SECRET is not set', () => {
-      delete process.env.SUDO_SECRET
-      process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-fallback-secret-12345'
-
-      expect(resolveSudoSecret()).toBe('service-role-fallback-secret-12345')
-    })
-
-    it('should fail closed (throw fatal error) in production if neither secret is configured', () => {
+    it('should explicitly verify that SUPABASE_SERVICE_ROLE_KEY alone is insufficient in production', () => {
       vi.stubEnv('NODE_ENV', 'production')
       delete process.env.SUDO_SECRET
-      delete process.env.SUPABASE_SERVICE_ROLE_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-secret-that-must-never-be-used-for-sudo'
+
+      // In production, SUPABASE_SERVICE_ROLE_KEY alone must fail closed
+      expect(() => resolveSudoSecret()).toThrow(/SUDO_SECRET is required in production/)
+    })
+
+    it('should explicitly verify that SUPABASE_SERVICE_ROLE_KEY alone is not used in dev/test (uses ephemeral key)', () => {
+      delete process.env.SUDO_SECRET
+      process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key-present-in-dev'
+
+      const resolved = resolveSudoSecret()
+      // Must not use SUPABASE_SERVICE_ROLE_KEY
+      expect(resolved).not.toBe('service-role-key-present-in-dev')
+      expect(resolved).toHaveLength(64) // 32 random bytes in hex
+    })
+
+    it('should fail closed in production if SUDO_SECRET is less than 32 chars even if SUPABASE_SERVICE_ROLE_KEY is set', () => {
+      vi.stubEnv('NODE_ENV', 'production')
+      process.env.SUDO_SECRET = 'short-secret-under-32-chars'
+      process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key-should-not-be-used'
 
       expect(() => resolveSudoSecret()).toThrow(/SUDO_SECRET is required in production/)
     })
@@ -171,12 +183,12 @@ describe('SEC-08: Sudo Mode Security & Secret Hardening', () => {
       expect(await verifySudoToken(tamperedToken, userId)).toBe(false)
     })
 
-    it('should fail closed and return false if secret resolution throws in production', async () => {
+    it('should fail closed and return false if SUDO_SECRET is missing in production even when SUPABASE_SERVICE_ROLE_KEY is set', async () => {
       vi.stubEnv('NODE_ENV', 'production')
       delete process.env.SUDO_SECRET
-      delete process.env.SUPABASE_SERVICE_ROLE_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key-present-but-must-not-enable-sudo'
 
-      // verifySudoToken should catch error, log security event, and return false
+      // verifySudoToken should fail closed, log error, and return false
       const isValid = await verifySudoToken('user.123456789.fakesig', userId)
       expect(isValid).toBe(false)
     })
