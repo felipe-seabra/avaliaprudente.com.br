@@ -16,11 +16,13 @@ COMMAND=$1
 SHIFT_ARGS="${@:2}"
 
 # 1. Environment Detection & Ref
-PROJECT_REF=""
-if [ -f "supabase/.temp/project-ref" ]; then
-    PROJECT_REF=$(cat supabase/.temp/project-ref)
-elif [ -f ".supabase/project-ref" ]; then
-    PROJECT_REF=$(cat .supabase/project-ref)
+PROJECT_REF="${SUPABASE_PROJECT_REF:-${SUPABASE_PROJECT_ID:-}}"
+if [ -z "$PROJECT_REF" ]; then
+    if [ -f "supabase/.temp/project-ref" ]; then
+        PROJECT_REF=$(cat supabase/.temp/project-ref)
+    elif [ -f ".supabase/project-ref" ]; then
+        PROJECT_REF=$(cat .supabase/project-ref)
+    fi
 fi
 
 # Determine Target Environment
@@ -29,7 +31,7 @@ TARGET_ENV="LOCAL (Docker)"
 
 if [[ "$SHIFT_ARGS" == *"--linked"* ]] || [[ "$COMMAND" == "db push" ]] || [[ "$SHIFT_ARGS" == *"--remote"* ]]; then
     IS_REMOTE=true
-    if [[ "$PROJECT_REF" == "gfcnoowmfrzlrzusjcbc" ]]; then
+    if [ -n "$SUPABASE_DEV_PROJECT_REF" ] && [[ "$PROJECT_REF" == "$SUPABASE_DEV_PROJECT_REF" ]]; then
         TARGET_ENV="REMOTE DEVELOPMENT (Supabase Cloud)"
     elif [ -n "$PROJECT_REF" ]; then
         TARGET_ENV="REMOTE (Project: $PROJECT_REF)"
