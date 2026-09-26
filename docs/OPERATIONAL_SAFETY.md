@@ -47,29 +47,22 @@ Before any change to RLS or Repositories:
 2. Verify that RLS policies for `UPDATE` and `DELETE` strictly check `auth.uid() = owner_id`.
 3. Ensure no infinite recursion is introduced by querying `profiles` inside RLS (use `is_admin()`).
 
-## 6. Anti-Spam & Abuse Prevention
+## 5. Anti-Spam & Abuse Prevention
 
-The platform implements a hybrid protection system to prevent rating inflation and spam reviews.
+The platform implements multi-layered abuse prevention controls to safeguard rating integrity and prevent spam reviews.
 
-### Review Cooldown Rules
-- **Authenticated Submission:** New review submissions require Supabase Auth through Google OAuth or Magic Link before the trusted server-side API writes to `reviews`.
-- **Per-Business Throttling:** A single device/browser (identified by an anonymous fingerprint) can only review the same business once every **60 minutes**.
-- **Content Deduplication:** Identical review text from the same fingerprint is blocked across any business for **10 minutes**.
+### Abuse Prevention Controls
+- **Authenticated Submission:** Review submissions require verified authentication before the trusted server-side API writes to reviews.
+- **Server-Side Rate Limiting:** Cooldown periods and server-side rate limiting prevent rapid or automated submission attempts.
+- **Content Deduplication:** Server-side deduplication blocks repetitive or duplicate content submissions.
+- **Privacy-Preserving Anti-Abuse Signals:** Abuse detection uses privacy-preserving anti-abuse signals without storing raw IP addresses or sensitive user identifiers.
+- **Server-Side Enforcement:** Protections are enforced at the database and server layers; client-side checks are never the sole line of defense.
+- **Shared Network Resilience:** Heuristics are designed to avoid penalizing legitimate users on shared networks.
 
-## 7. Analytics Anti-Inflation
+## 6. Analytics Anti-Inflation
 
-To preserve ranking integrity and metric accuracy, the platform deduplicates analytics signals.
+To preserve ranking integrity and metric accuracy, the platform applies server-side deduplication to analytics events.
 
-### Throttling Rules
-- **View/Click Cooldown:** Repeated events of the same type (`page_visit`, `cta_click`) for the same business from the same fingerprint are ignored if they occur within **15 minutes** of each other.
-- **Server-side Silencing:** Deduplication is handled by the `tr_enforce_analytics_deduplication` trigger, which silently drops duplicate insertions without affecting user experience.
-
-### Privacy & Fingerprinting
-- Uses the same anonymous SHA-256 fingerprinting system as the Anti-Spam protection.
-- No personal data or raw IPs are stored in the analytics pipeline.
-
-### Implementation Details
-- **Authenticated Identity:** New reviews store `user_id`, `display_name`, and minimal `auth_provider` metadata for moderation and lawful attribution. Public UI displays only `display_name`.
-- **Anonymous Fingerprinting:** Uses a SHA-256 hash of stable browser characteristics (User Agent, timezone, screen resolution) combined with anonymized network signals. Raw IPs are NOT stored to preserve user privacy.
-- **Server-side Enforcement:** Protection is enforced via database triggers (`tr_enforce_review_abuse_protection`) on the `reviews` table. Frontend-only checks are never the sole protection.
-- **Shared Network Support:** The system is designed to avoid blocking legitimate users on shared Wi-Fi (offices, homes) by combining multiple heuristics instead of a simple IP lock.
+### Analytics Integrity Controls
+- **Server-Side Deduplication:** Rapid repeated interactions (such as repeated page views or action clicks) are deduplicated server-side without degrading user experience.
+- **Privacy Protection:** Analytics event processing uses privacy-preserving anti-abuse signals to detect artificial inflation while ensuring no personal data or raw IP addresses are retained.
