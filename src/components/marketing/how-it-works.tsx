@@ -103,7 +103,6 @@ export function HowItWorks() {
                            fill
                            sizes="(max-width: 768px) 176px, 208px"
                            className="object-contain"
-                           priority
                          />
                       </div>
                    </div>
