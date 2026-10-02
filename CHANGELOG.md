@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Security
+- **Dependency Security Remediation:** Updated vulnerable transitive dependencies identified by CI security audit, including brace-expansion, fast-uri, hono, ip-address, undici, and Vitest packages.
+
 All notable changes to this project will be documented in this file.
 
 ## [0.24.0] - 2026-09-06
