@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { BusinessPageRepository, PageLinkRepository } from '@/core/infrastructure/repositories/supabase-page-repository'
 import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-review-repository'
 import { BusinessPageClient } from './business-page-client'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { APP_CONFIG } from '@/lib/constants'
 import { AlertTriangle, Home, Settings } from 'lucide-react'
 import Link from 'next/link'
@@ -109,14 +109,17 @@ const getBusinessData = (slug: string, pageNumber: number = 1) =>
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params
   const sParams = await searchParams
-  const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page) : 1
+  const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page, 10) : 1
+  
+  const currentPage = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
   
   // Fetch public data (cached)
-  const data = await getBusinessData(slug, pageParam)
+  const data = await getBusinessData(slug, currentPage)
 
   if (!data) {
     return {
       title: 'Página Indisponível | Avalia Prudente',
+      robots: { index: false, follow: false },
     }
   }
 
@@ -134,6 +137,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   if (!data.page.is_published && !isAdmin && !isOwner) {
     return {
       title: 'Página em Configuração | Avalia Prudente',
+      robots: { index: false, follow: false },
     }
   }
 
@@ -154,6 +158,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     alternates: {
       canonical: `${APP_CONFIG.url}/r/${slug}`,
     },
+    robots: currentPage > 1
+      ? { index: false, follow: true }
+      : { index: true, follow: true },
     openGraph: {
       title,
       description,
@@ -172,11 +179,18 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default async function BusinessPublicPage({ params, searchParams }: Props) {
   const { slug } = await params
+  const normalizedSlug = decodeURIComponent(slug).toLowerCase()
+
+  if (normalizedSlug === 'demonstracao') {
+    redirect('/r/demo')
+  }
+
   const sParams = await searchParams
-  const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page) : 1
+  const pageParam = typeof sParams.page === 'string' ? parseInt(sParams.page, 10) : 1
+  const currentPage = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
   
   // 1. Fetch public data (cached)
-  const publicData = await getBusinessData(slug, pageParam)
+  const publicData = await getBusinessData(slug, currentPage)
 
   if (!publicData) {
     notFound()
@@ -258,5 +272,28 @@ export default async function BusinessPublicPage({ params, searchParams }: Props
     )
   }
 
-  return <BusinessPageClient data={data} />
+  const business = data.page.businesses
+  const businessDescription = data.page.description?.trim() || `Página oficial de ${business.name} na plataforma Avalia Prudente.`
+  const businessSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: business.name,
+    description: businessDescription,
+    url: `${APP_CONFIG.url}/r/${business.slug}`,
+    ...(business.logo_url ? { image: business.logo_url } : {}),
+  }
+  const structuredData = JSON.stringify(businessSchema)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: structuredData }}
+      />
+      <BusinessPageClient data={data} />
+    </>
+  )
 }
