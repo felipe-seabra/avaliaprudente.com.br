@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { CTAButton } from '@/components/shared/cta-button'
-import { ReviewFlow } from '@/components/shared/review-flow'
+
 import { ReputationBadge } from '@/components/shared/reputation-badge'
 import { Star, ShieldCheck, MessageSquare } from 'lucide-react'
 import Image from 'next/image'
@@ -12,10 +13,15 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { AnalyticsRepository } from '@/core/infrastructure/repositories/supabase-analytics-repository'
+
 import { toast } from 'sonner'
 
 import { Pagination } from '@/components/shared/pagination'
+
+const ReviewFlow = dynamic(
+  () => import('@/components/shared/review-flow').then((mod) => mod.ReviewFlow),
+  { ssr: false },
+)
 
 interface BusinessPageClientProps {
   data: {
@@ -61,6 +67,7 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
     // Track visit
     const trackVisit = async () => {
       try {
+        const { AnalyticsRepository } = await import('@/core/infrastructure/repositories/supabase-analytics-repository')
         const analyticsRepo = new AnalyticsRepository()
         const urlParams = new URLSearchParams(window.location.search)
         const source = urlParams.get('utm_source') || urlParams.get('s') || 'direct'
