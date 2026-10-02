@@ -1,5 +1,9 @@
 ## Unreleased
 
+### Home
+- Removed the verification-only compliance bar and crawler compliance section from the homepage.
+- Redesigned the NFC hero animation with a natural phone-to-tag interaction and hover/focus feedback.
+
 ### Performance
 - Lazy-load the public review flow and analytics repository so interaction-only code is excluded from the initial public business-page client bundle.
 
