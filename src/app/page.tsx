@@ -1,15 +1,12 @@
 import { Navbar } from '@/components/marketing/navbar'
-import { ComplianceBar } from '@/components/marketing/compliance-bar'
 import { Hero } from '@/components/marketing/hero'
 import { Features } from '@/components/marketing/features'
 import { HowItWorks } from '@/components/marketing/how-it-works'
 import { Pricing } from '@/components/marketing/pricing'
 import { FAQ } from '@/components/marketing/faq'
 import { Footer } from '@/components/marketing/footer'
-import { LegalFooterBlock } from '@/components/marketing/legal-footer-block'
 import { BusinessRanking } from '@/components/marketing/business-ranking'
 import { PlatformPurpose } from '@/components/marketing/platform-purpose'
-import { CrawlerComplianceSection } from '@/components/marketing/crawler-compliance'
 import { Star, ShieldCheck, Zap, ShoppingBag } from 'lucide-react'
 import { getPublicRankings } from '@/core/application/use-cases/get-public-rankings'
 
@@ -20,13 +17,10 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <ComplianceBar />
       <Navbar />
       <main className="flex-1">
         <Hero />
 
-        <CrawlerComplianceSection />
-        
         {/* Onboarding Section */}
         <section className="py-20 bg-primary/5 border-y border-primary/10">
           <div className="container mx-auto px-4 md:px-8">
@@ -80,7 +74,6 @@ export default async function Home() {
         <Pricing />
         <FAQ />
       </main>
-      <LegalFooterBlock />
       <Footer />
     </div>
   )
