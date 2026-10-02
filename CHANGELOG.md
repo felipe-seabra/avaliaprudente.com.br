@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### SEO
+- **Technical Indexability Hardening:** Excluded authenticated account and onboarding routes from crawler access, prevented frozen public business pages from being indexed, and standardized root metadata URLs through `APP_CONFIG.url`.
+
 ### Security
 - **Dependency Security Remediation:** Updated vulnerable transitive dependencies identified by CI security audit, including brace-expansion, fast-uri, hono, ip-address, undici, and Vitest packages.
 
