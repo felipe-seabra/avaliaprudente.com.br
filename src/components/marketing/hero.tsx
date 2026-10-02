@@ -36,7 +36,6 @@ export function Hero() {
             height={120}
             sizes="120px"
             className="h-24 w-auto object-contain mb-8 mx-auto block dark:hidden"
-            priority
           />
           
           <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-6">
