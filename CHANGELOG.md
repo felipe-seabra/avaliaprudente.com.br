@@ -7,6 +7,7 @@
 
 ### Performance
 - **Public Route Client Work Reduction:** Limited the subscription provider to authenticated application route families, removed the production-inert React Query Devtools mount, removed a no-op pathname effect, and reduced unnecessary above-the-fold/non-critical image preloads.
+- **Middleware Runtime Reuse:** Reused Upstash rate limiter instances across requests and avoided mounting React Query on public routes, reducing repeated middleware setup and public-route client work.
 
 ### Security
 - **Dependency Security Remediation:** Updated vulnerable transitive dependencies identified by CI security audit, including brace-expansion, fast-uri, hono, ip-address, undici, and Vitest packages.
