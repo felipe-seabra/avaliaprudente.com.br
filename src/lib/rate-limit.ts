@@ -5,6 +5,36 @@ import { env } from './env'
 // In-memory fallback for local development if Upstash is not configured
 const memoryCache = new Map<string, number>()
 
+type RateLimitType = 'global' | 'api' | 'auth'
+
+interface RateLimiterConfig {
+  tokens: number
+  window: '60 s' | '10 s'
+}
+
+const rateLimitConfig: Record<RateLimitType, RateLimiterConfig> = {
+  global: { tokens: 100, window: '60 s' },
+  api: { tokens: 30, window: '10 s' },
+  auth: { tokens: 5, window: '60 s' },
+}
+
+const distributedLimiters = new Map<RateLimitType, Ratelimit>()
+
+function getDistributedRateLimiter(type: RateLimitType): Ratelimit | null {
+  if (!env.UPSTASH_REDIS_REST_URL || !env.UPSTASH_REDIS_REST_TOKEN) return null
+  const existing = distributedLimiters.get(type)
+  if (existing) return existing
+  const { tokens, window } = rateLimitConfig[type]
+  const limiter = new Ratelimit({
+    redis: new Redis({ url: env.UPSTASH_REDIS_REST_URL, token: env.UPSTASH_REDIS_REST_TOKEN }),
+    limiter: Ratelimit.slidingWindow(tokens, window),
+    analytics: true,
+    prefix: `@avaliaprudente/ratelimit/${type}`,
+  })
+  distributedLimiters.set(type, limiter)
+  return limiter
+}
+
 export interface RateLimitResult {
   success: boolean
   limit: number
@@ -17,31 +47,12 @@ export interface RateLimitResult {
  */
 export async function checkRateLimit(
   identifier: string,
-  type: 'global' | 'api' | 'auth' = 'global'
+  type: RateLimitType = 'global'
 ): Promise<RateLimitResult> {
-  // Configurable limits per type
-  const config = {
-    global: { tokens: 100, window: '60 s' as const },
-    api: { tokens: 30, window: '10 s' as const },
-    auth: { tokens: 5, window: '60 s' as const },
-  }
+  const { tokens, window } = rateLimitConfig[type]
+  const ratelimit = getDistributedRateLimiter(type)
 
-  const { tokens, window } = config[type]
-
-  // Production / Staging: Use Upstash Redis
-  if (env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN) {
-    const redis = new Redis({
-      url: env.UPSTASH_REDIS_REST_URL,
-      token: env.UPSTASH_REDIS_REST_TOKEN,
-    })
-
-    const ratelimit = new Ratelimit({
-      redis: redis,
-      limiter: Ratelimit.slidingWindow(tokens, window),
-      analytics: true,
-      prefix: `@avaliaprudente/ratelimit/${type}`,
-    })
-
+  if (ratelimit) {
     const result = await ratelimit.limit(identifier)
     
     return {
