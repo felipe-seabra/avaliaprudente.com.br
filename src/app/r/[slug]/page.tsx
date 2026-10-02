@@ -130,6 +130,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   if (data.page.businesses.is_frozen && !isAdmin) {
     return {
       title: 'Página Indisponível | Avalia Prudente',
+      robots: { index: false, follow: false },
     }
   }
 
