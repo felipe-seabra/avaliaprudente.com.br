@@ -12,6 +12,7 @@ import Link from 'next/link'
 export const metadata = {
   title: 'Configurações - Avalia Prudente',
   description: 'Gerencie seu perfil e preferências.',
+  robots: { index: false, follow: false },
 }
 
 export default async function SettingsPage() {

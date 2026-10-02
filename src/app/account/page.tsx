@@ -8,6 +8,7 @@ import { ReviewRepository } from '@/core/infrastructure/repositories/supabase-re
 export const metadata = {
   title: 'Minha Conta - Avalia Prudente',
   description: 'Gerencie suas avaliações.',
+  robots: { index: false, follow: false },
 }
 
 interface Props {

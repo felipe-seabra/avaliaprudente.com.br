@@ -9,14 +9,14 @@ export default function robots(): MetadataRoute.Robots {
         allow: [
           '/',
           '/r/',
-          '/login',
-          '/register',
           '/privacy',
           '/terms',
         ],
         disallow: [
           '/admin/',
           '/dashboard/',
+          '/account/',
+          '/onboarding/',
           '/api/',
           '/auth/',
           '/blocked',
