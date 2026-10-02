@@ -74,7 +74,3 @@
 - [x] **Security Observability Dashboard:** Production-safe internal dashboard for `super_admin` users to monitor audit logs, security violations, and privileged actions.
 - [x] **Audit Logging Foundation:** Tamper-resistant infrastructure for capturing system-wide security and administrative events.
 - [x] **Metadata Sanitization Engine:** Automated redaction of sensitive PII in observability logs to prevent administrative data leaks.
-- [x] **Mandatory Documentation Sync:** Unified rule for all AI agents to keep documentation and changelog updated.
-- [x] **Completion Workflows:** Explicitly defined lifecycle (Implement -> Lint -> Build -> Test -> Docs -> Commit) in `CODEX.md` (Primary) and `GEMINI.md`.
-- [x] **Shared Governance:** Centralized rules in `docs/ai/shared-context.md` covering all documentation types (current-state, architecture, security, onboarding).
-- [x] **Self-Documenting Repository:** Institutionalized the requirement to evaluate documentation impact before finishing any task.

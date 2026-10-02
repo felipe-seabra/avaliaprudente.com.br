@@ -1,5 +1,10 @@
 ## Unreleased
 
+### Documentation
+- Removed internal AI-agent workflows and operational guidance from the public repository surface.
+- Removed internal AI governance references from architecture and current-state documentation.
+
+
 ### Home
 - Removed the verification-only compliance bar and crawler compliance section from the homepage.
 - Redesigned the NFC hero animation with a natural phone-to-tag interaction and hover/focus feedback.
