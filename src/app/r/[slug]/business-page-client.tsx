@@ -132,7 +132,6 @@ export function BusinessPageClient({ data }: BusinessPageClientProps) {
                   alt={page.businesses.name} 
                   fill 
                   className="object-cover block dark:hidden"
-                  priority
                 />
               )}
             </div>
