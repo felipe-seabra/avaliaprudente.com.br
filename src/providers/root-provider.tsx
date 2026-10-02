@@ -27,13 +27,19 @@ export function RootProvider({ children }: { children: React.ReactNode }) {
         disableTransitionOnChange
       >
         <TooltipProvider>
-          <SubscriptionProvider>
-            {children}
-            <Toaster position="top-right" richColors />
-          </SubscriptionProvider>
+          {/^\/(dashboard|admin|account)(\/|$)/.test(pathname) ? (
+            <SubscriptionProvider>
+              {children}
+            </SubscriptionProvider>
+          ) : (
+            children
+          )}
+          <Toaster position="top-right" richColors />
         </TooltipProvider>
       </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {process.env.NODE_ENV !== 'production' && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
     </QueryClientProvider>
   )
 }
