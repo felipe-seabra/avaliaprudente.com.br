@@ -5,6 +5,9 @@
 ### SEO
 - **Technical Indexability Hardening:** Excluded authenticated account and onboarding routes from crawler access, prevented frozen public business pages from being indexed, and standardized root metadata URLs through `APP_CONFIG.url`.
 
+### Performance
+- **Public Route Client Work Reduction:** Limited the subscription provider to authenticated application route families, removed the production-inert React Query Devtools mount, removed a no-op pathname effect, and reduced unnecessary above-the-fold/non-critical image preloads.
+
 ### Security
 - **Dependency Security Remediation:** Updated vulnerable transitive dependencies identified by CI security audit, including brace-expansion, fast-uri, hono, ip-address, undici, and Vitest packages.
 
