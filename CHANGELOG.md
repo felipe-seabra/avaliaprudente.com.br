@@ -7,7 +7,7 @@
 
 ### Home
 - Removed the verification-only compliance bar and crawler compliance section from the homepage.
-- Redesigned the NFC hero animation with a natural phone-to-tag interaction and hover/focus feedback.
+- Replaced the NFC hero animation with a realistic tap sequence: the tag stays visible, the phone approaches it, NFC detection is confirmed, and the review page opens on the device.
 
 ### Performance
 - Lazy-load the public review flow and analytics repository so interaction-only code is excluded from the initial public business-page client bundle.
