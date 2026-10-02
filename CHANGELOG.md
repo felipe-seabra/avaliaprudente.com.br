@@ -1,3 +1,8 @@
+## Unreleased
+
+### Performance
+- Lazy-load the public review flow and analytics repository so interaction-only code is excluded from the initial public business-page client bundle.
+
 # Changelog
 
 ## [Unreleased]
