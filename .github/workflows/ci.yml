@@ -31,6 +31,7 @@ jobs:
       - name: Resolve and audit dependency updates
         run: |
           npm install --package-lock-only --ignore-scripts --no-fund
+          npm audit fix --package-lock-only --ignore-scripts --no-fund
           npm audit --audit-level=high
 
       - name: Upload refreshed lockfile
