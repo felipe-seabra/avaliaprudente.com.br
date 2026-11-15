@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getSafeInternalRedirect } from '@/lib/auth-redirect'
+import { logAuditEvent } from '@/lib/audit-logger'
 
 function appendAuthError(path: string) {
   const url = new URL(path, 'http://internal.local')
@@ -37,6 +38,17 @@ export async function GET(request: Request) {
     const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!exchangeError) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await logAuditEvent({
+          action: 'AUTH_CALLBACK_COMPLETED',
+          resourceType: 'auth',
+          resourceId: user.id,
+          actorId: user.id,
+          metadata: { provider: user.app_metadata?.provider || 'unknown' },
+        })
+      }
+
       // Use URL constructor for safer redirect
       const redirectUrl = new URL(next, origin)
       return NextResponse.redirect(redirectUrl.toString())
