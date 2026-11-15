@@ -51,12 +51,11 @@ export function validateCSRF(request: NextRequest): boolean {
  * CSRF validation is required for application API endpoints. Next.js Server
  * Actions have their own Origin/Host protection, while unrelated paths (for
  * example platform probes at /mcp) should not be reported as CSRF violations.
+ * Webhooks remain protected until their endpoints implement verified signatures.
  */
 export function shouldValidateCSRF(request: NextRequest): boolean {
   const pathname = request.nextUrl.pathname
-  return (pathname === '/api' || pathname.startsWith('/api/')) &&
-    !pathname.startsWith('/api/webhooks/') &&
-    pathname !== '/api/webhooks'
+  return pathname === '/api' || pathname.startsWith('/api/')
 }
 
 /**
