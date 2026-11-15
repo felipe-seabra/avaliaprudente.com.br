@@ -21,10 +21,14 @@ describe('auth callback redirects', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockCreateClient.mockResolvedValue(mockSupabase)
+    mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({
+      data: { user: null, session: null },
+      error: null,
+    })
   })
 
   it('preserves an internal review redirect after successful auth', async () => {
-    mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ error: null })
+    mockSupabase.auth.exchangeCodeForSession.mockResolvedValue({ data: { user: null, session: null }, error: null })
     const { GET } = await import('./route')
 
     const response = await GET(new Request('https://www.avaliaprudente.com.br/auth/callback?code=abc&next=%2Fr%2Fkifol-fertilizantes%3Freview%3D1'))
