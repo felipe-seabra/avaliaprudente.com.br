@@ -3,7 +3,7 @@ import { updateSession } from '@/lib/supabase/middleware'
 import { APP_CONFIG } from '@/lib/constants'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { generatePrivacyFingerprint } from '@/lib/privacy'
-import { validateCSRF, generateSecurityHeaders } from '@/lib/security'
+import { validateCSRF, shouldValidateCSRF, generateSecurityHeaders } from '@/lib/security'
 import { getClientIp } from '@/lib/request-utils'
 import { logger } from '@/lib/logger'
 import { logAuditEvent } from '@/lib/audit-logger'
@@ -80,8 +80,7 @@ export async function middleware(request: NextRequest) {
   })
 
   // Log CSRF failure if occurred (now with user if available)
-  const isWebhook = request.nextUrl.pathname.startsWith('/api/webhooks')
-  if (!isWebhook && !validateCSRF(request)) {
+  if (shouldValidateCSRF(request) && !validateCSRF(request)) {
     await logger.security('CSRF validation failure', {
       origin: request.headers.get('origin'),
       referer: request.headers.get('referer'),
@@ -94,7 +93,10 @@ export async function middleware(request: NextRequest) {
       actorId: user?.id,
       metadata: { 
         origin: request.headers.get('origin'),
-        referer: request.headers.get('referer')
+        referer: request.headers.get('referer'),
+        host: request.headers.get('host'),
+        forwardedHost: request.headers.get('x-forwarded-host'),
+        secFetchSite: request.headers.get('sec-fetch-site')
       }
     })
 
