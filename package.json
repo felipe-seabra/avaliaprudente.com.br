@@ -87,7 +87,9 @@
     "@typescript-eslint/parser": "^8.72.2",
     "@typescript-eslint/type-utils": "^8.72.2",
     "@typescript-eslint/utils": "^8.72.2",
-    "@typescript-eslint/typescript-estree": "^8.72.2",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.4"
+    },
     "@typescript-eslint/scope-manager": "^8.72.2",
     "@typescript-eslint/visitor-keys": "^8.72.2"
   }
