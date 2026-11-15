@@ -15,6 +15,32 @@ permissions:
   contents: read
 
 jobs:
+
+  dependency-refresh:
+    name: Dependency Lockfile Refresh
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Resolve and audit dependency updates
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-fund
+          npm audit --audit-level=high
+
+      - name: Upload refreshed lockfile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: refreshed-package-lock
+          path: package-lock.json
+          if-no-files-found: error
+
   install:
     name: Install
     runs-on: ubuntu-latest
