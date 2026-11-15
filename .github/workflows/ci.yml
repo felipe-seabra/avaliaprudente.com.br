@@ -1,7 +1,6 @@
 name: CI
 
 on:
-  workflow_dispatch:
   push:
     branches: [ "main" ]
   pull_request:
@@ -13,63 +12,9 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-
-  dependency-refresh:
-    name: Dependency Refresh and Validation
-    runs-on: ubuntu-latest
-    env:
-      NEXT_PUBLIC_SUPABASE_URL: "https://dummy.supabase.co"
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-key"
-      SUPABASE_SERVICE_ROLE_KEY: "dummy-service-key"
-      NEXT_PUBLIC_APP_URL: "https://www.avaliaprudente.com.br"
-      SKIP_ENV_VALIDATION: "true"
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: fix/csrf-validation-and-security-audit
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Resolve and audit dependency updates
-        run: |
-          npm install --package-lock-only --ignore-scripts --no-fund
-          npm audit fix --package-lock-only --ignore-scripts --no-fund
-          npm audit --audit-level=high
-
-      - name: Install locked dependencies
-        run: npm ci
-
-      - name: Run lint
-        run: npm run lint
-
-      - name: Run typecheck
-        run: npm run typecheck
-
-      - name: Run tests
-        run: npm run test
-
-      - name: Run production build
-        run: npm run build
-
-      - name: Commit refreshed lockfile to this PR branch
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          if ! git diff --cached --quiet; then
-            git commit -m "fix(deps): update audited dependency lockfile"
-            git push origin HEAD:refs/heads/fix/csrf-validation-and-security-audit
-          fi
-          gh workflow run ci.yml --ref fix/csrf-validation-and-security-audit
 
   install:
     name: Install
