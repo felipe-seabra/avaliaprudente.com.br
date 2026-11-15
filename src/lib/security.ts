@@ -16,10 +16,9 @@ export function validateCSRF(request: NextRequest): boolean {
 
   const origin = request.headers.get('origin')
   const host = request.headers.get('host')
-  const xForwardedHost = request.headers.get('x-forwarded-host')
-  
-  // Use X-Forwarded-Host if available (e.g. behind a proxy/load balancer)
-  const effectiveHost = xForwardedHost || host
+  // Host is supplied by the platform-facing request. Do not let an arbitrary
+  // X-Forwarded-Host value override it during CSRF validation.
+  const effectiveHost = host
 
   // If there's no Origin header on a POST/PUT/DELETE, it's either:
   // 1. A server-to-server request (should use API keys, handled separately or bypass CSRF if webhook)
@@ -46,6 +45,18 @@ export function validateCSRF(request: NextRequest): boolean {
   }
 
   return true
+}
+
+/**
+ * CSRF validation is required for application API endpoints. Next.js Server
+ * Actions have their own Origin/Host protection, while unrelated paths (for
+ * example platform probes at /mcp) should not be reported as CSRF violations.
+ */
+export function shouldValidateCSRF(request: NextRequest): boolean {
+  const pathname = request.nextUrl.pathname
+  return (pathname === '/api' || pathname.startsWith('/api/')) &&
+    !pathname.startsWith('/api/webhooks/') &&
+    pathname !== '/api/webhooks'
 }
 
 /**
