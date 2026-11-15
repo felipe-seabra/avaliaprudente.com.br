@@ -51,6 +51,10 @@ export function LoginForm() {
         return
       }
 
+      void fetch('/api/activity/login', { method: 'POST' }).catch((activityError) => {
+        console.error('[Auth Activity] Failed to notify login event:', activityError)
+      })
+
       toast.success('Login realizado com sucesso!')
       router.push('/dashboard')
       router.refresh()
