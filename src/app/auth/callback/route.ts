@@ -35,10 +35,10 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!exchangeError) {
-      const { data: { user } } = await supabase.auth.getUser()
+      const user = exchangeData?.user
       if (user) {
         await logAuditEvent({
           action: 'AUTH_CALLBACK_COMPLETED',
