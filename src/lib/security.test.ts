@@ -80,9 +80,9 @@ describe('Security Utilities', () => {
       })
     })
 
-    it('should leave webhook authentication to the webhook endpoint', () => {
+    it('should also validate webhook requests until signature verification is implemented', () => {
       const req = new NextRequest('https://www.avaliaprudente.com.br/api/webhooks/provider', { method: 'POST' })
-      expect(shouldValidateCSRF(req)).toBe(false)
+      expect(shouldValidateCSRF(req)).toBe(true)
     })
   })
 
