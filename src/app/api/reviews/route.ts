@@ -7,6 +7,7 @@ import { generatePrivacyFingerprint } from '@/lib/privacy'
 import { PublicScopes } from '@/core/infrastructure/repositories/public-scopes'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { getClientIp } from '@/lib/request-utils'
+import { logAuditEvent } from '@/lib/audit-logger'
 
 const ReviewSubmissionSchema = z.object({
   business_id: z.string().uuid(),
@@ -217,6 +218,18 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
+
+    await logAuditEvent({
+      action: existingReview ? 'REVIEW_UPDATED' : 'REVIEW_CREATED',
+      resourceType: 'review',
+      resourceId: resultData.id,
+      actorId: user.id,
+      metadata: {
+        businessId: business_id,
+        rating,
+        source: source || 'api',
+      },
+    })
 
     return NextResponse.json(resultData)
   } catch (err) {
