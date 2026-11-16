@@ -23,6 +23,7 @@ import { RoleManagementDialog } from '@/components/admin/governance/role-managem
 import { SubscriptionManagementDialog } from '@/components/admin/subscriptions/subscription-management-dialog'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
+import { UserActivityDialog } from '@/components/admin/user-activity-dialog'
 
 // Extend Profile entity with moderation fields
 interface ModeratedProfile extends Profile {
@@ -47,6 +48,7 @@ export default function AdminCustomersPage() {
   const [isDeactivationDialogOpen, setIsDeactivationDialogOpen] = useState(false)
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false)
   const [isSubscriptionDialogOpen, setIsSubscriptionDialogOpen] = useState(false)
+  const [isActivityDialogOpen, setIsActivityDialogOpen] = useState(false)
   const [selectedUserRole, setSelectedUserRole] = useState<string>('')
   const [selectedUser, setSelectedUser] = useState<{ id: string, name: string } | null>(null)
   
@@ -107,6 +109,11 @@ export default function AdminCustomersPage() {
     setSelectedUser({ id, name })
     setSelectedUserRole(role)
     setIsRoleDialogOpen(true)
+  }
+
+  const handleOpenActivityDialog = (id: string, name: string) => {
+    setSelectedUser({ id, name })
+    setIsActivityDialogOpen(true)
   }
 
   const handleOpenSubscriptionDialog = (id: string, name: string) => {
@@ -307,6 +314,14 @@ export default function AdminCustomersPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => handleOpenActivityDialog(customer.id, customer.full_name || customer.email || 'Usuário')}
+                            >
+                              <Users className="h-4 w-4 mr-2" />
+                              Ver atividade
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
                             <DropdownMenuLabel>Moderação</DropdownMenuLabel>
                             
                             {/* Send Warning Action */}
@@ -402,6 +417,15 @@ export default function AdminCustomersPage() {
           )}
         </CardContent>
       </Card>
+
+      {selectedUser && (
+        <UserActivityDialog
+          open={isActivityDialogOpen}
+          onOpenChange={setIsActivityDialogOpen}
+          userId={selectedUser.id}
+          userName={selectedUser.name}
+        />
+      )}
 
       {/* Dialogs */}
       {selectedUser && (

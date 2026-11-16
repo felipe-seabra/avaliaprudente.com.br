@@ -15,6 +15,7 @@ permissions:
   contents: read
 
 jobs:
+
   install:
     name: Install
     runs-on: ubuntu-latest

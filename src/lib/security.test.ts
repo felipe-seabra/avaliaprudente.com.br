@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { NextRequest } from 'next/server'
-import { validateCSRF, generateSecurityHeaders } from './security'
+import { validateCSRF, shouldValidateCSRF, generateSecurityHeaders } from './security'
 
 describe('Security Utilities', () => {
   describe('validateCSRF', () => {
@@ -42,7 +42,7 @@ describe('Security Utilities', () => {
       expect(validateCSRF(req)).toBe(false)
     })
 
-    it('should respect X-Forwarded-Host if available', () => {
+    it('should not trust X-Forwarded-Host to override the request Host', () => {
       const req = new NextRequest('http://localhost/api/test', {
         method: 'POST',
         headers: {
@@ -51,7 +51,7 @@ describe('Security Utilities', () => {
           'x-forwarded-host': 'avaliaprudente.com.br'
         }
       })
-      expect(validateCSRF(req)).toBe(true)
+      expect(validateCSRF(req)).toBe(false)
     })
 
     it('should reject invalid Origin format', () => {
@@ -63,6 +63,26 @@ describe('Security Utilities', () => {
         }
       })
       expect(validateCSRF(req)).toBe(false)
+    })
+  })
+
+  describe('shouldValidateCSRF', () => {
+    it('should validate state-changing API requests', () => {
+      const req = new NextRequest('https://www.avaliaprudente.com.br/api/reviews', { method: 'POST' })
+      expect(shouldValidateCSRF(req)).toBe(true)
+    })
+
+    it('should not treat platform or unrelated paths as CSRF-protected API requests', () => {
+      const paths = ['/mcp', '/login', '/dashboard', '/apiary']
+      paths.forEach(path => {
+        const req = new NextRequest(`https://www.avaliaprudente.com.br${path}`, { method: 'POST' })
+        expect(shouldValidateCSRF(req)).toBe(false)
+      })
+    })
+
+    it('should also validate webhook requests until signature verification is implemented', () => {
+      const req = new NextRequest('https://www.avaliaprudente.com.br/api/webhooks/provider', { method: 'POST' })
+      expect(shouldValidateCSRF(req)).toBe(true)
     })
   })
 
